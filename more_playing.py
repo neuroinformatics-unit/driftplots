@@ -16,12 +16,15 @@ import numpy as np
 class DriftMapView():
     def __init__(self, sorter_path):
         self.sorter_path = Path(sorter_path)
-        self.ks_version = "kilosort4"  # TODO: infer from logs
+
+        log_file = list(self.sorter_path.glob("kilosort*.log"))
+        assert len(log_file) == 1
+        self.ks_version = Path(log_file[0]).name.split(".")[0]
 
         # TODO: pay the cost once, then can plot a lot
         # TOOD: compute cost of holding all in memory
 
-        func = kilosort_4.get_spikes_info_ks4 if self.ks_version == "kilosort4" else  kilosort1_3.get_spike_info
+        func = kilosort_4.get_spikes_info_ks4 if self.ks_version == "kilosort4" else  kilosort1_3.get_spikes_info_ks1_3
 
         self.spike_times, self.spike_amplitudes, self.spike_depths = func(
             self.sorter_path
@@ -130,8 +133,7 @@ class DriftMapView():
         pass
 
 for file in [
-    r"Y:\public\projects\BeJG_20230130_VisDetect\wEPhys\BG_046\joe\scratch\derivatives\BG_046_26062025\shank_1\sorting\no_motion\sorter_output",
-    r"Y:\public\projects\BeJG_20230130_VisDetect\wEPhys\BG_046\joe\scratch\derivatives\BG_046_27062025\shank_1\sorting\no_motion\sorter_output",
+    r"C:\Users\Jzimi\Desktop\derivatives\1119617_LSE1_shank12_g0\0\sorter_output",
 ]:
     plotter = DriftMapView(
         file

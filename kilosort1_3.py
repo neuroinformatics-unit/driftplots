@@ -4,6 +4,8 @@ if TYPE_CHECKING:
     from pathlib import Path
     import numpy as np
 import numpy as np
+from spikeinterface.core import read_python
+
 
 def get_spikes_info_ks1_3(
     sorter_output: str | Path,
@@ -41,7 +43,7 @@ def get_spikes_info_ks1_3(
     if isinstance(sorter_output, str):
         sorter_output = Path(sorter_output)
 
-    params = self._load_ks_dir(sorter_output, load_pcs=True)
+    params = _load_ks_dir(sorter_output, load_pcs=True)
 
     # Compute spike depths
     pc_features = params["pc_features"][:, 0, :]
@@ -64,9 +66,6 @@ def get_spikes_info_ks1_3(
         params["spike_templates"],
         params["temp_scaling_amplitudes"],
     )
-
-    if gain is not None:
-        spike_amplitudes *= gain
 
     return params["spike_times"], spike_amplitudes, spike_depths
 
@@ -184,7 +183,7 @@ def _template_positions_amplitudes(
         waveforms,
     )
 
-def _load_ks_dir(sorter_output: Path, exclude_noise: bool = True, load_pcs: bool = False) -> dict:
+def _load_ks_dir(sorter_output: Path, load_pcs: bool = False) -> dict:
     """
     Loads the output of Kilosort into a `params` dict.
 
