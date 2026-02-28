@@ -115,20 +115,19 @@ def _filter_large_amplitude_spikes(
     spike_amplitudes: np.ndarray,
     spike_depths: np.ndarray,
     large_amplitude_only_segment_size,
+    return_mask: bool = False,
 ) -> tuple[np.ndarray, ...]:
     """
-    Return spike properties with only the largest-amplitude spikes included. The probe
-    is split into segments, and within each segment the mean and std computed.
-    Any spike less than 1.5x the standard deviation in amplitude of it's segment is excluded
-    Splitting the probe is only done for the exclusion step, the returned array are flat.
+    Return spike properties with only the largest-amplitude spikes included.
 
-    Takes as input arrays `spike_times`, `spike_depths` and `spike_amplitudes` and returns
-    copies of these arrays containing only the large amplitude spikes.
+    If return_mask=True, also returns `spike_bool` (mask into the *input* arrays).
     """
     spike_bool = np.zeros_like(spike_amplitudes, dtype=bool)
 
     segment_size_um = large_amplitude_only_segment_size
-    probe_segments_left_edges = np.arange(np.floor(spike_depths.max() / segment_size_um) + 1) * segment_size_um
+    probe_segments_left_edges = (
+        np.arange(np.floor(spike_depths.max() / segment_size_um) + 1) * segment_size_um
+    )
 
     for segment_left_edge in probe_segments_left_edges:
         segment_right_edge = segment_left_edge + segment_size_um
@@ -136,16 +135,26 @@ def _filter_large_amplitude_spikes(
         spikes_in_seg = np.where(
             np.logical_and(spike_depths >= segment_left_edge, spike_depths < segment_right_edge)
         )[0]
+        if spikes_in_seg.size == 0:
+            continue
+
         spike_amps_in_seg = spike_amplitudes[spikes_in_seg]
-        is_high_amplitude = spike_amps_in_seg > np.mean(spike_amps_in_seg) + 1.5 * np.std(spike_amps_in_seg, ddof=1)
 
-        spike_bool[spikes_in_seg] = is_high_amplitude
+        # avoid ddof=1 on tiny segments
+        if spike_amps_in_seg.size < 3:
+            spike_bool[spikes_in_seg] = True
+            continue
 
-    spike_times = spike_times[spike_bool]
-    spike_amplitudes = spike_amplitudes[spike_bool]
-    spike_depths = spike_depths[spike_bool]
+        thr = np.mean(spike_amps_in_seg) + 1.5 * np.std(spike_amps_in_seg, ddof=1)
+        spike_bool[spikes_in_seg] = spike_amps_in_seg > thr
 
-    return spike_times, spike_amplitudes, spike_depths
+    out_times = spike_times[spike_bool]
+    out_amps = spike_amplitudes[spike_bool]
+    out_depths = spike_depths[spike_bool]
+
+    if return_mask:
+        return out_times, out_amps, out_depths, spike_bool
+    return out_times, out_amps, out_depths
 
 def _plot_kilosort_drift_map_raster(
     spike_times: np.ndarray,
