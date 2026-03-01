@@ -48,29 +48,28 @@ def load_cluster_groups(cluster_path: Path) -> tuple[np.ndarray, ...]:
     return cluster_ids, cluster_groups
 
 # This is such a jankily written function fix it
-def exclude_noise(sorter_output, spike_times, spike_amplitudes, spike_depths):
+def exclude_noise(sorter_output, spike_times, spike_amplitudes, spike_depths, spike_templates):
     """"""
-    if (cluster_path := sorter_output / "spike_clusters.npy").is_file():  # TODO: this can be csv?!?!?
+    if (cluster_path := sorter_output / "spike_clusters.npy").is_file():
         spike_clusters = np.load(cluster_path)
     else:
-        # this is a pain to have here,  I don't think this case is realistic.
-        raise NotImplementedError("spike clusters.csv does not exist. Under what circumstance is this? probably very old.")
-        # spike_clusters = spike_templates.copy()
+        raise NotImplementedError("spike clusters.csv does not exist.")
 
-    if ( # short circuit ensures cluster_path is assigned appropriately
+    if (
         (cluster_path := sorter_output / "cluster_groups.csv").is_file()
         or (cluster_path := sorter_output / "cluster_group.tsv").is_file()
     ):
         cluster_ids, cluster_groups = load_cluster_groups(cluster_path)
 
         noise_cluster_ids = cluster_ids[cluster_groups == 0]
-        not_noise_clusters_by_spike = ~np.isin(spike_clusters.ravel(),
-                                               noise_cluster_ids)
-        spike_times = spike_times[not_noise_clusters_by_spike]
-        spike_amplitudes = spike_amplitudes[not_noise_clusters_by_spike]
-        spike_depths = spike_depths[not_noise_clusters_by_spike]
+        keep = ~np.isin(spike_clusters.ravel(), noise_cluster_ids)
 
-        return spike_times, spike_amplitudes, spike_depths
+        out_times = spike_times[keep]
+        out_amps = spike_amplitudes[keep]
+        out_depths = spike_depths[keep]
+        out_spike_templates = spike_templates[keep]
+
+        return out_times, out_amps, out_depths, out_spike_templates
 
     raise ValueError(
         f"`exclude_noise` is `True` but there is no `cluster_groups.csv` or `.tsv` "

@@ -5,6 +5,12 @@ import kilosort_4
 import helpers
 from pathlib import Path
 import numpy as np
+from driftmap_plot_widget import DriftmapPlotWidget
+import numpy as np
+import pyqtgraph as pg
+from pyqtgraph.Qt import QtWidgets, QtCore
+import matplotlib.pyplot as plt
+
 
 # TODO: dont use gain, instead set clim
 # TODO: removed localised peaks
@@ -26,14 +32,27 @@ class DriftMapView():
 
         func = kilosort_4.get_spikes_info_ks4 if self.ks_version == "kilosort4" else  kilosort1_3.get_spikes_info_ks1_3
 
-        self.spike_times, self.spike_amplitudes, self.spike_depths = func(
+        (
+            self.spike_times,
+            self.spike_amplitudes,
+            self.spike_depths,
+            self.spike_templates,
+            self.templates
+        ) = func(
             self.sorter_path
         )
 
         self.spike_times.flags.writeable = False
         self.spike_amplitudes.flags.writeable = False
         self.spike_depths.flags.writeable = False
+        self.spike_templates.flags.writeable = False
+        self.templates.flags.writeable = False
 
+    # TODO: this isn't great, it is convenient but wasteful. But much of this is necessary
+    # e.g. compute amplitude with all spikes etc...
+    # still refactor for return a spike bool, index on the fly, and have a func compute
+    # min/max that takes the spike bool and uses to compute spike_amplitudes min/max
+    # and compute log on the fly at the end...
     def _process_data(
         self,
         exclude_noise,
@@ -46,14 +65,13 @@ class DriftMapView():
         spike_times = self.spike_times
         spike_amplitudes = self.spike_amplitudes
         spike_depths = self.spike_depths
+        spike_templates = self.spike_templates
 
-
-      #  min, max = np.percentile(spike_amplitudes, (90, 98))
-       # spike_amplitudes = np.clip(spike_amplitudes, min, max)
+        #  min, max = np.percentile(spike_amplitudes, (90, 98))
+        # spike_amplitudes = np.clip(spike_amplitudes, min, max)
         # This makes the assumption that there will never be different .csv and .tsv files
         # in the same sorter output (this should never happen, there will never even be two).
         # Though can be saved as .tsv, it seems the .csv is also tab formatted as far as pandas is concerned.
-
 
         # TODO: this is super weird, can be improved?
         if log_transform_amplitudes:
@@ -66,25 +84,78 @@ class DriftMapView():
             spike_amplitudes.max(),
         )
 
-        # TODO: move exclude noise here!
+        # TODO: this is horrible, just create a bool array and index it later
         if exclude_noise:
-            spike_times, spike_amplitudes, spike_depths = helpers.exclude_noise(
-                self.sorter_path, spike_times, spike_amplitudes, spike_depths
+            spike_times, spike_amplitudes, spike_depths, spike_templates = helpers.exclude_noise(
+                self.sorter_path, spike_times, spike_amplitudes, spike_depths, spike_templates
             )
 
         if decimate:
             spike_times = spike_times[:: decimate]
             spike_amplitudes = spike_amplitudes[:: decimate]
             spike_depths = spike_depths[:: decimate]
+            spike_templates = spike_templates[:: decimate]
 
         if only_include_large_amplitude_spikes:
 
-            spike_times, spike_amplitudes, spike_depths = _filter_large_amplitude_spikes(
-                spike_times, spike_amplitudes, spike_depths,
+            spike_times, spike_amplitudes, spike_depths, spike_templates = _filter_large_amplitude_spikes(
+                spike_times, spike_amplitudes, spike_depths, spike_templates,
                 large_amplitude_only_segment_size
             )
 
-        return spike_times, spike_amplitudes, spike_depths, amplitude_range_all_spikes
+        return spike_times, spike_amplitudes, spike_depths, amplitude_range_all_spikes, spike_templates
+
+    def get_drift_map_plot_interactive(
+        self,
+        only_include_large_amplitude_spikes=True,
+        decimate=False,
+        exclude_noise=True,
+        log_transform_amplitudes=True,
+        large_amplitude_only_segment_size=800,
+    ):
+        (
+            spike_times,
+            spike_amplitudes,
+            spike_depths,
+            amplitude_range_all_spikes,
+            spike_templates,
+        ) = self._process_data(
+            exclude_noise,
+            log_transform_amplitudes,
+            decimate,
+            only_include_large_amplitude_spikes,
+            large_amplitude_only_segment_size
+        )
+
+        app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+
+        self.plot = DriftmapPlotWidget(
+            spike_times,
+            spike_amplitudes,
+            spike_depths,
+            amplitude_range_all_spikes,
+            spike_templates,
+            self.templates
+        )
+
+        app.exec()
+
+
+        # histogram
+        if False:
+            hist_axis.set_xlabel("count")
+            raster_axis.set_xlabel("time")
+            hist_axis.set_ylabel("y position")
+
+            bin_centers, counts = _compute_activity_histogram(
+                spike_amplitudes, spike_depths, weight_histogram_by_amplitude
+            )
+            hist_axis.plot(counts, bin_centers, color="black", linewidth=1)
+
+
+
+
+
 
     def get_drift_map_plot(self,
         only_include_large_amplitude_spikes=True,
@@ -97,7 +168,8 @@ class DriftMapView():
             spike_times,
             spike_amplitudes,
             spike_depths,
-            amplitude_range_all_spikes
+            amplitude_range_all_spikes,
+            _
         ) = self._process_data(
             exclude_noise,
             log_transform_amplitudes,
@@ -132,6 +204,9 @@ class DriftMapView():
     ):
         pass
 
+
+
+
 for file in [
     r"C:\Users\Jzimi\Desktop\derivatives\1119617_LSE1_shank12_g0\0\sorter_output",
 ]:
@@ -139,14 +214,14 @@ for file in [
         file
     )
 
-    fig = plotter.get_drift_map_plot(
+    fig = plotter.get_drift_map_plot_interactive(
         only_include_large_amplitude_spikes=True,  # exclude amplitude outliers? maybe just do this instead of doing this segmented way.
         decimate=False,
         exclude_noise=False,
-        log_transform_amplitudes=True
+        log_transform_amplitudes=False
     )
 
-plt.show()
+
 
 
 if False:

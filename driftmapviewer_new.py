@@ -114,6 +114,7 @@ def _filter_large_amplitude_spikes(
     spike_times: np.ndarray,
     spike_amplitudes: np.ndarray,
     spike_depths: np.ndarray,
+    spike_templates: np.ndarray,
     large_amplitude_only_segment_size,
 ) -> tuple[np.ndarray, ...]:
     """
@@ -144,8 +145,9 @@ def _filter_large_amplitude_spikes(
     spike_times = spike_times[spike_bool]
     spike_amplitudes = spike_amplitudes[spike_bool]
     spike_depths = spike_depths[spike_bool]
+    spike_templates = spike_templates[spike_bool]
 
-    return spike_times, spike_amplitudes, spike_depths
+    return spike_times, spike_amplitudes, spike_depths, spike_templates
 
 def _plot_kilosort_drift_map_raster(
     spike_times: np.ndarray,
