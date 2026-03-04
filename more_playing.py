@@ -127,7 +127,7 @@ class DriftMapView():
             large_amplitude_only_segment_size
         )
 
-        app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+        QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
 
         self.plot = DriftmapPlotWidget(
             spike_times,
@@ -138,7 +138,8 @@ class DriftMapView():
             self.templates
         )
 
-        app.exec()
+        return self.plot
+
 
 
         # histogram
@@ -204,10 +205,12 @@ class DriftMapView():
     ):
         pass
 
+from PySide6 import QtWidgets
+app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
 
-
-
+panels = []
 for file in [
+    r"C:\Users\Jzimi\Desktop\derivatives\1119617_LSE1_shank12_g0\0\sorter_output",
     r"C:\Users\Jzimi\Desktop\derivatives\1119617_LSE1_shank12_g0\0\sorter_output",
 ]:
     plotter = DriftMapView(
@@ -221,7 +224,12 @@ for file in [
         log_transform_amplitudes=False
     )
 
+    panels.append(fig)
 
+from multi_session_drift_map import MultiSessionDriftmapWidget
+multi = MultiSessionDriftmapWidget(panels)
+
+app.exec()
 
 
 if False:
