@@ -28,6 +28,7 @@ def get_spikes_info(sorter_output, ks_version, exclude_noise):
 
 # TODO: GAIN DOES NOTHING
 # separate function to add histogram
+# TODO: https://github.com/SpikeInterface/spikeinterface/issues/4366#issuecomment-3860990211!!! templates vs clusters file
 
 def get_drift_map_plot(
     sorter_output: str | Path,

@@ -16,7 +16,9 @@ def get_spikes_info_ks4(
     spike_amplitudes = np.load(sorter_output / "amplitudes.npy")
     spike_depths = np.load(sorter_output / "spike_positions.npy")[:, 1]
 
-    spike_templates = np.load(sorter_output / "spike_templates.npy")  # rename spike_tempaltes_idx?
-    templates = np.load(sorter_output / "templates.npy") # rename unwihten?
+    spike_templates = np.load(sorter_output / "spike_templates.npy")
+    templates = np.load(sorter_output / "templates.npy")
+
+    # MASSIVE TODO: It is still not clear if these templates are white or not...
 
     return spike_times, spike_amplitudes, spike_depths, spike_templates, templates
