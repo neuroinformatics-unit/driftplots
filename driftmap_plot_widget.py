@@ -17,15 +17,15 @@ pg.setConfigOption("antialias", True)
 
 class DriftmapPlotWidget(QtWidgets.QWidget):
     def __init__(self, spike_times, spike_amplitudes, spike_depths,
-                 amplitude_range_all_spikes, spike_templates, templates):
+                 spike_templates, templates, log_transform_amplitudes):
         super().__init__()
 
         self.spike_times = spike_times
         self.spike_amplitudes = spike_amplitudes
         self.spike_depths = spike_depths
-        self.amplitude_range_all_spikes = amplitude_range_all_spikes
         self.spike_templates = spike_templates
         self.templates = templates
+        self.log_transform_amplitudes = log_transform_amplitudes
 
         self.cfgs = {
             "right_panel_view_mode": "heatmap",
@@ -130,9 +130,17 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
 
         # set amplitude colors
         n_color_bins = 20
-        amp_min, amp_max = spike_amplitudes.min(), spike_amplitudes.max()
+        amp_min, amp_max = (
+        spike_amplitudes.min(),
+        spike_amplitudes.max(),
+    )
         assert amp_min >= 0
         assert amp_max >= 0
+
+        if self.log_transform_amplitudes:
+            amp_min = np.log(amp_min)
+            amp_max = np.log(amp_max)
+            spike_amplitudes = np.log(spike_amplitudes)
 
         color_bins = np.linspace(amp_min, amp_max, n_color_bins)
         gray_colors = plt.get_cmap("gray")(np.linspace(0, 1, n_color_bins))[::-1]
@@ -150,7 +158,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         )
 
         # create plot
-        point_size = 9.0
+        point_size = 5.0
         self.scatter = pg.ScatterPlotItem(
             spike_times, spike_depths,
             pxMode=True, size=point_size, hoverable=True, antialias=True, data=np.arange(spike_times.size), brush=rgba_float*255, pen=None

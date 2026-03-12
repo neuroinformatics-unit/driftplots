@@ -108,46 +108,6 @@ def get_drift_map_plot(
 
     return fig
 
-#  TODO: not sure about this, much point in computing as segments? Just combine? Its just another parameter to track...
-# hmm I guess it makes sense if going through brain regions, and if want to do the entire thing, you can set segment to probe...
-def _filter_large_amplitude_spikes(
-    spike_times: np.ndarray,
-    spike_amplitudes: np.ndarray,
-    spike_depths: np.ndarray,
-    spike_templates: np.ndarray,
-    large_amplitude_only_segment_size,
-) -> tuple[np.ndarray, ...]:
-    """
-    Return spike properties with only the largest-amplitude spikes included. The probe
-    is split into segments, and within each segment the mean and std computed.
-    Any spike less than 1.5x the standard deviation in amplitude of it's segment is excluded
-    Splitting the probe is only done for the exclusion step, the returned array are flat.
-
-    Takes as input arrays `spike_times`, `spike_depths` and `spike_amplitudes` and returns
-    copies of these arrays containing only the large amplitude spikes.
-    """
-    spike_bool = np.zeros_like(spike_amplitudes, dtype=bool)
-
-    segment_size_um = large_amplitude_only_segment_size
-    probe_segments_left_edges = np.arange(np.floor(spike_depths.max() / segment_size_um) + 1) * segment_size_um
-
-    for segment_left_edge in probe_segments_left_edges:
-        segment_right_edge = segment_left_edge + segment_size_um
-
-        spikes_in_seg = np.where(
-            np.logical_and(spike_depths >= segment_left_edge, spike_depths < segment_right_edge)
-        )[0]
-        spike_amps_in_seg = spike_amplitudes[spikes_in_seg]
-        is_high_amplitude = spike_amps_in_seg > np.mean(spike_amps_in_seg) + 1.5 * np.std(spike_amps_in_seg, ddof=1)
-
-        spike_bool[spikes_in_seg] = is_high_amplitude
-
-    spike_times = spike_times[spike_bool]
-    spike_amplitudes = spike_amplitudes[spike_bool]
-    spike_depths = spike_depths[spike_bool]
-    spike_templates = spike_templates[spike_bool]
-
-    return spike_times, spike_amplitudes, spike_depths, spike_templates
 
 def _plot_kilosort_drift_map_raster(
     spike_times: np.ndarray,

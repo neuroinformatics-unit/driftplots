@@ -47,31 +47,27 @@ def load_cluster_groups(cluster_path: Path) -> tuple[np.ndarray, ...]:
 
     return cluster_ids, cluster_groups
 
-# This is such a jankily written function fix it
-def exclude_noise(sorter_output, spike_times, spike_amplitudes, spike_depths, spike_templates):
+
+def get_noise_exclusion_mask(sorter_output):
     """"""
     if (cluster_path := sorter_output / "spike_clusters.npy").is_file():
         spike_clusters = np.load(cluster_path)
     else:
-        raise NotImplementedError("spike clusters.csv does not exist.")
+        raise NotImplementedError("spike_clusters.npy does not exist.")
 
-    if (
+    if not (
         (cluster_path := sorter_output / "cluster_groups.csv").is_file()
         or (cluster_path := sorter_output / "cluster_group.tsv").is_file()
     ):
-        cluster_ids, cluster_groups = load_cluster_groups(cluster_path)
+        raise ValueError(
+            f"`exclude_noise` is `True` but there is no `cluster_groups.csv` or `.tsv` "
+            f"in the sorting output at: {sorter_output}"
+        )
 
-        noise_cluster_ids = cluster_ids[cluster_groups == 0]
-        keep = ~np.isin(spike_clusters.ravel(), noise_cluster_ids)
+    cluster_ids, cluster_groups = load_cluster_groups(cluster_path)
 
-        out_times = spike_times[keep]
-        out_amps = spike_amplitudes[keep]
-        out_depths = spike_depths[keep]
-        out_spike_templates = spike_templates[keep]
+    noise_cluster_ids = cluster_ids[cluster_groups == 0]
 
-        return out_times, out_amps, out_depths, out_spike_templates
+    exclude_bool_mask = np.isin(spike_clusters.ravel(), noise_cluster_ids)
 
-    raise ValueError(
-        f"`exclude_noise` is `True` but there is no `cluster_groups.csv` or `.tsv` "
-        f"in the sorting output at: {sorter_output}"
-    )
+    return exclude_bool_mask

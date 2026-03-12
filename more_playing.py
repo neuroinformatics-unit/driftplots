@@ -1,4 +1,4 @@
-from driftmapviewer_new import get_drift_map_plot, _plot_kilosort_drift_map_raster, _filter_large_amplitude_spikes
+from driftmapviewer_new import get_drift_map_plot, _plot_kilosort_drift_map_raster
 import matplotlib.pyplot as plt
 import kilosort1_3
 import kilosort_4
@@ -18,6 +18,8 @@ import matplotlib.pyplot as plt
 
 # TODO: it would be really cool and useful to hover over
 # the plot and see the template waveform
+
+# TODO idea: memmap the npy files and decimate ON LOAD
 
 class DriftMapView():
     def __init__(self, sorter_path):
@@ -42,52 +44,40 @@ class DriftMapView():
             self.sorter_path
         )
 
+        assert self.spike_times.size == self.spike_amplitudes.size == self.spike_depths.size == self.spike_templates.size
+
         self.spike_times.flags.writeable = False
         self.spike_amplitudes.flags.writeable = False
         self.spike_depths.flags.writeable = False
         self.spike_templates.flags.writeable = False
         self.templates.flags.writeable = False
 
-    # TODO: this isn't great, it is convenient but wasteful. But much of this is necessary
-    # e.g. compute amplitude with all spikes etc...
-    # still refactor for return a spike bool, index on the fly, and have a func compute
-    # min/max that takes the spike bool and uses to compute spike_amplitudes min/max
-    # and compute log on the fly at the end...
+    # This makes the assumption that there will never be different .csv and .tsv files
+    # in the same sorter output (this should never happen, there will never even be two).
+    # Though can be saved as .tsv, it seems the .csv is also tab formatted as far as pandas is concerned.
+
+    # TODO: this is super weird, can be improved?
+    #  if log_transform_amplitudes:
+    #     spike_amplitudes = np.log(spike_amplitudes)  # TODO: give optional (None, 2 or 10)
+
     def _process_data(
         self,
         exclude_noise,
-        log_transform_amplitudes,
         decimate,
-        only_include_large_amplitude_spikes,
-        large_amplitude_only_segment_size
+        filter_amplitude_mode,
+        filter_amplitude_values
      ):
-        # start with a view, but we may end up with a copy depending on the settings
+        # Select a view for now, this may be copied depending on options (e.g. decimate)
         spike_times = self.spike_times
         spike_amplitudes = self.spike_amplitudes
         spike_depths = self.spike_depths
         spike_templates = self.spike_templates
 
-        #  min, max = np.percentile(spike_amplitudes, (90, 98))
-        # spike_amplitudes = np.clip(spike_amplitudes, min, max)
-        # This makes the assumption that there will never be different .csv and .tsv files
-        # in the same sorter output (this should never happen, there will never even be two).
-        # Though can be saved as .tsv, it seems the .csv is also tab formatted as far as pandas is concerned.
+        exclude_bool_mask = None
 
-        # TODO: this is super weird, can be improved?
-        if log_transform_amplitudes:
-            spike_amplitudes = np.log(spike_amplitudes)  # TODO: give optional (None, 2 or 10)
-
-        # Calculate the amplitude range for plotting first, so the scale is always the
-        # same across all options (e.g. decimation) which helps with interpretability.
-        amplitude_range_all_spikes = (
-            spike_amplitudes.min(),
-            spike_amplitudes.max(),
-        )
-
-        # TODO: this is horrible, just create a bool array and index it later
         if exclude_noise:
-            spike_times, spike_amplitudes, spike_depths, spike_templates = helpers.exclude_noise(
-                self.sorter_path, spike_times, spike_amplitudes, spike_depths, spike_templates
+            exclude_bool_mask = helpers.get_noise_exclusion_mask(
+                self.sorter_path
             )
 
         if decimate:
@@ -96,35 +86,51 @@ class DriftMapView():
             spike_depths = spike_depths[:: decimate]
             spike_templates = spike_templates[:: decimate]
 
-        if only_include_large_amplitude_spikes:
+            if exclude_bool_mask is not None:
+                exclude_bool_mask = exclude_bool_mask[:: decimate]
 
-            spike_times, spike_amplitudes, spike_depths, spike_templates = _filter_large_amplitude_spikes(
-                spike_times, spike_amplitudes, spike_depths, spike_templates,
-                large_amplitude_only_segment_size
-            )
+        if filter_amplitude_mode is not None:
+            assert filter_amplitude_mode in ["percentile", "absolute"]
 
-        return spike_times, spike_amplitudes, spike_depths, amplitude_range_all_spikes, spike_templates
+            if filter_amplitude_mode == "percentile":
+                min_val, max_val = np.percentile(
+                    spike_amplitudes, filter_amplitude_values
+                )
+            else:
+                min_val, max_val = filter_amplitude_values
+
+            if exclude_bool_mask is None:
+                exclude_bool_mask = np.zeros(spike_amplitudes.size, dtype=bool)
+
+            exclude_bool_mask[spike_amplitudes < min_val] = True
+            exclude_bool_mask[spike_amplitudes > max_val] = True
+
+        if exclude_bool_mask is not None:
+            spike_times = spike_times[~exclude_bool_mask]  # TODO: might be faster to do the other way I thin k
+            spike_amplitudes = spike_amplitudes[~exclude_bool_mask]
+            spike_depths = spike_depths[~exclude_bool_mask]
+            spike_templates = spike_templates[~exclude_bool_mask]
+
+        return spike_times, spike_amplitudes, spike_depths, spike_templates
 
     def get_drift_map_plot_interactive(
         self,
-        only_include_large_amplitude_spikes=True,
         decimate=False,
         exclude_noise=True,
         log_transform_amplitudes=True,
-        large_amplitude_only_segment_size=800,
+        filter_amplitude_mode=None,
+        filter_amplitude_values=(),
     ):
         (
             spike_times,
             spike_amplitudes,
             spike_depths,
-            amplitude_range_all_spikes,
             spike_templates,
         ) = self._process_data(
             exclude_noise,
-            log_transform_amplitudes,
             decimate,
-            only_include_large_amplitude_spikes,
-            large_amplitude_only_segment_size
+            filter_amplitude_mode,
+            filter_amplitude_values
         )
 
         QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
@@ -133,14 +139,41 @@ class DriftMapView():
             spike_times,
             spike_amplitudes,
             spike_depths,
-            amplitude_range_all_spikes,
             spike_templates,
-            self.templates
+            self.templates,
+            log_transform_amplitudes
         )
 
         return self.plot
 
+    def drift_map_plot_matplotlib(self,
+        decimate=False,
+        exclude_noise=True,
+        log_transform_amplitudes=True,
+        filter_amplitude_mode=None,
+        filter_amplitude_values=(),
+     ):
+        (
+            spike_times,
+            spike_amplitudes,
+            spike_depths,
+            spike_templates,
+        ) = self._process_data(
+            exclude_noise,
+            decimate,
+            filter_amplitude_mode,
+            filter_amplitude_values
+        )
 
+        fig = plt.figure(figsize=(10, 10 * (6 / 8)))
+        raster_axis = fig.add_subplot()
+
+        _plot_kilosort_drift_map_raster(
+            spike_times,
+            spike_amplitudes,
+            spike_depths,
+            axis=raster_axis,
+        )
 
         # histogram
         if False:
@@ -153,75 +186,26 @@ class DriftMapView():
             )
             hist_axis.plot(counts, bin_centers, color="black", linewidth=1)
 
-
-
-
-
-
-    def get_drift_map_plot(self,
-        only_include_large_amplitude_spikes=True,
-        decimate=False,
-        exclude_noise=True,
-        log_transform_amplitudes=True,
-        large_amplitude_only_segment_size=800,
-     ):
-        (
-            spike_times,
-            spike_amplitudes,
-            spike_depths,
-            amplitude_range_all_spikes,
-            _
-        ) = self._process_data(
-            exclude_noise,
-            log_transform_amplitudes,
-            decimate,
-            only_include_large_amplitude_spikes,
-            large_amplitude_only_segment_size
-        )
-
-        fig = plt.figure(figsize=(10, 10 * (6 / 8)))
-        raster_axis = fig.add_subplot()
-
-        _plot_kilosort_drift_map_raster(
-            spike_times,
-            spike_amplitudes,
-            spike_depths,
-            amplitude_range_all_spikes,
-            axis=raster_axis,
-        )
-
         return fig
-
-    def get_1d_histogram_plot(
-        self,
-    ):
-        pass
-
-    def get_2d_histogram_plot(self):
-        pass
-
-    def get_combined_drift_map_plot(
-        self
-    ):
-        pass
 
 from PySide6 import QtWidgets
 app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
 
 panels = []
 for file in [
-    r"C:\Users\Jzimi\Desktop\derivatives\1119617_LSE1_shank12_g0\0\sorter_output",
-    r"C:\Users\Jzimi\Desktop\derivatives\1119617_LSE1_shank12_g0\0\sorter_output",
+    r"Y:\public\projects\BeJG_20230130_VisDetect\wEPhys\BG_046\joe\scratch\derivatives\BG_046_26062025\shank_1\sorting\no_motion\sorter_output",
+    r"Y:\public\projects\BeJG_20230130_VisDetect\wEPhys\BG_046\joe\scratch\derivatives\BG_046_27062025\shank_1\sorting\motion\sorter_output"
 ]:
     plotter = DriftMapView(
         file
     )
 
     fig = plotter.get_drift_map_plot_interactive(
-        only_include_large_amplitude_spikes=True,  # exclude amplitude outliers? maybe just do this instead of doing this segmented way.
-        decimate=False,
-        exclude_noise=False,
-        log_transform_amplitudes=False
+        decimate=10,
+        exclude_noise=True,
+        log_transform_amplitudes=False,  # scatter_amplitude_scaling="log", (XX,XX), "linear"
+        filter_amplitude_mode="percentile", # "percentile",
+        filter_amplitude_values=(80, 98)
     )
 
     panels.append(fig)
@@ -230,16 +214,3 @@ from multi_session_drift_map import MultiSessionDriftmapWidget
 multi = MultiSessionDriftmapWidget(panels)
 
 app.exec()
-
-
-if False:
-    plot = get_drift_map_plot(
-        r"C:\Users\Joe\PycharmProjects\viewephys3\kilosort4_output\sorter_output",
-        only_include_large_amplitude_spikes=True,
-        add_histogram_plot=True,
-        weight_histogram_by_amplitude=True,
-        decimate=False,
-        exclude_noise=True
-    )
-
-    plt.show()
