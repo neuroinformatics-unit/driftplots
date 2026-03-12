@@ -129,20 +129,30 @@ class DriftMapView():
 
 from multi_session_driftmap_widget import MultiSessionDriftmapWidget
 
-app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+def main():
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
 
-session_data = []
-for file in [
-    r"C:\Users\Jzimi\Desktop\derivatives\1119617_LSE1_shank12_g0\0\sorter_output",
-    r"C:\Users\Jzimi\Desktop\derivatives\1119617_LSE1_shank12_g0\0\sorter_output",
-]:
-    plotter = DriftMapView(file)
-    session_data.append(plotter.get_session_data(
-        only_include_large_amplitude_spikes=True,
-        decimate=False,
-        exclude_noise=False,
-        log_transform_amplitudes=False,
-    ))
+    session_data = []
+    for file in [
+        r"Y:\public\projects\BeJG_20230130_VisDetect\wEPhys\BG_046\joe\scratch\derivatives\BG_046_24062025\shank_0\sorting\no_motion\sorter_output",
+    ]:
+        sorter_output = Path(file)
+        total_spikes = np.load(sorter_output / "spike_times.npy").size
+        kept_spikes = int(np.load(sorter_output / "kept_spikes.npy").sum())
+        print(f"[{sorter_output.name}] total spikes: {total_spikes:,}")
+        print(f"[{sorter_output.name}] kept spikes:  {kept_spikes:,}")
 
-multi = MultiSessionDriftmapWidget(session_data)
-app.exec()
+        plotter = DriftMapView(file)
+        session_data.append(plotter.get_session_data(
+            only_include_large_amplitude_spikes=True,
+            decimate=False,
+            exclude_noise=False,
+            log_transform_amplitudes=False,
+        ))
+
+    multi = MultiSessionDriftmapWidget(session_data)
+    app.exec()
+
+
+if __name__ == "__main__":
+    main()
