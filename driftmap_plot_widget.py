@@ -129,14 +129,25 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         self.p_scatter.showGrid(x=False, y=False)
 
         # set amplitude colors
-        n_color_bins = 20
-        amp_min, amp_max = spike_amplitudes.min(), spike_amplitudes.max()
-        assert amp_min >= 0
-        assert amp_max >= 0
+        # Use robust percentile clipping to avoid washed-out points when the
+        # amplitude distribution is highly skewed.
+        n_color_bins = 64
+        robust_min, robust_max = np.percentile(spike_amplitudes, (5.0, 99.5))
 
-        color_bins = np.linspace(amp_min, amp_max, n_color_bins)
-        gray_colors = plt.get_cmap("gray")(np.linspace(0, 1, n_color_bins))[::-1]
-        bin_indices = np.clip(np.searchsorted(color_bins, spike_amplitudes, side="right") - 1, 0, n_color_bins - 2)
+        if not np.isfinite(robust_min) or not np.isfinite(robust_max) or robust_max <= robust_min:
+            robust_min = float(np.min(spike_amplitudes))
+            robust_max = float(np.max(spike_amplitudes))
+
+        amplitude_span = max(robust_max - robust_min, 1e-12)
+        scaled_amplitudes = np.clip((spike_amplitudes - robust_min) / amplitude_span, 0.0, 1.0)
+
+        # Keep a floor so low-amplitude points are still visible (not pure white).
+        scaled_amplitudes = 0.15 + 0.85 * scaled_amplitudes
+
+        bin_indices = np.floor(scaled_amplitudes * (n_color_bins - 1)).astype(np.int32)
+        bin_indices = np.clip(bin_indices, 0, n_color_bins - 1)
+
+        gray_colors = plt.get_cmap("gray_r")(np.linspace(0, 1, n_color_bins))
         rgba_float = gray_colors[bin_indices]
 
         # set axis limits
@@ -150,7 +161,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         )
 
         # create plot
-        point_size = 9.0
+        point_size = 5.0
         self.scatter = pg.ScatterPlotItem(
             spike_times, spike_depths,
             pxMode=True, size=point_size, hoverable=True, antialias=True, data=np.arange(spike_times.size), brush=rgba_float*255, pen=None

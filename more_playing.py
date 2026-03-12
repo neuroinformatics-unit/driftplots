@@ -48,6 +48,39 @@ class DriftMapView():
         self.spike_templates.flags.writeable = False
         self.templates.flags.writeable = False
 
+    @staticmethod
+    def _apply_boolean_mask(spike_times, spike_amplitudes, spike_depths, spike_templates, mask):
+        return (
+            spike_times[mask],
+            spike_amplitudes[mask],
+            spike_depths[mask],
+            spike_templates[mask],
+        )
+
+    @staticmethod
+    def _compute_threshold_mask(
+        spike_amplitudes,
+        amplitude_percentile_min=None,
+        amplitude_raw_min=None,
+    ):
+        keep = np.ones(spike_amplitudes.shape[0], dtype=bool)
+
+        if amplitude_percentile_min is not None:
+            if not 0 <= amplitude_percentile_min <= 100:
+                raise ValueError("`amplitude_percentile_min` must be in [0, 100].")
+            percentile_threshold = np.percentile(spike_amplitudes, amplitude_percentile_min)
+            keep &= spike_amplitudes >= percentile_threshold
+
+        if amplitude_raw_min is not None:
+            keep &= spike_amplitudes >= amplitude_raw_min
+
+        return keep
+
+    @staticmethod
+    def _compute_global_std_mask(spike_amplitudes, std_multiplier=1.5):
+        threshold = np.mean(spike_amplitudes) + std_multiplier * np.std(spike_amplitudes, ddof=1)
+        return spike_amplitudes >= threshold
+
     # TODO: this isn't great, it is convenient but wasteful. But much of this is necessary
     # e.g. compute amplitude with all spikes etc...
     # still refactor for return a spike bool, index on the fly, and have a func compute
@@ -59,7 +92,11 @@ class DriftMapView():
         log_transform_amplitudes,
         decimate,
         only_include_large_amplitude_spikes,
-        large_amplitude_only_segment_size
+        large_amplitude_only_segment_size,
+        amplitude_filter_mode="segment_std",
+        amplitude_percentile_min=None,
+        amplitude_raw_min=None,
+        amplitude_global_std_multiplier=1.5,
      ):
         # start with a view, but we may end up with a copy depending on the settings
         spike_times = self.spike_times
@@ -96,11 +133,56 @@ class DriftMapView():
             spike_depths = spike_depths[:: decimate]
             spike_templates = spike_templates[:: decimate]
 
-        if only_include_large_amplitude_spikes:
+        if only_include_large_amplitude_spikes and amplitude_filter_mode != "none":
+            if amplitude_filter_mode == "segment_std":
+                spike_times, spike_amplitudes, spike_depths, spike_templates = _filter_large_amplitude_spikes(
+                    spike_times, spike_amplitudes, spike_depths, spike_templates,
+                    large_amplitude_only_segment_size,
+                )
+            elif amplitude_filter_mode == "global_std":
+                keep = self._compute_global_std_mask(spike_amplitudes, amplitude_global_std_multiplier)
+                spike_times, spike_amplitudes, spike_depths, spike_templates = self._apply_boolean_mask(
+                    spike_times, spike_amplitudes, spike_depths, spike_templates, keep
+                )
+            elif amplitude_filter_mode == "percentile":
+                if amplitude_percentile_min is None:
+                    raise ValueError(
+                        "`amplitude_filter_mode='percentile'` requires `amplitude_percentile_min`."
+                    )
+                keep = self._compute_threshold_mask(
+                    spike_amplitudes,
+                    amplitude_percentile_min=amplitude_percentile_min,
+                    amplitude_raw_min=None,
+                )
+                spike_times, spike_amplitudes, spike_depths, spike_templates = self._apply_boolean_mask(
+                    spike_times, spike_amplitudes, spike_depths, spike_templates, keep
+                )
+            elif amplitude_filter_mode == "raw":
+                if amplitude_raw_min is None:
+                    raise ValueError("`amplitude_filter_mode='raw'` requires `amplitude_raw_min`.")
+                keep = self._compute_threshold_mask(
+                    spike_amplitudes,
+                    amplitude_percentile_min=None,
+                    amplitude_raw_min=amplitude_raw_min,
+                )
+                spike_times, spike_amplitudes, spike_depths, spike_templates = self._apply_boolean_mask(
+                    spike_times, spike_amplitudes, spike_depths, spike_templates, keep
+                )
+            else:
+                raise ValueError(
+                    "Unknown `amplitude_filter_mode`. Use one of: "
+                    "'none', 'segment_std', 'global_std', 'percentile', 'raw'."
+                )
 
-            spike_times, spike_amplitudes, spike_depths, spike_templates = _filter_large_amplitude_spikes(
-                spike_times, spike_amplitudes, spike_depths, spike_templates,
-                large_amplitude_only_segment_size
+        # Hard thresholds can be applied on top of any filtering mode.
+        if amplitude_percentile_min is not None or amplitude_raw_min is not None:
+            keep = self._compute_threshold_mask(
+                spike_amplitudes,
+                amplitude_percentile_min=amplitude_percentile_min,
+                amplitude_raw_min=amplitude_raw_min,
+            )
+            spike_times, spike_amplitudes, spike_depths, spike_templates = self._apply_boolean_mask(
+                spike_times, spike_amplitudes, spike_depths, spike_templates, keep
             )
 
         return spike_times, spike_amplitudes, spike_depths, amplitude_range_all_spikes, spike_templates
@@ -112,6 +194,10 @@ class DriftMapView():
         exclude_noise=True,
         log_transform_amplitudes=True,
         large_amplitude_only_segment_size=800,
+        amplitude_filter_mode="segment_std",
+        amplitude_percentile_min=None,
+        amplitude_raw_min=None,
+        amplitude_global_std_multiplier=1.5,
     ):
         (
             spike_times,
@@ -124,7 +210,11 @@ class DriftMapView():
             log_transform_amplitudes,
             decimate,
             only_include_large_amplitude_spikes,
-            large_amplitude_only_segment_size
+            large_amplitude_only_segment_size,
+            amplitude_filter_mode,
+            amplitude_percentile_min,
+            amplitude_raw_min,
+            amplitude_global_std_multiplier,
         )
 
         QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
@@ -158,12 +248,17 @@ class DriftMapView():
 
 
 
-    def get_drift_map_plot(self,
+    def get_drift_map_plot_matplotlib(self,
         only_include_large_amplitude_spikes=True,
         decimate=False,
         exclude_noise=True,
         log_transform_amplitudes=True,
         large_amplitude_only_segment_size=800,
+        amplitude_filter_mode="segment_std",
+        amplitude_percentile_min=None,
+        amplitude_raw_min=None,
+        amplitude_global_std_multiplier=1.5,
+
      ):
         (
             spike_times,
@@ -176,7 +271,11 @@ class DriftMapView():
             log_transform_amplitudes,
             decimate,
             only_include_large_amplitude_spikes,
-            large_amplitude_only_segment_size
+            large_amplitude_only_segment_size,
+            amplitude_filter_mode,
+            amplitude_percentile_min,
+            amplitude_raw_min,
+            amplitude_global_std_multiplier,
         )
 
         fig = plt.figure(figsize=(10, 10 * (6 / 8)))
@@ -210,18 +309,25 @@ app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
 
 panels = []
 for file in [
-    r"C:\Users\Jzimi\Desktop\derivatives\1119617_LSE1_shank12_g0\0\sorter_output",
-    r"C:\Users\Jzimi\Desktop\derivatives\1119617_LSE1_shank12_g0\0\sorter_output",
+    # r"Y:\public\projects\BeJG_20230130_VisDetect\wEPhys\BG_046\joe\scratch\derivatives\BG_046_23062025\shank_0\sorting\motion\sorter_output",
+    # r"Y:\public\projects\BeJG_20230130_VisDetect\wEPhys\BG_046\joe\scratch\derivatives\BG_046_24062025\shank_0\sorting\no_motion\sorter_output",
+    # r"Y:\public\projects\BeJG_20230130_VisDetect\wEPhys\BG_046\joe\scratch\derivatives\BG_046_25062025\shank_0\sorting\no_motion\sorter_output"
+    r"X:\aeon\dj_store\ephys-processed\social-ephys0.1-aeon3\ephys_blocks\2024-06-04T11-00-00_2024-06-04T14-00-00\0-95\kilosort4_400\spike_sorting\sorter_output",
+    r"X:\aeon\dj_store\ephys-processed\social-ephys0.1-aeon3\ephys_blocks\2024-06-04T13-00-00_2024-06-04T16-00-00\0-95\kilosort4_400\spike_sorting\sorter_output"
 ]:
     plotter = DriftMapView(
         file
     )
 
+    # TODO: plot num spikes loaded...
     fig = plotter.get_drift_map_plot_interactive(
-        only_include_large_amplitude_spikes=True,  # exclude amplitude outliers? maybe just do this instead of doing this segmented way.
+        only_include_large_amplitude_spikes=True,
         decimate=False,
         exclude_noise=False,
-        log_transform_amplitudes=False
+        log_transform_amplitudes=False,
+        amplitude_filter_mode="percentile",      # options: none, segment_std, global_std, percentile, raw
+        amplitude_percentile_min=75.0,           # hard cutoff (drop bottom 30% amplitudes)
+        amplitude_raw_min=4.0,                   # hard absolute cutoff (applied in addition)
     )
 
     panels.append(fig)
