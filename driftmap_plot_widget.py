@@ -80,16 +80,19 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         self.radio_max_wf = QtWidgets.QRadioButton("Max waveform")
         self.radio_heatmap = QtWidgets.QRadioButton("Heatmap")
         self.radio_heatmap_all = QtWidgets.QRadioButton("Heatmap (all channels)")
+        self.radio_trace_view = QtWidgets.QRadioButton("Trace view")
         self.radio_max_wf.setChecked(True)
 
         self._view_radio_group = QtWidgets.QButtonGroup(self)
         self._view_radio_group.addButton(self.radio_max_wf, 0)
         self._view_radio_group.addButton(self.radio_heatmap, 1)
         self._view_radio_group.addButton(self.radio_heatmap_all, 2)
+        self._view_radio_group.addButton(self.radio_trace_view, 3)
 
         radio_layout.addWidget(self.radio_max_wf)
         radio_layout.addWidget(self.radio_heatmap)
         radio_layout.addWidget(self.radio_heatmap_all)
+        radio_layout.addWidget(self.radio_trace_view)
         radio_layout.addStretch()
         controls_layout.addWidget(radio_row)
 
@@ -196,8 +199,9 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         if not checked:
             return
 
-        mode_map = {0: "max_waveform", 1: "heatmap", 2: "heatmap_all_channels"}
+        mode_map = {0: "max_waveform", 1: "heatmap", 2: "heatmap_all_channels", 3: "trace_view"}
         self.cfgs["right_panel_view_mode"] = mode_map[button_id]
+        self._trace_view_initialized = False
 
         if self.selected_spot is not None:
             self.set_y_limit()
@@ -256,6 +260,8 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
 
         if self.cfgs["right_panel_view_mode"] == "max_waveform":
             self._draw_max_waveform_on_panel(spike_idx)
+        elif self.cfgs["right_panel_view_mode"] == "trace_view":
+            self._draw_template_trace_view_on_panel(spike_idx)
         else:
             self._draw_template_heatmap_on_panel(spike_idx)
 
@@ -310,11 +316,141 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         self.panel_plot.setXRange(0, n_samples, padding=0.05)
         self.panel_plot.setYRange(0, n_chans, padding=0.05)
 
+    def _draw_template_trace_view_on_panel(self, spike_index):
+        template_idx = self.spike_templates[spike_index]
+        wv = self.templates[template_idx].copy() * self.spike_amplitudes[spike_index]
+        n_samples, n_chan = wv.shape
+
+        # Use only channels with non-zero data, unwrapping if KS wrapped them
+        contains_data_idx, is_wrapped = self._get_nonzero_channel_indices(wv)
+        wv = wv[:, contains_data_idx]
+        xc = self.channel_positions[contains_data_idx, 0]
+        yc = self.channel_positions[contains_data_idx, 1]
+
+        if is_wrapped:
+            xc, yc = self._make_positions_contiguous(xc, yc)
+
+        # Scale amplitude so the largest waveform fills ~half the channel spacing
+        unique_y = np.unique(yc)
+        if len(unique_y) > 1:
+            chan_spacing = np.min(np.diff(np.sort(unique_y)))
+        else:
+            chan_spacing = 1.0
+        max_abs = np.max(np.abs(wv))
+        amp = (chan_spacing * 0.45) / max_abs if max_abs > 0 else 1.0
+
+        # Scale time axis proportional to x-spacing
+        unique_x = np.unique(xc)
+        if len(unique_x) > 1:
+            x_spacing = np.min(np.diff(np.sort(unique_x)))
+        else:
+            x_spacing = 20.0
+
+        self.panel_plot.clear()
+        for ii, (xi, yi) in enumerate(zip(xc, yc)):
+            t = np.arange(-n_samples // 2, n_samples // 2, 1, dtype=np.float32)
+            t /= n_samples / (x_spacing * 0.9)
+            self.panel_plot.plot(xi + t, yi + wv[:, ii] * amp, pen=pg.mkPen('k', width=0.5))
+
+        self.panel_plot.setLabel("bottom", "x position")
+        self.panel_plot.setLabel("left", "y position (\u00b5m)")
+        self.panel_plot.getAxis("left").setTicks(None)
+
+        # Center the view on the displayed channels, preserving current zoom level
+        y_center = (yc.min() + yc.max()) / 2
+        x_center = (xc.min() + xc.max()) / 2
+        view_box = self.panel_plot.getViewBox()
+        [[x_lo, x_hi], [y_lo, y_hi]] = view_box.viewRange()
+        y_half = (y_hi - y_lo) / 2
+        x_half = (x_hi - x_lo) / 2
+
+        if not hasattr(self, '_trace_view_initialized') or not self._trace_view_initialized:
+            # First time: set a sensible default range
+            y_pad = (yc.max() - yc.min()) * 0.15 + chan_spacing
+            x_pad = (xc.max() - xc.min()) * 0.15 + x_spacing
+            self.panel_plot.setXRange(xc.min() - x_pad, xc.max() + x_pad, padding=0)
+            self.panel_plot.setYRange(yc.min() - y_pad, yc.max() + y_pad, padding=0)
+            self._trace_view_initialized = True
+        else:
+            # Subsequent clicks: keep zoom, just re-center
+            self.panel_plot.setXRange(x_center - x_half, x_center + x_half, padding=0)
+            self.panel_plot.setYRange(y_center - y_half, y_center + y_half, padding=0)
+        self.panel_plot.getAxis("left").setStyle(showValues=True)
+
     def get_max_waveform_data(self, spike_index):
         template_idx = self.spike_templates[spike_index]
         scaled_template = self.templates[template_idx, :, :] * self.spike_amplitudes[spike_index]
         peak_ch = np.argmax(np.max(np.abs(scaled_template), axis=0))
         return scaled_template[:, peak_ch]
+
+    @staticmethod
+    def _get_nonzero_channel_indices(scaled_template):
+        """Get indices of channels with data, unwrapping if KS wrapped them.
+
+        Kilosort can wrap template channel assignments around the probe
+        boundaries (e.g. channels [0, 1, 2, 380, 381, 382]). This detects
+        the wrap and reorders so the high-index group comes first,
+        giving a spatially contiguous result.
+
+        Returns
+        -------
+        contains_data_idx : np.ndarray
+            Channel indices with data, reordered if wrapping detected.
+        is_wrapped : bool
+            True if wrapping was detected and corrected.
+        """
+        contains_data_idx = np.where(scaled_template[0, :] != 0)[0]
+
+        if len(contains_data_idx) < 2:
+            return contains_data_idx, False
+
+        # Check for a gap (non-contiguous indices)
+        diffs = np.diff(contains_data_idx)
+        gap_positions = np.where(diffs > 1)[0]
+
+        if len(gap_positions) == 1:
+            # Wrapped: split at gap, put the higher-index group first
+            split = gap_positions[0] + 1
+            contains_data_idx = np.concatenate([
+                contains_data_idx[split:],
+                contains_data_idx[:split],
+            ])
+            return contains_data_idx, True
+
+        return contains_data_idx, False
+
+    @staticmethod
+    def _make_positions_contiguous(xc, yc):
+        """Remap channel positions so wrapped channels sit contiguously.
+
+        When KS wraps, channels from the top and bottom of the probe
+        end up in the same template. We shift the lower-position group
+        to sit just above the higher-position group (or vice versa)
+        so they display as one contiguous block.
+        """
+        sorted_y = np.sort(np.unique(yc))
+        if len(sorted_y) < 2:
+            return xc.copy(), yc.copy()
+
+        # Find the largest gap in y positions
+        y_diffs = np.diff(sorted_y)
+        largest_gap_idx = np.argmax(y_diffs)
+        gap_size = y_diffs[largest_gap_idx]
+        typical_spacing = np.min(y_diffs)
+
+        # If the largest gap is much bigger than typical spacing, it's a wrap
+        if gap_size > typical_spacing * 3:
+            gap_threshold = sorted_y[largest_gap_idx] + gap_size / 2
+            yc_new = yc.copy()
+            # Move the upper group down to sit just above the lower group
+            upper_mask = yc >= gap_threshold
+            lower_max = yc[~upper_mask].max() if np.any(~upper_mask) else yc.min()
+            upper_min = yc[upper_mask].min() if np.any(upper_mask) else yc.max()
+            shift = upper_min - lower_max - typical_spacing
+            yc_new[upper_mask] -= shift
+            return xc.copy(), yc_new
+
+        return xc.copy(), yc.copy()
 
     def get_heatmap_data(self, spike_index):
         """"""
@@ -325,7 +461,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
             scaled_template = scaled_template.copy()  # TODO: check if this is necessary
             scaled_template[:, scaled_template[0, :] == 0] = np.nan
         else:
-            contains_data_idx = np.where(scaled_template[0, :] != 0)[0]
+            contains_data_idx, _ = self._get_nonzero_channel_indices(scaled_template)
             scaled_template = scaled_template[:, contains_data_idx]
 
         return scaled_template

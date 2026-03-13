@@ -21,6 +21,11 @@ import matplotlib.pyplot as plt
 
 # TODO idea: memmap the npy files and decimate ON LOAD
 
+# TODO: KS can wrap template channels around probe boundaries (e.g. channels
+#       [0,1,2,380,381,382] for a template near the top). We unwrap these in
+#       _get_nonzero_channel_indices. Post about this on the Kilosort GitHub
+#       and consider adding an option to disable the unwrap.
+
 class DriftMapView():
     def __init__(self, sorter_path):
         self.sorter_path = Path(sorter_path)
