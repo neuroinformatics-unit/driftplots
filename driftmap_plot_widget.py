@@ -28,7 +28,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         self.log_transform_amplitudes = log_transform_amplitudes
 
         self.cfgs = {
-            "right_panel_view_mode": "heatmap",
+            "right_panel_view_mode": "max_waveform",
             "left_panel_y_axis": {
                 "on": False,
                 "y_max": 200,
@@ -78,14 +78,17 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
 
         self.radio_max_wf = QtWidgets.QRadioButton("Max waveform")
         self.radio_heatmap = QtWidgets.QRadioButton("Heatmap")
+        self.radio_heatmap_all = QtWidgets.QRadioButton("Heatmap (all channels)")
         self.radio_max_wf.setChecked(True)
 
         self._view_radio_group = QtWidgets.QButtonGroup(self)
-        self._view_radio_group.addButton(self.radio_heatmap, 0)
-        self._view_radio_group.addButton(self.radio_max_wf, 1)
+        self._view_radio_group.addButton(self.radio_max_wf, 0)
+        self._view_radio_group.addButton(self.radio_heatmap, 1)
+        self._view_radio_group.addButton(self.radio_heatmap_all, 2)
 
         radio_layout.addWidget(self.radio_max_wf)
         radio_layout.addWidget(self.radio_heatmap)
+        radio_layout.addWidget(self.radio_heatmap_all)
         radio_layout.addStretch()
         controls_layout.addWidget(radio_row)
 
@@ -191,12 +194,13 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
     def handle_view_radio_toggled(self, button_id, checked):
         if not checked:
             return
-        self.cfgs["right_panel_view_mode"] = "heatmap" if button_id == 0 else "max_waveform"
-        self.panel_plot.clear()
-        self.set_y_limit()
-        if self.selected_spot is None:
-            return
-        self.update_panel(int(self.selected_spot.data()))
+
+        mode_map = {0: "max_waveform", 1: "heatmap", 2: "heatmap_all_channels"}
+        self.cfgs["right_panel_view_mode"] = mode_map[button_id]
+
+        if self.selected_spot is not None:
+            self.set_y_limit()
+            self.update_panel(int(self.selected_spot.data()))
 
     def handle_y_spinbox_min(self, value):
         self.panel_plot.setYRange(
@@ -270,6 +274,8 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         template_waveform_2d = self.get_heatmap_data(spike_index)
         n_samples, n_chans = template_waveform_2d.shape[0], template_waveform_2d.shape[1]
 
+        self.panel_plot.clear()
+
         image_item = pg.ImageItem()
         self.panel_plot.addItem(image_item)
 
@@ -296,12 +302,13 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         return scaled_template[:, peak_ch]
 
     def get_heatmap_data(self, spike_index):
+        """"""
         template_idx = self.spike_templates[spike_index]
         scaled_template = self.templates[template_idx, :, :] * self.spike_amplitudes[spike_index]
 
-        if mode == "all_channels":
-            scaled_template = scaled_template.copy()
-            scaled_template[:, scaled_template[0, :] != 0] = np.nan
+        if self.cfgs["right_panel_view_mode"] == "heatmap_all_channels":
+            scaled_template = scaled_template.copy()  # TODO: check if this is necessary
+            scaled_template[:, scaled_template[0, :] == 0] = np.nan
         else:
             contains_data_idx = np.where(scaled_template[0, :] != 0)[0]
             scaled_template = scaled_template[:, contains_data_idx]

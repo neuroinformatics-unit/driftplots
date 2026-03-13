@@ -23,9 +23,4 @@ def get_spikes_info_ks4(
 
     templates = np.load(sorter_output / "templates.npy") # rename unwihten?
 
-    inv_white_mat = np.load(sorter_output / "whitening_mat_inv.npy")
-
-    for i in range(templates.shape[0]):
-        templates[i, :, :] = templates[i, :, :] @ inv_white_mat
-
     return spike_times, spike_amplitudes, spike_depths, spike_templates, templates

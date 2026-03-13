@@ -81,7 +81,6 @@ def get_drift_map_plot(
     else:
         raster_axis = fig.add_subplot()
 
-    print(amplitude_range_all_spikes)
     _plot_kilosort_drift_map_raster(
         spike_times,
         spike_amplitudes,
