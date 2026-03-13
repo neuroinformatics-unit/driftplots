@@ -171,7 +171,8 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         point_size = 5.0
         self.scatter = pg.ScatterPlotItem(
             spike_times, spike_depths,
-            pxMode=True, size=point_size, hoverable=True, antialias=True, data=np.arange(spike_times.size), brush=rgba_float*255, pen=None
+            pxMode=True, size=point_size, hoverable=True, antialias=True, data=spike_amplitudes, brush=rgba_float*255, pen=None,
+            tip=lambda x, y, data: f"x={x:.3f}\ny={y:.1f}\namp={data:.2f}",
         )
 
         # Template Plot
