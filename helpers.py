@@ -1,7 +1,8 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from pathlib import Path
 if TYPE_CHECKING:
-    from pathlib import Path
+    pass
 import pandas as pd
 import numpy as np
 
@@ -71,3 +72,19 @@ def get_noise_exclusion_mask(sorter_output):
     exclude_bool_mask = np.isin(spike_clusters.ravel(), noise_cluster_ids)
 
     return exclude_bool_mask
+
+
+def get_pooled_amplitudes(paths):
+    """Load and concatenate amplitudes.npy from multiple sorter output paths.
+
+    Parameters
+    ----------
+    paths : list of Path
+        List of sorter output directories, each containing amplitudes.npy.
+
+    Returns
+    -------
+    np.ndarray
+        Concatenated amplitudes from all paths.
+    """
+    return np.concatenate([np.load(Path(p) / "amplitudes.npy").ravel() for p in paths])

@@ -32,7 +32,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         self.channel_positions = channel_positions
 
         self.cfgs = {
-            "right_panel_view_mode": "max_waveform",
+            "right_panel_view_mode": "heatmap",
             "left_panel_y_axis": {
                 "on": False,
                 "y_max": 200,
@@ -84,7 +84,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         self.radio_heatmap = QtWidgets.QRadioButton("Heatmap")
         self.radio_heatmap_all = QtWidgets.QRadioButton("Heatmap (all channels)")
         self.radio_trace_view = QtWidgets.QRadioButton("Trace view")
-        self.radio_max_wf.setChecked(True)
+        self.radio_heatmap.setChecked(True)
 
         self._view_radio_group = QtWidgets.QButtonGroup(self)
         self._view_radio_group.addButton(self.radio_max_wf, 0)
@@ -99,13 +99,13 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         radio_layout.addStretch()
         controls_layout.addWidget(radio_row)
 
-        # Page 0 — Max waveform
-        max_wf_page = QtWidgets.QWidget()
-        max_wf_layout = QtWidgets.QHBoxLayout(max_wf_page)
-        max_wf_layout.setContentsMargins(0, 0, 0, 0)
-        max_wf_layout.setSpacing(8)
+        # Limits controls row
+        self._limits_page = QtWidgets.QWidget()
+        limits_layout = QtWidgets.QHBoxLayout(self._limits_page)
+        limits_layout.setContentsMargins(0, 0, 0, 0)
+        limits_layout.setSpacing(8)
 
-        fix_ylim_cb = QtWidgets.QCheckBox("Fix y-limits")
+        self._fix_limits_cb = QtWidgets.QCheckBox("Fix y-limits")
         self.ymin_spin = QtWidgets.QDoubleSpinBox()
         self.ymax_spin = QtWidgets.QDoubleSpinBox()
         for spin in (self.ymin_spin, self.ymax_spin):
@@ -118,14 +118,16 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         self.ymin_spin.setValue(self.cfgs["left_panel_y_axis"]["y_min"])
         self.ymax_spin.setValue(self.cfgs["left_panel_y_axis"]["y_max"])
 
-        max_wf_layout.addWidget(fix_ylim_cb)
-        max_wf_layout.addWidget(QtWidgets.QLabel("Y min:"))
-        max_wf_layout.addWidget(self.ymin_spin)
-        max_wf_layout.addWidget(QtWidgets.QLabel("Y max:"))
-        max_wf_layout.addWidget(self.ymax_spin)
-        max_wf_layout.addStretch()
+        limits_layout.addWidget(self._fix_limits_cb)
+        self._min_label = QtWidgets.QLabel("Y min:")
+        self._max_label = QtWidgets.QLabel("Y max:")
+        limits_layout.addWidget(self._min_label)
+        limits_layout.addWidget(self.ymin_spin)
+        limits_layout.addWidget(self._max_label)
+        limits_layout.addWidget(self.ymax_spin)
+        limits_layout.addStretch()
 
-        controls_layout.addWidget(max_wf_page)
+        controls_layout.addWidget(self._limits_page)
 
         # Add controls below the splitter, spanning full width
         outer_layout.addWidget(controls_widget)
@@ -170,8 +172,8 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         # create plot
         self.scatter = pg.ScatterPlotItem(
             spike_times, spike_depths,
-            pxMode=True, size=point_size, hoverable=True, antialias=True, data=spike_amplitudes, brush=rgba_float*255, pen=None,
-            tip=lambda x, y, data: f"x={x:.3f}\ny={y:.1f}\namp={data:.2f}",
+            pxMode=True, size=point_size, hoverable=True, antialias=True, data=np.arange(spike_times.size), brush=rgba_float*255, pen=None,
+            tip=lambda x, y, data: f"x={x:.3f}\ny={y:.1f}\namp={spike_amplitudes[int(data)]:.2f}",  # TODO: this is super weird
         )
 
         # Template Plot
@@ -192,7 +194,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
 
         self.ymin_spin.valueChanged.connect(self.handle_y_spinbox_min)
         self.ymax_spin.valueChanged.connect(self.handle_y_spinbox_max)
-        fix_ylim_cb.toggled.connect(self.handle_fix_ylim_cb)
+        self._fix_limits_cb.toggled.connect(self.handle_fix_ylim_cb)
         self.scatter.sigClicked.connect(self.handle_click)
         self._view_radio_group.idToggled.connect(self.handle_view_radio_toggled)
 
@@ -201,26 +203,38 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
             return
 
         mode_map = {0: "max_waveform", 1: "heatmap", 2: "heatmap_all_channels", 3: "trace_view"}
-        self.cfgs["right_panel_view_mode"] = mode_map[button_id]
+        mode = mode_map[button_id]
+        self.cfgs["right_panel_view_mode"] = mode
         self._trace_view_initialized = False
+
+        if mode == "trace_view":
+            self._limits_page.setVisible(False)
+        else:
+            self._limits_page.setVisible(True)
+            if mode == "max_waveform":
+                self._fix_limits_cb.setText("Fix y-limits")
+                self._min_label.setText("Y min:")
+                self._max_label.setText("Y max:")
+            else:
+                self._fix_limits_cb.setText("Fix color limits")
+                self._min_label.setText("C min:")
+                self._max_label.setText("C max:")
 
         if self.selected_spot is not None:
             self.set_y_limit()
             self.update_panel(int(self.selected_spot.data()))
 
     def handle_y_spinbox_min(self, value):
-        self.panel_plot.setYRange(
-            value,
-            self.cfgs["left_panel_y_axis"]["y_max"],
-            padding=0
-        )
+        self.cfgs["left_panel_y_axis"]["y_min"] = value
+        if self.selected_spot is not None:
+            self.set_y_limit()
+            self.update_panel(int(self.selected_spot.data()))
 
     def handle_y_spinbox_max(self, value):
-        self.panel_plot.setYRange(
-            self.cfgs["left_panel_y_axis"]["y_min"],
-            value,
-            padding=0
-        )
+        self.cfgs["left_panel_y_axis"]["y_max"] = value
+        if self.selected_spot is not None:
+            self.set_y_limit()
+            self.update_panel(int(self.selected_spot.data()))
 
     def handle_fix_ylim_cb(self, active):
         self.ymin_spin.setEnabled(active)
@@ -232,11 +246,14 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         self.update_panel(int(self.selected_spot.data()))
 
     def set_y_limit(self):
-        if self.cfgs["right_panel_view_mode"] == "max_waveform":
+        mode = self.cfgs["right_panel_view_mode"]
+        if mode == "max_waveform":
             if self.cfgs["left_panel_y_axis"]["on"]:
                 self.panel_plot.setYRange(self.ymin_spin.value(), self.ymax_spin.value(), padding=0)
             else:
                 self.panel_plot.enableAutoRange(axis='y')
+        elif mode in ("heatmap", "heatmap_all_channels"):
+            pass  # color limits applied during draw
         else:
             self.panel_plot.enableAutoRange()
 
@@ -258,6 +275,8 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
     def update_panel(self, spike_idx):
         template_id = int(self.spike_templates[spike_idx])
         self.panel_plot.setTitle(f"Template {template_id}")
+        print(spike_idx)
+        print(template_id)
 
         if self.cfgs["right_panel_view_mode"] == "max_waveform":
             self._draw_max_waveform_on_panel(spike_idx)
@@ -309,8 +328,8 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
 
         if self.cfgs["left_panel_y_axis"]["on"]:
             image_item.setLevels((
-                self.cfgs["left_panel_y_axis"]["y_min"],
-                self.cfgs["left_panel_y_axis"]["y_max"]
+                self.ymin_spin.value(),
+                self.ymax_spin.value(),
             ))
         image_item.setImage(template_waveform_2d)
         image_item.setRect(0, 0, n_samples, n_chans)
