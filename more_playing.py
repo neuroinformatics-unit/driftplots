@@ -123,7 +123,8 @@ class DriftMapView():
         self,
         decimate=False,
         exclude_noise=True,
-        log_transform_amplitudes=True,
+        amplitude_scaling="linear",
+        n_color_bins=20,
         filter_amplitude_mode=None,
         filter_amplitude_values=(),
     ):
@@ -148,7 +149,8 @@ class DriftMapView():
             spike_templates,
             self.templates,
             self.channel_positions,
-            log_transform_amplitudes,
+            amplitude_scaling=amplitude_scaling,
+            n_color_bins=n_color_bins,
             sorter_path=self.sorter_path
         )
 
@@ -211,8 +213,9 @@ for file in [
     fig = plotter.get_drift_map_plot_interactive(
         decimate=10,
         exclude_noise=True,
-        log_transform_amplitudes=False,  # scatter_amplitude_scaling="log", (XX,XX), "linear"
-        filter_amplitude_mode="percentile", # "percentile",
+        amplitude_scaling="log10",
+        n_color_bins=100,
+        filter_amplitude_mode="percentile",  # "percentile",
         filter_amplitude_values=(80, 98)
     )
 

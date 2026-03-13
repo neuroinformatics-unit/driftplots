@@ -17,7 +17,8 @@ pg.setConfigOption("antialias", True)
 
 class DriftmapPlotWidget(QtWidgets.QWidget):
     def __init__(self, spike_times, spike_amplitudes, spike_depths,
-                 spike_templates, templates, channel_positions, log_transform_amplitudes,
+                 spike_templates, templates, channel_positions,
+                 amplitude_scaling="linear", n_color_bins=20,
                  sorter_path=None):
         super().__init__()
 
@@ -29,7 +30,6 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         self.spike_templates = spike_templates
         self.templates = templates
         self.channel_positions = channel_positions
-        self.log_transform_amplitudes = log_transform_amplitudes
 
         self.cfgs = {
             "right_panel_view_mode": "max_waveform",
@@ -139,22 +139,22 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         self.p_scatter.showGrid(x=False, y=False)
 
         # set amplitude colors
-        n_color_bins = 20
-        amp_min, amp_max = (
-        spike_amplitudes.min(),
-        spike_amplitudes.max(),
-    )
-        assert amp_min >= 0
-        assert amp_max >= 0
+        amp_values = spike_amplitudes.copy()
 
-        if self.log_transform_amplitudes:
-            amp_min = np.log(amp_min)
-            amp_max = np.log(amp_max)
-            spike_amplitudes = np.log(spike_amplitudes)
+        if isinstance(amplitude_scaling, tuple):
+            amp_min, amp_max = amplitude_scaling
+        elif amplitude_scaling == "log2":
+            amp_values = np.log2(amp_values)
+            amp_min, amp_max = amp_values.min(), amp_values.max()
+        elif amplitude_scaling == "log10":
+            amp_values = np.log10(amp_values)
+            amp_min, amp_max = amp_values.min(), amp_values.max()
+        else:  # "linear"
+            amp_min, amp_max = amp_values.min(), amp_values.max()
 
         color_bins = np.linspace(amp_min, amp_max, n_color_bins)
         gray_colors = plt.get_cmap("gray")(np.linspace(0, 1, n_color_bins))[::-1]
-        bin_indices = np.clip(np.searchsorted(color_bins, spike_amplitudes, side="right") - 1, 0, n_color_bins - 2)
+        bin_indices = np.clip(np.searchsorted(color_bins, amp_values, side="right") - 1, 0, n_color_bins - 2)
         rgba_float = gray_colors[bin_indices]
 
         # set axis limits
