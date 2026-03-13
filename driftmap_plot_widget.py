@@ -19,7 +19,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
     def __init__(self, spike_times, spike_amplitudes, spike_depths,
                  spike_templates, templates, channel_positions,
                  amplitude_scaling="linear", n_color_bins=20,
-                 sorter_path=None):
+                 point_size=5.0, sorter_path=None):
         super().__init__()
 
         print(f"Loaded {spike_times.size} spikes from {sorter_path}")
@@ -168,7 +168,6 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         )
 
         # create plot
-        point_size = 5.0
         self.scatter = pg.ScatterPlotItem(
             spike_times, spike_depths,
             pxMode=True, size=point_size, hoverable=True, antialias=True, data=spike_amplitudes, brush=rgba_float*255, pen=None,
@@ -196,8 +195,6 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         fix_ylim_cb.toggled.connect(self.handle_fix_ylim_cb)
         self.scatter.sigClicked.connect(self.handle_click)
         self._view_radio_group.idToggled.connect(self.handle_view_radio_toggled)
-
-        self.show()
 
     def handle_view_radio_toggled(self, button_id, checked):
         if not checked:

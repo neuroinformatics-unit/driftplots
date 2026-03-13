@@ -125,6 +125,7 @@ class DriftMapView():
         exclude_noise=True,
         amplitude_scaling="linear",
         n_color_bins=20,
+        point_size=5.0,
         filter_amplitude_mode=None,
         filter_amplitude_values=(),
     ):
@@ -151,6 +152,7 @@ class DriftMapView():
             self.channel_positions,
             amplitude_scaling=amplitude_scaling,
             n_color_bins=n_color_bins,
+            point_size=point_size,
             sorter_path=self.sorter_path
         )
 
@@ -203,8 +205,13 @@ app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
 
 panels = []
 for file in [
-    r"Y:\public\projects\BeJG_20230130_VisDetect\wEPhys\BG_046\joe\scratch\derivatives\BG_046_26062025\shank_1\sorting\no_motion\sorter_output",
-    r"Y:\public\projects\BeJG_20230130_VisDetect\wEPhys\BG_046\joe\scratch\derivatives\BG_046_27062025\shank_1\sorting\motion\sorter_output"
+ #   r"Y:\public\projects\BeJG_20230130_VisDetect\wEPhys\BG_046\joe\scratch\derivatives\BG_046_26062025\shank_1\sorting\no_motion\sorter_output",
+  #  r"Y:\public\projects\BeJG_20230130_VisDetect\wEPhys\BG_046\joe\scratch\derivatives\BG_046_27062025\shank_1\sorting\motion\sorter_output",
+    r"X:\aeon\dj_store\ephys-processed\social-ephys0.1-aeon3\ephys_blocks\2024-06-04T11-00-00_2024-06-04T14-00-00\0-95\kilosort4_400\spike_sorting\sorter_output",
+   # r"X:\aeon\dj_store\ephys-processed\social-ephys0.1-aeon3\ephys_blocks\2024-06-04T13-00-00_2024-06-04T16-00-00\0-95\kilosort4_400\spike_sorting\sorter_output",
+  #  r"X:\aeon\dj_store\ephys-processed\social-ephys0.1-aeon3\ephys_blocks\2024-06-04T15-00-00_2024-06-04T18-00-00\0-95\kilosort4_400\spike_sorting\sorter_output"
+
+
 ]:
     plotter = DriftMapView(
         file
@@ -213,8 +220,8 @@ for file in [
     fig = plotter.get_drift_map_plot_interactive(
         decimate=10,
         exclude_noise=True,
-        amplitude_scaling="log10",
-        n_color_bins=100,
+        amplitude_scaling="linear",
+        n_color_bins=25,
         filter_amplitude_mode="percentile",  # "percentile",
         filter_amplitude_values=(80, 98)
     )
