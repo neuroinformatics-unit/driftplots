@@ -298,5 +298,12 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
     def get_heatmap_data(self, spike_index):
         template_idx = self.spike_templates[spike_index]
         scaled_template = self.templates[template_idx, :, :] * self.spike_amplitudes[spike_index]
-        contains_data_idx = np.where(scaled_template[0, :] != 0)[0]
-        return scaled_template[:, contains_data_idx]
+
+        if mode == "all_channels":
+            scaled_template = scaled_template.copy()
+            scaled_template[:, scaled_template[0, :] != 0] = np.nan
+        else:
+            contains_data_idx = np.where(scaled_template[0, :] != 0)[0]
+            scaled_template = scaled_template[:, contains_data_idx]
+
+        return scaled_template
