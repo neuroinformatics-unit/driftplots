@@ -39,7 +39,8 @@ class DriftMapView():
             self.spike_amplitudes,
             self.spike_depths,
             self.spike_templates,
-            self.templates
+            self.templates,
+            self.channel_positions
         ) = func(
             self.sorter_path
         )
@@ -141,6 +142,7 @@ class DriftMapView():
             spike_depths,
             spike_templates,
             self.templates,
+            self.channel_positions,
             log_transform_amplitudes
         )
 

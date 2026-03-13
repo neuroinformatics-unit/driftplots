@@ -22,5 +22,6 @@ def get_spikes_info_ks4(
     spike_templates = np.load(sorter_output / "spike_templates.npy")  # rename spike_tempaltes_idx?
 
     templates = np.load(sorter_output / "templates.npy") # rename unwihten?
+    channel_positions = np.load(sorter_output / "channel_positions.npy")
 
-    return spike_times, spike_amplitudes, spike_depths, spike_templates, templates
+    return spike_times, spike_amplitudes, spike_depths, spike_templates, templates, channel_positions

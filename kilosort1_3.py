@@ -67,7 +67,7 @@ def get_spikes_info_ks1_3(
         params["temp_scaling_amplitudes"],
     )
 
-    return params["spike_times"], spike_amplitudes, spike_depths
+    return params["spike_times"], spike_amplitudes, spike_depths, params["spike_templates"].squeeze(), unwhite_templates, params["channel_positions"]
 
 
 def _template_positions_amplitudes(

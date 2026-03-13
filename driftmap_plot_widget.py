@@ -17,7 +17,7 @@ pg.setConfigOption("antialias", True)
 
 class DriftmapPlotWidget(QtWidgets.QWidget):
     def __init__(self, spike_times, spike_amplitudes, spike_depths,
-                 spike_templates, templates, log_transform_amplitudes):
+                 spike_templates, templates, channel_positions, log_transform_amplitudes):
         super().__init__()
 
         self.spike_times = spike_times
@@ -25,6 +25,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         self.spike_depths = spike_depths
         self.spike_templates = spike_templates
         self.templates = templates
+        self.channel_positions = channel_positions
         self.log_transform_amplitudes = log_transform_amplitudes
 
         self.cfgs = {
