@@ -268,6 +268,8 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
 
         self.panel_plot.setLabel("bottom", "sample")
         self.panel_plot.setLabel("left", "amplitude")
+        self.panel_plot.getAxis("left").setTicks(None)
+        self.panel_plot.getAxis("left").setStyle(showValues=True)
         self.panel_plot.setXRange(0, n_samples, padding=0.05)
 
     def _draw_template_heatmap_on_panel(self, spike_index):
@@ -275,6 +277,16 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         n_samples, n_chans = template_waveform_2d.shape[0], template_waveform_2d.shape[1]
 
         self.panel_plot.clear()
+
+        if self.cfgs["right_panel_view_mode"] == "heatmap_all_channels":
+            self.panel_plot.setLabel("left", "channel")
+            self.panel_plot.getAxis("left").setTicks(None)
+            self.panel_plot.getAxis("left").setStyle(showValues=True)
+        else:
+            self.panel_plot.setLabel("left", "")
+            self.panel_plot.getAxis("left").setTicks([])
+            self.panel_plot.getAxis("left").setStyle(showValues=False)
+        self.panel_plot.setLabel("bottom", "sample")
 
         image_item = pg.ImageItem()
         self.panel_plot.addItem(image_item)
@@ -294,6 +306,8 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
             ))
         image_item.setImage(template_waveform_2d)
         image_item.setRect(0, 0, n_samples, n_chans)
+        self.panel_plot.setXRange(0, n_samples, padding=0.05)
+        self.panel_plot.setYRange(0, n_chans, padding=0.05)
 
     def get_max_waveform_data(self, spike_index):
         template_idx = self.spike_templates[spike_index]
