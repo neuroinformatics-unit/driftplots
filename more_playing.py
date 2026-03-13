@@ -148,7 +148,8 @@ class DriftMapView():
             spike_templates,
             self.templates,
             self.channel_positions,
-            log_transform_amplitudes
+            log_transform_amplitudes,
+            sorter_path=self.sorter_path
         )
 
         return self.plot
