@@ -1,6 +1,6 @@
 import math
 from PySide6 import QtWidgets
-from driftmap_plot_widget import DriftmapPlotWidget
+from .driftmap_plot_widget import DriftmapPlotWidget
 
 class MultiSessionDriftmapWidget(QtWidgets.QWidget):
     def __init__(self, panels: list[DriftmapPlotWidget], grid=None):

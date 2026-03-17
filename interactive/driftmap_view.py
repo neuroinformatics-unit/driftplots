@@ -1,11 +1,11 @@
-from driftmapviewer_new import get_drift_map_plot, _plot_kilosort_drift_map_raster
+from mpl_plotting.driftmapviewer_new import get_drift_map_plot, _plot_kilosort_drift_map_raster
 import matplotlib.pyplot as plt
-import kilosort1_3
-import kilosort_4
-import helpers
+from ks_extractors import kilosort1_3
+from ks_extractors import kilosort_4
+from ks_extractors import helpers
 from pathlib import Path
 import numpy as np
-from driftmap_plot_widget import DriftmapPlotWidget
+from .driftmap_plot_widget import DriftmapPlotWidget
 import numpy as np
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtWidgets, QtCore
@@ -113,6 +113,8 @@ class DriftMapView():
         filter_amplitude_mode=None,
         filter_amplitude_values=(),
     ):
+        """
+        """
         (
             spike_times,
             spike_amplitudes,

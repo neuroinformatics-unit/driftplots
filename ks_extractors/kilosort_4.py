@@ -5,7 +5,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 import numpy as np
-import helpers
+from . import helpers
 
 
 def get_spikes_info_ks4(
