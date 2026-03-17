@@ -1,8 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from pathlib import Path
-if TYPE_CHECKING:
-    pass
+
 import pandas as pd
 import numpy as np
 
@@ -50,19 +49,44 @@ def load_cluster_groups(cluster_path: Path) -> tuple[np.ndarray, ...]:
     return cluster_ids, cluster_groups
 
 
-def get_noise_mask(sorter_output):
-    """"""
+def get_noise_mask(sorter_output: Path) -> np.ndarray:
+    """Build a boolean mask identifying spikes that belong to noise clusters.
+
+    Loads ``spike_clusters.npy`` and the cluster-groups file
+    (``cluster_groups.csv`` or ``cluster_group.tsv``) from the sorter
+    output directory.  Spikes whose cluster is labelled *noise*
+    (group == 0) are marked ``True``.
+
+    Parameters
+    ----------
+    sorter_output : Path
+        Path to the Kilosort sorter output directory.
+
+    Returns
+    -------
+    np.ndarray
+        (num_spikes,) boolean array — ``True`` for spikes belonging to
+        a noise cluster.
+
+    Raises
+    ------
+    FileNotFoundError
+        If ``spike_clusters.npy`` is not found.
+    ValueError
+        If neither ``cluster_groups.csv`` nor ``cluster_group.tsv``
+        exists in ``sorter_output``.
+    """
     if (cluster_path := sorter_output / "spike_clusters.npy").is_file():
         spike_clusters = np.load(cluster_path)
     else:
-        raise NotImplementedError("spike_clusters.npy does not exist.")
+        raise FileNotFoundError("spike_clusters.npy does not exist.")
 
     if not (
         (cluster_path := sorter_output / "cluster_groups.csv").is_file()
         or (cluster_path := sorter_output / "cluster_group.tsv").is_file()
     ):
         raise ValueError(
-            f"`exclude_noise` is `True` but there is no `cluster_groups.csv` or `.tsv` "
+            f"`exclude_noise` is `True` but there is no `cluster_groups.csv/.tsv` "
             f"in the sorting output at: {sorter_output}"
         )
 
@@ -75,7 +99,7 @@ def get_noise_mask(sorter_output):
     return exclude_bool_mask
 
 
-def get_pooled_amplitudes(paths):
+def get_pooled_amplitudes(paths: list[Path]) -> np.ndarray:
     """Load and concatenate amplitudes.npy from multiple sorter output paths.
 
     Parameters

@@ -86,7 +86,7 @@ class DriftMapView():
         self.spike_depths.flags.writeable = False
         self.spike_templates.flags.writeable = False
         self.templates.flags.writeable = False
-        self.channel_positions.flags.writeable = false
+        self.channel_positions.flags.writeable = False
 
     def _process_data(
         self,

@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 
 # TODO
 # ----
+# - review driftmap_view and multi_session_drift_map
 # - review KS4 and KS3 method, in particular the scaling and whitening. Check ks4 vs. ks25
 #
 #
