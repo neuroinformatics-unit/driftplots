@@ -11,6 +11,33 @@ import pyqtgraph as pg
 from pyqtgraph.Qt import QtWidgets, QtCore
 import matplotlib.pyplot as plt
 
+# TODO
+# ----
+# - review KS4 and KS3 method, in particular the scaling and whitening. Check ks4 vs. ks25
+#
+#
+#
+# Don't forget to write in docs the caveats on the extraction
+
+
+
+# TODO Extra - look into:
+# TODO idea: memmap the npy files and decimate ON LOAD
+# TODO: KS can wrap template channels around probe boundaries (e.g. channels
+#       [0,1,2,380,381,382] for a template near the top). We unwrap these in
+#       _get_nonzero_channel_indices. Post about this on the Kilosort GitHub
+#       and consider adding an option to disable the unwrap.
+
+# This makes the assumption that there will never be different .csv and .tsv files
+# in the same sorter output (this should never happen, there will never even be two).
+# Though can be saved as .tsv, it seems the .csv is also tab formatted as far as pandas is concerned.
+
+# TODO: this is super weird, can be improved?
+#  if log_transform_amplitudes:
+#     spike_amplitudes = np.log(spike_amplitudes)  # TODO: give optional (None, 2 or 10)
+
+
+
 
 # TODO: dont use gain, instead set clim
 # TODO: removed localised peaks

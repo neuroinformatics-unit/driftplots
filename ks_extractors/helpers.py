@@ -6,6 +6,7 @@ if TYPE_CHECKING:
 import pandas as pd
 import numpy as np
 
+
 def load_cluster_groups(cluster_path: Path) -> tuple[np.ndarray, ...]:
     """
     Load kilosort `cluster_groups` file, that contains a table of
@@ -49,7 +50,7 @@ def load_cluster_groups(cluster_path: Path) -> tuple[np.ndarray, ...]:
     return cluster_ids, cluster_groups
 
 
-def get_noise_exclusion_mask(sorter_output):
+def get_noise_mask(sorter_output):
     """"""
     if (cluster_path := sorter_output / "spike_clusters.npy").is_file():
         spike_clusters = np.load(cluster_path)
