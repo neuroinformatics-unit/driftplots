@@ -11,7 +11,9 @@ dependencies = [
     "scipy",
     "numpy",
     "pandas",
-    "spikeinterface"
+    "spikeinterface",
+    "pyqtgraph",
+    "PySide6" # TODO: let user install own?
 ]
 
 license = "MIT"

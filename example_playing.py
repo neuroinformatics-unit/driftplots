@@ -1,11 +1,11 @@
-from mpl_plotting.driftmapviewer_new import get_drift_map_plot, _plot_kilosort_drift_map_raster
+from driftmap_viewer.mpl_plotting.driftmapviewer_new import get_drift_map_plot, _plot_kilosort_drift_map_raster
 import matplotlib.pyplot as plt
-from ks_extractors import kilosort1_3
-from ks_extractors import kilosort_4
-from ks_extractors import helpers
+from driftmap_viewer.ks_extractors import kilosort1_3
+from driftmap_viewer.ks_extractors import kilosort_4
+from driftmap_viewer.ks_extractors import helpers
 from pathlib import Path
 import numpy as np
-from interactive.driftmap_plot_widget import DriftmapPlotWidget
+from driftmap_viewer.interactive.driftmap_plot_widget import DriftmapPlotWidget
 import numpy as np
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtWidgets, QtCore
@@ -55,20 +55,19 @@ import matplotlib.pyplot as plt
 #       and consider adding an option to disable the unwrap.
 
 from PySide6 import QtWidgets
-from interactive.driftmap_view import DriftMapView
+from driftmap_viewer.interactive.driftmap_view import DriftMapView
 
 app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
 
 FILES = [
-    r"X:\aeon\dj_store\ephys-processed\social-ephys0.1-aeon3\ephys_blocks\2024-06-04T11-00-00_2024-06-04T14-00-00\0-95\kilosort4_400\spike_sorting\sorter_output",
-    r"X:\aeon\dj_store\ephys-processed\social-ephys0.1-aeon3\ephys_blocks\2024-06-04T13-00-00_2024-06-04T16-00-00\0-95\kilosort4_400\spike_sorting\sorter_output"
+    r"C:\Users\Jzimi\Desktop\ks_versions\kilosort2_5_output\sorter_output",
 ]
 
 pooled_amplitudes = helpers.get_pooled_amplitudes(
     FILES
 )
 
-min_, max_ = np.percentile(pooled_amplitudes, (97, 99))  # TODO: add exclude noise
+min_, max_ = np.percentile(pooled_amplitudes, (50, 99))  # TODO: add exclude noise
 
 
 panels = []
@@ -84,19 +83,21 @@ for file in FILES: #[
     plotter = DriftMapView(
         file
     )
-
+    # False or None for filter_amplitude_values
+    # better error if all spikes are filtered
+    # handle filter_amplitude_values if filter_amplitude_mode is not None
     fig = plotter.drift_map_plot_interactive(
-        decimate=10,
-        exclude_noise=True,
+        decimate=False, # 10,
+        exclude_noise=False,
         amplitude_scaling=(min_, max_),
         n_color_bins=25,
-        filter_amplitude_mode="absolute",  # "percentile",
-        filter_amplitude_values=(min_, max_)
+        filter_amplitude_mode=None, # "absolute",  # "percentile",
+        filter_amplitude_values=None, # (min_, max_)
     )
 
     panels.append(fig)
 
-from interactive.multi_session_drift_map import MultiSessionDriftmapWidget
+from driftmap_viewer.interactive.multi_session_drift_map import MultiSessionDriftmapWidget
 multi = MultiSessionDriftmapWidget(panels)
 
 app.exec()

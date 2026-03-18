@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 import matplotlib.pyplot as plt
 from scipy import stats
-from ks_extractors import kilosort_4, kilosort1_3
+from driftmap_viewer.ks_extractors import kilosort_4, kilosort1_3
 
 
 def get_spikes_info(sorter_output, ks_version, exclude_noise):
