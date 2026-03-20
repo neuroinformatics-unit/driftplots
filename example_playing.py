@@ -89,7 +89,7 @@ for file in FILES: #[
     fig = plotter.drift_map_plot_interactive(
         decimate=False, # 10,
         exclude_noise=False,
-        amplitude_scaling=(min_, max_),
+        amplitude_scaling=None, # (min_, max_),
         n_color_bins=25,
         filter_amplitude_mode=None, # "absolute",  # "percentile",
         filter_amplitude_values=None, # (min_, max_)

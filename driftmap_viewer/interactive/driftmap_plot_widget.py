@@ -235,6 +235,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
 
     def _draw_template_heatmap_on_panel(self, spike_index):
         template_waveform_2d = self.get_heatmap_data(spike_index)
+
         n_samples, n_chans = template_waveform_2d.shape[0], template_waveform_2d.shape[1]
 
         self.panel_plot.clear()
@@ -413,23 +414,25 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         # KS templates have zeros on inactive channels; checking row 0 is
         # sufficient because active channels always have non-zero values at
         # the first sample (the template extends across all samples).
-        contains_data_idx = np.where(scaled_template[0, :] != 0)[0]
+        mid_idx = int(scaled_template.shape[0] / 2)
+        contains_data_idx = np.where(scaled_template[mid_idx, :] != 0)[0]
 
-        if len(contains_data_idx) < 2:
-            return contains_data_idx, False
+        if False:
+            if len(contains_data_idx) < 2:
+                return contains_data_idx, False
 
-        # Check for a gap (non-contiguous indices)
-        diffs = np.diff(contains_data_idx)
-        gap_positions = np.where(diffs > 1)[0]
+            # Check for a gap (non-contiguous indices)
+            diffs = np.diff(contains_data_idx)
+            gap_positions = np.where(diffs > 1)[0]
 
-        if len(gap_positions) == 1:
-            # Wrapped: split at gap, put the higher-index group first
-            split = gap_positions[0] + 1
-            contains_data_idx = np.concatenate([
-                contains_data_idx[split:],
-                contains_data_idx[:split],
-            ])
-            return contains_data_idx, True
+            if len(gap_positions) == 1:
+                # Wrapped: split at gap, put the higher-index group first
+                split = gap_positions[0] + 1
+                contains_data_idx = np.concatenate([
+                    contains_data_idx[split:],
+                    contains_data_idx[:split],
+                ])
+                return contains_data_idx, True
 
         return contains_data_idx, False
 
@@ -466,9 +469,26 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         template_idx = self.spike_templates[spike_index]
         scaled_template = self.templates[template_idx, :, :] * self.spike_amplitudes[spike_index]
 
+        mid_idx = int(scaled_template.shape[0] / 2)
+        chan_with_signal = np.where(scaled_template[mid_idx, :] !=0)
+        positions_with_signal = self.channel_positions[chan_with_signal]
+        shank_contacts_with_signal = np.unique(positions_with_signal[:, 0])
+
+        try:
+            assert len(shank_contacts_with_signal) == 2  # v hacky
+        except:
+            breakpoint()
+        shank_select = np.logical_or(
+            self.channel_positions[:, 0] == shank_contacts_with_signal[0],
+            self.channel_positions[:, 0] == shank_contacts_with_signal[1]
+        )
+
+        # TODO: could include shank it is on, will need to actually
+        scaled_template = scaled_template[:, shank_select]
+
         if self.cfgs["right_panel_view_mode"] == "heatmap_all_channels":
             scaled_template = scaled_template.copy()  # TODO: check if this is necessary
-            scaled_template[:, scaled_template[0, :] == 0] = np.nan
+            scaled_template[:, scaled_template[mid_idx, :] == 0] = np.nan
         else:
             contains_data_idx, _ = self._get_nonzero_channel_indices(scaled_template)
             scaled_template = scaled_template[:, contains_data_idx]

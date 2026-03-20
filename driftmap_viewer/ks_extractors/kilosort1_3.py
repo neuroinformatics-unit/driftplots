@@ -55,11 +55,13 @@ def get_spikes_info_ks1_3(
     ycoords = params["channel_positions"][:, 1]
     spike_feature_ycoords = ycoords[spike_features_indices]
 
+    # TODO: document this, it's from Nick Steinmetz
     spike_depths = np.sum(spike_feature_ycoords * pc_features ** 2, axis=1) / np.sum(
-        pc_features ** 2, axis=1)
+        pc_features ** 2, axis=1
+    )
 
     # Compute amplitudes, scale if required and drop un-localised spikes before returning.
-    spike_amplitudes, _, _, _, unwhite_templates, *_ = _template_positions_amplitudes(
+    spike_amplitudes, white_templates = _template_positions_amplitudes(
         params["templates"],
         params["whitening_matrix_inv"],
         ycoords,
@@ -67,7 +69,7 @@ def get_spikes_info_ks1_3(
         params["temp_scaling_amplitudes"],
     )
 
-    return params["spike_times"], spike_amplitudes, spike_depths, params["spike_templates"].squeeze(), unwhite_templates, params["channel_positions"]
+    return params["spike_times"], spike_amplitudes, spike_depths, params["spike_templates"].squeeze(), white_templates, params["channel_positions"]
 
 
 def _template_positions_amplitudes(
@@ -106,16 +108,8 @@ def _template_positions_amplitudes(
         (num_spikes,) array of the depth (probe y-axis) of each spike. Note
         this is just the template depth for each spike (i.e. depth of all spikes
         from the same cluster are identical).
-    template_amplitudes : np.ndarray
-        (num_templates,) Amplitude of each template, calculated as average of spike amplitudes.
-    template_depths : np.ndarray
-        (num_templates,) array of the depth of each template.
-    unwhite_templates : np.ndarray
-        Unwhitened templates (num_clusters, num_samples, num_channels).
-    trough_peak_durations : np.ndarray
-        (num_templates, ) array of durations from trough to peak for each template waveform
-    waveforms : np.ndarray
-        (num_templates, num_samples) Waveform of each template, taken as the signal on the maximum loading channel.
+    white_templates : np.ndarray
+        Whitened templates (num_clusters, num_samples, num_channels).
     """
     # Unwhiten the template waveforms
     unwhite_templates = np.zeros_like(templates)
@@ -134,53 +128,18 @@ def _template_positions_amplitudes(
     threshold_values = 0.3 * template_amplitudes_unscaled
     template_amplitudes_per_channel[template_amplitudes_per_channel < threshold_values[:, np.newaxis]] = 0
 
-    # Calculate the template depth as the center of mass based on channel amplitudes
-    template_depths = np.sum(template_amplitudes_per_channel * ycoords[np.newaxis, :], axis=1) / np.sum(
-        template_amplitudes_per_channel, axis=1
-    )
-
     # Next, find the depth of each spike based on its template. Recompute the template
     # amplitudes as the average of the spike amplitudes ('since
     # tempScalingAmps are equal mean for all templates')
-    spike_amplitudes = template_amplitudes_unscaled[spike_templates] * template_scaling_amplitudes
-
-    # Take the average of all spike amplitudes to get actual template amplitudes
-    # (since tempScalingAmps are equal mean for all templates)
-    num_indices = templates.shape[0]
-    sum_per_index = np.zeros(num_indices, dtype=np.float64)
-    np.add.at(sum_per_index, spike_templates, spike_amplitudes)
-    counts = np.bincount(spike_templates, minlength=num_indices)
-    template_amplitudes = np.divide(sum_per_index, counts, out=np.zeros_like(sum_per_index), where=counts != 0)
-
-    # Each spike's depth is the depth of its template
-    spike_depths = template_depths[spike_templates]
-
-    # Get channel with the largest amplitude (take that as the waveform)
-    max_site = np.argmax(np.max(np.abs(templates), axis=1), axis=1)
-
-    # Use template channel with max signal as waveform
-    waveforms = np.empty(templates.shape[:2])
-    for idx, template in enumerate(templates):
-        waveforms[idx, :] = templates[idx, :, max_site[idx]]
-
-    # Get trough-to-peak time for each template. Find the trough as the
-    # minimum signal for the template waveform. The duration (in
-    # samples) is the num samples from trough to the largest value
-    # following the trough.
-    waveform_trough = np.argmin(waveforms, axis=1)
-
-    trough_peak_durations = np.zeros(waveforms.shape[0])
-    for idx, tmp_max in enumerate(waveforms):
-        trough_peak_durations[idx] = np.argmax(tmp_max[waveform_trough[idx] :])
+    QUICK_AMPLITUDES = True
+    if QUICK_AMPLITUDES:
+        spike_amplitudes = template_scaling_amplitudes
+    else:
+        spike_amplitudes = template_amplitudes_unscaled[spike_templates] * template_scaling_amplitudes
 
     return (
         spike_amplitudes,
-        spike_depths,
-        template_depths,
-        template_amplitudes,
-        unwhite_templates,
-        trough_peak_durations,
-        waveforms,
+        templates,
     )
 
 def _load_ks_dir(sorter_output: Path, load_pcs: bool = False) -> dict:
