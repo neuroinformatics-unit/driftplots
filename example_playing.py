@@ -60,15 +60,22 @@ from driftmap_viewer.interactive.driftmap_view import DriftMapView
 app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
 
 FILES = [
+    r"C:\Users\Jzimi\Desktop\ks_versions\kilosort2_output\sorter_output",
     r"C:\Users\Jzimi\Desktop\ks_versions\kilosort2_5_output\sorter_output",
 ]
 
+# TODO: THIS IS NO GOOD. NEED TO PROPERLY COMPUTE AMPLITUDES. AMPLITUDES ARE ENERGIES.
+# Need to be careful on how comparable these are between sessions.
 pooled_amplitudes = helpers.get_pooled_amplitudes(
     FILES
 )
 
 min_, max_ = np.percentile(pooled_amplitudes, (50, 99))  # TODO: add exclude noise
 
+# KS1 is not well supported
+# KS43 is not supported as it does not  https://github.com/cortex-lab/phylib/issues/33
+
+# https://github.com/cortex-lab/phylib/blob/3e4dfb9be8caead2d82b38c842b3fddbc84cf59a/phylib/io/alf.py#L209
 
 panels = []
 for file in FILES: #[

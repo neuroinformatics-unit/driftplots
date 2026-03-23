@@ -74,10 +74,12 @@ class DriftMapView():
             self.spike_depths,
             self.spike_templates,
             self.templates,
-            self.channel_positions
+            self.channel_positions,
         ) = func(
             self.sorter_path
         )
+
+        print(f"Loaded {self.spike_times.size} spikes from {self.sorter_path.as_posix()}")
 
         assert self.spike_times.size == self.spike_amplitudes.size == self.spike_depths.size == self.spike_templates.size
 
@@ -225,7 +227,6 @@ class DriftMapView():
             amplitude_scaling=amplitude_scaling,
             n_color_bins=n_color_bins,
             point_size=point_size,
-            sorter_path=self.sorter_path
         )
 
         return self.plot

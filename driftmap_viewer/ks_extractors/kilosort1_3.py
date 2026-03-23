@@ -48,6 +48,7 @@ def get_spikes_info_ks1_3(
     # Compute spike depths
     pc_features = params["pc_features"][:, 0, :]
     pc_features[pc_features < 0] = 0
+    pc_features = pc_features**2
 
     # Get the channel indexes corresponding to the 32 channels from the PC.
     spike_features_indices = params["pc_features_indices"][params["spike_templates"], :]
@@ -55,16 +56,13 @@ def get_spikes_info_ks1_3(
     ycoords = params["channel_positions"][:, 1]
     spike_feature_ycoords = ycoords[spike_features_indices]
 
-    # TODO: document this, it's from Nick Steinmetz
-    spike_depths = np.sum(spike_feature_ycoords * pc_features ** 2, axis=1) / np.sum(
-        pc_features ** 2, axis=1
-    )
+    # TODO: document this, it's from Nick Steinmetz, or phy
+    spike_depths = np.sum(spike_feature_ycoords * pc_features, axis=1) / np.sum(pc_features, axis=1)
 
     # Compute amplitudes, scale if required and drop un-localised spikes before returning.
     spike_amplitudes, white_templates = _template_positions_amplitudes(
         params["templates"],
         params["whitening_matrix_inv"],
-        ycoords,
         params["spike_templates"],
         params["temp_scaling_amplitudes"],
     )
@@ -75,7 +73,6 @@ def get_spikes_info_ks1_3(
 def _template_positions_amplitudes(
     templates: np.ndarray,
     inverse_whitening_matrix: np.ndarray,
-    ycoords: np.ndarray,
     spike_templates: np.ndarray,
     template_scaling_amplitudes: np.ndarray,
 ) -> tuple[np.ndarray, ...]:
@@ -131,11 +128,7 @@ def _template_positions_amplitudes(
     # Next, find the depth of each spike based on its template. Recompute the template
     # amplitudes as the average of the spike amplitudes ('since
     # tempScalingAmps are equal mean for all templates')
-    QUICK_AMPLITUDES = True
-    if QUICK_AMPLITUDES:
-        spike_amplitudes = template_scaling_amplitudes
-    else:
-        spike_amplitudes = template_amplitudes_unscaled[spike_templates] * template_scaling_amplitudes
+    spike_amplitudes = template_amplitudes_unscaled[spike_templates] * template_scaling_amplitudes
 
     return (
         spike_amplitudes,
