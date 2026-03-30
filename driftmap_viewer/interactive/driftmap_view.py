@@ -10,9 +10,10 @@ import numpy as np
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtWidgets, QtCore
 import matplotlib.pyplot as plt
+from driftmap_viewer.interactive.data_model import DataLoader
 
 
-class DriftMapView():
+class DriftMapView:
     """Load Kilosort sorter output and provide interactive or static drift map plots.
 
     On construction, spike data is loaded from a Kilosort output directory
@@ -38,7 +39,7 @@ class DriftMapView():
         (num_spikes,) template index assigned to each spike.
     templates : np.ndarray
         (num_templates, num_samples, num_channels) template waveforms.
-    channel_positions : np.ndarray
+    channel_locations : np.ndarray
         (num_channels, 2) x/y positions of each channel on the probe.
 
     TODO
@@ -60,115 +61,7 @@ class DriftMapView():
             If the directory does not contain exactly one ``kilosort*.log``
             file, or if the loaded spike arrays have mismatched sizes.
         """
-        self.sorter_path = Path(sorter_path)
-
-        log_file = list(self.sorter_path.glob("kilosort*.log"))
-        assert len(log_file) == 1
-        self.ks_version = Path(log_file[0]).name.split(".")[0]
-
-        func = kilosort_4.get_spikes_info_ks4 if self.ks_version == "kilosort4" else  kilosort1_3.get_spikes_info_ks1_3
-
-        (
-            self.spike_times,
-            self.spike_amplitudes,
-            self.spike_depths,
-            self.spike_templates,
-            self.templates,
-            self.channel_positions,
-        ) = func(
-            self.sorter_path
-        )
-
-        print(f"Loaded {self.spike_times.size} spikes from {self.sorter_path.as_posix()}")
-
-        assert self.spike_times.size == self.spike_amplitudes.size == self.spike_depths.size == self.spike_templates.size
-
-        self.spike_times.flags.writeable = False
-        self.spike_amplitudes.flags.writeable = False
-        self.spike_depths.flags.writeable = False
-        self.spike_templates.flags.writeable = False
-        self.templates.flags.writeable = False
-        self.channel_positions.flags.writeable = False
-
-    def _process_data(
-        self,
-        exclude_noise,
-        decimate,
-        filter_amplitude_mode,
-        filter_amplitude_values
-     ):
-        """Filter and subsample the loaded spike data.
-
-        Operations are applied in order: decimation → noise exclusion →
-        amplitude filtering → masking. Decimation is applied first as a
-        performance knob to thin the full dataset before further filtering.
-
-        Parameters
-        ----------
-        exclude_noise : bool
-            If ``True``, spikes belonging to clusters labelled "noise" in
-            the Kilosort cluster groups file are removed.
-        decimate : int | False
-            Keep every *n*-th spike. Applied first to reduce the dataset
-            before noise/amplitude filters. ``False`` disables decimation.
-        filter_amplitude_mode : {"percentile", "absolute"} | None
-            How ``filter_amplitude_values`` is interpreted.
-            ``None`` disables amplitude filtering.
-        filter_amplitude_values : tuple of float
-            (low, high) bounds. Interpreted as percentile ranks or
-            absolute amplitude values depending on ``filter_amplitude_mode``.
-
-        Returns
-        -------
-        spike_times : np.ndarray
-        spike_amplitudes : np.ndarray
-        spike_depths : np.ndarray
-        spike_templates : np.ndarray
-            Filtered copies (views when no filtering is needed) of the
-            corresponding instance arrays.
-        """
-        # Select a view for now, this may be copied depending on options (e.g. decimate)
-        spike_times = self.spike_times
-        spike_amplitudes = self.spike_amplitudes
-        spike_depths = self.spike_depths
-        spike_templates = self.spike_templates
-
-        keep_bool_mask = None
-
-        if exclude_noise:
-            keep_bool_mask = ~helpers.get_noise_mask(
-                self.sorter_path
-            )
-
-        if filter_amplitude_mode is not None:
-            assert filter_amplitude_mode in ["percentile", "absolute"]
-
-            if filter_amplitude_mode == "percentile":
-                min_val, max_val = np.percentile(
-                    spike_amplitudes, filter_amplitude_values
-                )
-            else:
-                min_val, max_val = filter_amplitude_values
-
-            if keep_bool_mask is None:
-                keep_bool_mask = np.ones(spike_amplitudes.size, dtype=bool)
-
-            keep_bool_mask[spike_amplitudes < min_val] = False
-            keep_bool_mask[spike_amplitudes > max_val] = False
-
-        if keep_bool_mask is not None:
-            spike_times = spike_times[keep_bool_mask]
-            spike_amplitudes = spike_amplitudes[keep_bool_mask]
-            spike_depths = spike_depths[keep_bool_mask]
-            spike_templates = spike_templates[keep_bool_mask]
-
-        if decimate:
-            spike_times = spike_times[:: decimate]
-            spike_amplitudes = spike_amplitudes[:: decimate]
-            spike_depths = spike_depths[:: decimate]
-            spike_templates = spike_templates[:: decimate]
-
-        return spike_times, spike_amplitudes, spike_depths, spike_templates
+        self.data_loader = DataLoader(sorter_path)
 
     def drift_map_plot_interactive(
         self,
@@ -205,12 +98,7 @@ class DriftMapView():
         DriftmapPlotWidget
             The pyqtgraph widget (already populated but not yet shown).
         """
-        (
-            spike_times,
-            spike_amplitudes,
-            spike_depths,
-            spike_templates,
-        ) = self._process_data(
+        processed_data = self.data_loader.get_processed_data(
             exclude_noise,
             decimate,
             filter_amplitude_mode,
@@ -218,12 +106,7 @@ class DriftMapView():
         )
 
         self.plot = DriftmapPlotWidget(
-            spike_times,
-            spike_amplitudes,
-            spike_depths,
-            spike_templates,
-            self.templates,
-            self.channel_positions,
+            processed_data,
             amplitude_scaling=amplitude_scaling,
             n_color_bins=n_color_bins,
             point_size=point_size,

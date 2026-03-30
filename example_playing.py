@@ -56,21 +56,27 @@ import matplotlib.pyplot as plt
 
 from PySide6 import QtWidgets
 from driftmap_viewer.interactive.driftmap_view import DriftMapView
+import spikeinterface as si
 
 app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
 
+base_path = Path(r"C:\Users\Jzimi\PycharmProjects\ks-driftmap")
+analyzer = si.load_sorting_analyzer(base_path / "analyzer.zarr")
+
 FILES = [
-    r"C:\Users\Jzimi\Desktop\ks_versions\kilosort2_output\sorter_output",
-    r"C:\Users\Jzimi\Desktop\ks_versions\kilosort2_5_output\sorter_output",
+    analyzer,
+    r"C:\Users\Jzimi\PycharmProjects\ks-driftmap\kilosort4_output\sorter_output",
+    # r"C:\Users\Jzimi\Desktop\ks_versions\kilosort2_output\sorter_output",
+    # r"C:\Users\Jzimi\Desktop\ks_versions\kilosort2_5_output\sorter_output",
 ]
 
 # TODO: THIS IS NO GOOD. NEED TO PROPERLY COMPUTE AMPLITUDES. AMPLITUDES ARE ENERGIES.
 # Need to be careful on how comparable these are between sessions.
-pooled_amplitudes = helpers.get_pooled_amplitudes(
-    FILES
-)
+#pooled_amplitudes = helpers.get_pooled_amplitudes(
+#    FILES
+#)
 
-min_, max_ = np.percentile(pooled_amplitudes, (50, 99))  # TODO: add exclude noise
+#min_, max_ = np.percentile(pooled_amplitudes, (50, 99))  # TODO: add exclude noise
 
 # KS1 is not well supported
 # KS43 is not supported as it does not  https://github.com/cortex-lab/phylib/issues/33
@@ -84,8 +90,6 @@ for file in FILES: #[
    # r"X:\aeon\dj_store\ephys-processed\social-ephys0.1-aeon3\ephys_blocks\2024-06-04T11-00-00_2024-06-04T14-00-00\0-95\kilosort4_400\spike_sorting\sorter_output",
    # r"X:\aeon\dj_store\ephys-processed\social-ephys0.1-aeon3\ephys_blocks\2024-06-04T13-00-00_2024-06-04T16-00-00\0-95\kilosort4_400\spike_sorting\sorter_output",
   #  r"X:\aeon\dj_store\ephys-processed\social-ephys0.1-aeon3\ephys_blocks\2024-06-04T15-00-00_2024-06-04T18-00-00\0-95\kilosort4_400\spike_sorting\sorter_output"
-
-
 #]:
     plotter = DriftMapView(
         file
@@ -98,8 +102,8 @@ for file in FILES: #[
         exclude_noise=False,
         amplitude_scaling=None, # (min_, max_),
         n_color_bins=25,
-        filter_amplitude_mode=None, # "absolute",  # "percentile",
-        filter_amplitude_values=None, # (min_, max_)
+        filter_amplitude_mode="percentile", # "percentile", # "absolute",  # "percentile",
+        filter_amplitude_values=(0, 99), # (0, 95), # (min_, max_)
     )
 
     panels.append(fig)
