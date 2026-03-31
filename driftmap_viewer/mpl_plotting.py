@@ -1,15 +1,4 @@
-
-from pathlib import Path
-import matplotlib.axis
-import scipy.signal
-from spikeinterface.core import read_python
-import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
-
-import matplotlib.pyplot as plt
-from scipy import stats
-from driftmap_viewer.extractors import kilosort_4, kilosort1_3
 
 
 def _plot_matplotlib(
@@ -18,7 +7,7 @@ def _plot_matplotlib(
     n_color_bins,
     point_size,
     add_histogram_plot,
-    weight_histogram_by_amplitude
+    weight_histogram_by_amplitude,
 ) -> None:
 
     # Setup axis and plot the raster drift map

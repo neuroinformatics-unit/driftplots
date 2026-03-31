@@ -1,8 +1,6 @@
 import numpy as np
 import pyqtgraph as pg
-from pyqtgraph.Qt import QtWidgets, QtCore
-import matplotlib.pyplot as plt
-import warnings
+from pyqtgraph.Qt import QtCore, QtWidgets
 
 pg.setConfigOption("background", "w")
 pg.setConfigOption("foreground", "k")
@@ -10,11 +8,15 @@ pg.setConfigOption("antialias", True)
 
 
 class DriftmapPlotWidget(QtWidgets.QWidget):
-    """
-    """
-    def __init__(self, processed_data,
-                 amplitude_scaling="linear", n_color_bins=20,
-                 point_size=5.0):
+    """ """
+
+    def __init__(
+        self,
+        processed_data,
+        amplitude_scaling="linear",
+        n_color_bins=20,
+        point_size=5.0,
+    ):
         super().__init__()
 
         self.processed_data = processed_data
@@ -35,8 +37,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         # Instantiate UI and scatter plot
         win_left, win_right = self._init_ui()
 
-        self._init_scatter_plot(win_left, amplitude_scaling,
-                                n_color_bins, point_size)
+        self._init_scatter_plot(win_left, amplitude_scaling, n_color_bins, point_size)
 
         self._init_panel_plot(win_right)
 
@@ -47,8 +48,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         self.scatter.sigClicked.connect(self.handle_click)
         self._view_radio_group.idToggled.connect(self.handle_view_radio_toggled)
 
-    def _init_scatter_plot(self, win_left, amplitude_scaling, n_color_bins,
-                           point_size):
+    def _init_scatter_plot(self, win_left, amplitude_scaling, n_color_bins, point_size):
         """Create the scatter plot on the left panel.
 
         Parameters
@@ -64,7 +64,9 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         point_size : float
             Scatter-point diameter in pixels.
         """
-        spike_times, spike_depths, spike_amplitudes = self.processed_data.get_scatter_data()
+        spike_times, spike_depths, spike_amplitudes = (
+            self.processed_data.get_scatter_data()
+        )
 
         # set amplitude colors
         rgba_colors = self.processed_data.compute_amplitude_colors(
@@ -99,8 +101,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
             brush=rgba_colors,
             pen=None,
             tip=lambda x, y, data: (
-                f"x={x:.3f}\ny={y:.1f}\n"
-                f"amp={spike_amplitudes[int(data)]:.2f}"
+                f"x={x:.3f}\ny={y:.1f}\namp={spike_amplitudes[int(data)]:.2f}"
             ),
         )
         self.p_scatter.addItem(self.scatter)
@@ -160,26 +161,29 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         if self.selected_spot is not None:
             self.selected_spot.setPen(pg.mkPen(None))
 
-        spot.setPen(pg.mkPen('r', width=2))
+        spot.setPen(pg.mkPen("r", width=2))
         self.selected_spot = spot
 
         idx = int(spot.data())
         self.update_panel(idx)
 
     def update_panel(self, spike_idx):
-        self.panel_plot.setTitle(f"Template {self.processed_data.get_template_id(spike_idx)}")
+        self.panel_plot.setTitle(
+            f"Template {self.processed_data.get_template_id(spike_idx)}"
+        )
 
         self._draw_template_heatmap_on_panel(spike_idx)
 
-
     def _draw_template_heatmap_on_panel(self, spike_index):
-        """
-        """
+        """ """
         template_waveform_2d = self.processed_data.get_template_heatmap(
             spike_index, self.cfgs["right_panel_view_mode"]
         )
 
-        n_samples, n_chans = template_waveform_2d.shape[0], template_waveform_2d.shape[1]
+        n_samples, n_chans = (
+            template_waveform_2d.shape[0],
+            template_waveform_2d.shape[1],
+        )
 
         self.panel_plot.clear()
 
@@ -205,10 +209,12 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         image_item.setColorMap(cmap)
 
         if self.cfgs["left_panel_y_axis"]["on"]:
-            image_item.setLevels((
-                self.ymin_spin.value(),
-                self.ymax_spin.value(),
-            ))
+            image_item.setLevels(
+                (
+                    self.ymin_spin.value(),
+                    self.ymax_spin.value(),
+                )
+            )
         image_item.setImage(template_waveform_2d)
         image_item.setRect(0, 0, n_samples, n_chans)
         self.panel_plot.setXRange(0, n_samples, padding=0.05)
@@ -272,7 +278,9 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         radio_layout.setSpacing(12)
 
         self.radio_heatmap = QtWidgets.QRadioButton("Template heatmap")
-        self.radio_heatmap_all = QtWidgets.QRadioButton("Template heatmap (all channels)")
+        self.radio_heatmap_all = QtWidgets.QRadioButton(
+            "Template heatmap (all channels)"
+        )
         self.radio_heatmap.setChecked(True)
 
         self._view_radio_group = QtWidgets.QButtonGroup(self)

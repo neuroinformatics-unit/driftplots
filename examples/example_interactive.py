@@ -1,8 +1,12 @@
-from PySide6 import QtWidgets
-from driftmap_viewer import DriftMapView
-import spikeinterface as si
-from driftmap_viewer.interactive.multi_session_drift_map import MultiSessionDriftmapWidget
 from pathlib import Path
+
+import spikeinterface as si
+from PySide6 import QtWidgets
+
+from driftmap_viewer import DriftMapView
+from driftmap_viewer.interactive.multi_session_drift_map import (
+    MultiSessionDriftmapWidget,
+)
 
 # In interactive mode, we must create a Qt instance before generating any plot.
 app = QtWidgets.QApplication([])
@@ -17,7 +21,6 @@ sorting_output_path = data_path / "sorting" / "sorter_output"
 # into a single plot using MultiSessionDriftmapWidget
 panels = []
 for path_or_analyzer in [analyzer, sorting_output_path]:
-
     plotter = DriftMapView(path_or_analyzer)
 
     plot = plotter.drift_map_plot_interactive(

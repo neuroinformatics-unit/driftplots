@@ -1,16 +1,6 @@
-from driftmap_viewer.mpl_plotting import _plot_matplotlib
-import matplotlib.pyplot as plt
-from driftmap_viewer.extractors import kilosort1_3
-from driftmap_viewer.extractors import kilosort_4
-from driftmap_viewer.extractors import kilosort_helpers
-from pathlib import Path
-import numpy as np
-from driftmap_viewer.interactive.driftmap_plot_widget import DriftmapPlotWidget
-import numpy as np
-import pyqtgraph as pg
-from pyqtgraph.Qt import QtWidgets, QtCore
-import matplotlib.pyplot as plt
 from driftmap_viewer.data_loader import DataLoader
+from driftmap_viewer.interactive.driftmap_plot_widget import DriftmapPlotWidget
+from driftmap_viewer.mpl_plotting import _plot_matplotlib
 
 
 class DriftMapView:
@@ -47,6 +37,7 @@ class DriftMapView:
     - Evaluate memory cost of holding all arrays; consider lazy / mmap loading.
     - Harmonise spike_times units (seconds everywhere).
     """
+
     def __init__(self, sorter_path):
         """Load spike data from a Kilosort output directory.
 
@@ -99,10 +90,7 @@ class DriftMapView:
             The pyqtgraph widget (already populated but not yet shown).
         """
         processed_data = self.data_loader.get_processed_data(
-            exclude_noise,
-            decimate,
-            filter_amplitude_mode,
-            filter_amplitude_values
+            exclude_noise, decimate, filter_amplitude_mode, filter_amplitude_values
         )
 
         self.plot = DriftmapPlotWidget(
@@ -118,7 +106,8 @@ class DriftMapView:
     # TODO MATPLOTLIB
     # ----------------------------------------------------------------------------------
 
-    def drift_map_plot_matplotlib(self,
+    def drift_map_plot_matplotlib(
+        self,
         decimate=False,
         exclude_noise=True,
         amplitude_scaling="linear",
@@ -127,13 +116,10 @@ class DriftMapView:
         filter_amplitude_mode=None,
         filter_amplitude_values=(),
         add_histogram_plot=False,
-        weight_histogram_by_amplitude=False
-     ):
+        weight_histogram_by_amplitude=False,
+    ):
         processed_data = self.data_loader.get_processed_data(
-            exclude_noise,
-            decimate,
-            filter_amplitude_mode,
-            filter_amplitude_values
+            exclude_noise, decimate, filter_amplitude_mode, filter_amplitude_values
         )
 
         fig = _plot_matplotlib(
@@ -142,7 +128,7 @@ class DriftMapView:
             n_color_bins,
             point_size,
             add_histogram_plot,
-            weight_histogram_by_amplitude
+            weight_histogram_by_amplitude,
         )
 
         return fig

@@ -1,7 +1,9 @@
-import matplotlib.pyplot as plt
-from driftmap_viewer import DriftMapView
-import spikeinterface as si
 from pathlib import Path
+
+import matplotlib.pyplot as plt
+import spikeinterface as si
+
+from driftmap_viewer import DriftMapView
 
 # Load the data. In this example we load as a sorting analyzer
 # or from the raw kilosort output to demonstrate both methods
@@ -18,7 +20,7 @@ plot = plotter.drift_map_plot_matplotlib(
     filter_amplitude_mode="percentile",
     filter_amplitude_values=(0, 99),
     add_histogram_plot=True,
-    weight_histogram_by_amplitude=True
+    weight_histogram_by_amplitude=True,
 )
 
 plt.show()

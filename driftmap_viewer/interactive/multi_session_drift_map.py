@@ -1,5 +1,7 @@
 import math
+
 from PySide6 import QtWidgets
+
 from .driftmap_plot_widget import DriftmapPlotWidget
 
 
@@ -65,8 +67,7 @@ class MultiSessionDriftmapWidget(QtWidgets.QWidget):
             n_rows, n_cols = grid
             if n_rows * n_cols != num_panels:
                 raise ValueError(
-                    f"grid {grid} expects {n_rows * n_cols} panels "
-                    f"but got {num_panels}"
+                    f"grid {grid} expects {n_rows * n_cols} panels but got {num_panels}"
                 )
             return n_rows, n_cols
 

@@ -1,8 +1,10 @@
-import matplotlib.pyplot as plt
-from driftmap_viewer import get_amplitudes, DriftMapView
-import spikeinterface as si
 from pathlib import Path
+
+import matplotlib.pyplot as plt
 import numpy as np
+import spikeinterface as si
+
+from driftmap_viewer import DriftMapView, get_amplitudes
 
 # Getting the amplitudes across a set of sorting outputs can be useful to
 # compute absolute amplitudes used for filtering spikes based
@@ -14,7 +16,9 @@ data_path = Path(__file__).parent / "example_data"
 analyzer = si.load_sorting_analyzer(data_path / "analyzer.zarr")
 sorting_output_path = data_path / "sorting" / "sorter_output"
 breakpoint()
-all_spike_amplitudes = get_amplitudes([analyzer, sorting_output_path], concatenate=False)
+all_spike_amplitudes = get_amplitudes(
+    [analyzer, sorting_output_path], concatenate=False
+)
 
 fig, axes = plt.subplots(1, 2)
 for idx, amplitudes in enumerate(all_spike_amplitudes):
@@ -36,4 +40,3 @@ for path_or_analzyer in [analyzer, sorting_output_path]:
     )
 
     plt.show()
-

@@ -9,7 +9,7 @@ For example:
 
 ```
 
-it just shows the template for that spike, it does NOT show the spike or even the scaled template, 
+it just shows the template for that spike, it does NOT show the spike or even the scaled template,
 due to inconsistencies in XXX.
 
 This will load all key features (e.g. spike imes, ampliudes) into memory, once.

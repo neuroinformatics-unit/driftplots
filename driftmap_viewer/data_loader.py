@@ -1,25 +1,18 @@
-import matplotlib.pyplot as plt
-from driftmap_viewer.extractors import kilosort1_3
-from driftmap_viewer.extractors import kilosort_4
-from driftmap_viewer.extractors import kilosort_helpers
-from driftmap_viewer.extractors.analyzer import get_sorting_analyzer
 from pathlib import Path
+
 import numpy as np
-from driftmap_viewer.interactive.driftmap_plot_widget import DriftmapPlotWidget
-import numpy as np
-import pyqtgraph as pg
-from pyqtgraph.Qt import QtWidgets, QtCore
-import matplotlib.pyplot as plt
 import spikeinterface as si
-import warnings
+
 from driftmap_viewer.data_model import DataModel
+from driftmap_viewer.extractors import kilosort1_3, kilosort_4, kilosort_helpers
+from driftmap_viewer.extractors.analyzer import get_sorting_analyzer
 
 
 class DataLoader:
     """"""
+
     def __init__(self, path_or_analyzer: Path) -> None:
-        """
-        """
+        """ """
         self.path_or_analyzer = path_or_analyzer
 
         if isinstance(path_or_analyzer, si.SortingAnalyzer):
@@ -30,7 +23,11 @@ class DataLoader:
             path_or_analyzer = Path(path_or_analyzer)
             ks_version = kilosort_helpers.get_ks_version(path_or_analyzer)
 
-            func = kilosort_4.get_spikes_info_ks4 if ks_version == "kilosort4" else  kilosort1_3.get_spikes_info_ks1_3
+            func = (
+                kilosort_4.get_spikes_info_ks4
+                if ks_version == "kilosort4"
+                else kilosort1_3.get_spikes_info_ks1_3
+            )
 
             self.sorter = ks_version
 
@@ -41,11 +38,14 @@ class DataLoader:
             self._spike_templates,
             self.templates,
             self.channel_locations,
-        ) = func(
-            path_or_analyzer
-        )
+        ) = func(path_or_analyzer)
 
-        assert self._spike_times.size == self._spike_amplitudes.size == self._spike_depths.size == self._spike_templates.size
+        assert (
+            self._spike_times.size
+            == self._spike_amplitudes.size
+            == self._spike_depths.size
+            == self._spike_templates.size
+        )
         assert self.channel_locations.shape[0] > self.channel_locations.shape[1]
 
         self._spike_times.flags.writeable = False
@@ -56,12 +56,8 @@ class DataLoader:
         self.channel_locations.flags.writeable = False
 
     def get_processed_data(
-        self,
-        exclude_noise,
-        decimate,
-        filter_amplitude_mode,
-        filter_amplitude_values
-     ):
+        self, exclude_noise, decimate, filter_amplitude_mode, filter_amplitude_values
+    ):
         """Filter and subsample the loaded spike data.
 
         Operations are applied in order: decimation → noise exclusion →
@@ -101,9 +97,7 @@ class DataLoader:
         keep_bool_mask = None
 
         if exclude_noise:
-            keep_bool_mask = ~kilosort_helpers.get_noise_mask(
-                self.path_or_analyzer
-            )
+            keep_bool_mask = ~kilosort_helpers.get_noise_mask(self.path_or_analyzer)
 
         if filter_amplitude_mode is not None:
             assert filter_amplitude_mode in ["percentile", "absolute"]
@@ -128,10 +122,10 @@ class DataLoader:
             spike_templates = spike_templates[keep_bool_mask]
 
         if decimate:
-            spike_times = spike_times[:: decimate]
-            spike_amplitudes = spike_amplitudes[:: decimate]
-            spike_depths = spike_depths[:: decimate]
-            spike_templates = spike_templates[:: decimate]
+            spike_times = spike_times[::decimate]
+            spike_amplitudes = spike_amplitudes[::decimate]
+            spike_depths = spike_depths[::decimate]
+            spike_templates = spike_templates[::decimate]
 
         return DataModel(
             self.sorter,
@@ -140,5 +134,5 @@ class DataLoader:
             spike_depths,
             spike_templates,
             self.templates,
-            self.channel_locations
+            self.channel_locations,
         )

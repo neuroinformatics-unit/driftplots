@@ -1,7 +1,10 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from pathlib import Path
+
     import numpy as np
 import numpy as np
 from spikeinterface.core import read_python
@@ -57,7 +60,9 @@ def get_spikes_info_ks1_3(
     spike_feature_ycoords = ycoords[spike_features_indices]
 
     # TODO: document this, it's from Nick Steinmetz, or phy
-    spike_depths = np.sum(spike_feature_ycoords * pc_features, axis=1) / np.sum(pc_features, axis=1)
+    spike_depths = np.sum(spike_feature_ycoords * pc_features, axis=1) / np.sum(
+        pc_features, axis=1
+    )
 
     # Compute amplitudes, scale if required and drop un-localised spikes before returning.
     spike_amplitudes, white_templates = _template_positions_amplitudes(
@@ -67,7 +72,14 @@ def get_spikes_info_ks1_3(
         params["temp_scaling_amplitudes"],
     )
 
-    return params["spike_times"], spike_amplitudes, spike_depths, params["spike_templates"].squeeze(), white_templates, params["channel_positions"]
+    return (
+        params["spike_times"],
+        spike_amplitudes,
+        spike_depths,
+        params["spike_templates"].squeeze(),
+        white_templates,
+        params["channel_positions"],
+    )
 
 
 def _template_positions_amplitudes(
@@ -118,22 +130,29 @@ def _template_positions_amplitudes(
 
     # Take the max amplitude for each channel, then use the channel
     # with most signal as template amplitude. Zero any small channel amplitudes.
-    template_amplitudes_per_channel = np.max(unwhite_templates, axis=1) - np.min(unwhite_templates, axis=1)
+    template_amplitudes_per_channel = np.max(unwhite_templates, axis=1) - np.min(
+        unwhite_templates, axis=1
+    )
 
     template_amplitudes_unscaled = np.max(template_amplitudes_per_channel, axis=1)
 
     threshold_values = 0.3 * template_amplitudes_unscaled
-    template_amplitudes_per_channel[template_amplitudes_per_channel < threshold_values[:, np.newaxis]] = 0
+    template_amplitudes_per_channel[
+        template_amplitudes_per_channel < threshold_values[:, np.newaxis]
+    ] = 0
 
     # Next, find the depth of each spike based on its template. Recompute the template
     # amplitudes as the average of the spike amplitudes ('since
     # tempScalingAmps are equal mean for all templates')
-    spike_amplitudes = template_amplitudes_unscaled[spike_templates] * template_scaling_amplitudes
+    spike_amplitudes = (
+        template_amplitudes_unscaled[spike_templates] * template_scaling_amplitudes
+    )
 
     return (
         spike_amplitudes,
         templates,
     )
+
 
 def _load_ks_dir(sorter_output: Path, load_pcs: bool = False) -> dict:
     """

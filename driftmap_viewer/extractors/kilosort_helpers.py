@@ -1,9 +1,9 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+
 from pathlib import Path
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 
 def load_cluster_groups(cluster_path: Path) -> tuple[np.ndarray, ...]:
@@ -37,11 +37,13 @@ def load_cluster_groups(cluster_path: Path) -> tuple[np.ndarray, ...]:
     group_key = cluster_groups_table.columns[1]  # "groups" (csv) or "KSLabel" (tsv)
 
     for key, _id in zip(
-            ["noise", "mua", "good", "unsorted"],
-            ["0", "1", "2", "3"],
-            # required as str to avoid pandas replace downcast FutureWarning
+        ["noise", "mua", "good", "unsorted"],
+        ["0", "1", "2", "3"],
+        # required as str to avoid pandas replace downcast FutureWarning
     ):
-        cluster_groups_table[group_key] = cluster_groups_table[group_key].replace(key, _id)
+        cluster_groups_table[group_key] = cluster_groups_table[group_key].replace(
+            key, _id
+        )
 
     cluster_ids = cluster_groups_table["cluster_id"].to_numpy()
     cluster_groups = cluster_groups_table[group_key].astype(int).to_numpy()
@@ -100,8 +102,7 @@ def get_noise_mask(sorter_output: Path) -> np.ndarray:
 
 
 def get_ks_version(sorter_path):
-    """
-    """
+    """ """
     log_file = list(sorter_path.glob("kilosort*.log"))
     assert len(log_file) == 1
 
