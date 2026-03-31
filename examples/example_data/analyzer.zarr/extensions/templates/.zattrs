@@ -1,0 +1,18 @@
+{
+    "info": {
+        "class": "spikeinterface.core.analyzer_extension_core.ComputeTemplates",
+        "module": "spikeinterface",
+        "version": "0.103.3"
+    },
+    "params": {
+        "ms_after": 2.0,
+        "ms_before": 1.0,
+        "operators": [
+            "average"
+        ]
+    },
+    "run_info": {
+        "run_completed": true,
+        "runtime_s": 0.009727600030601025
+    }
+}

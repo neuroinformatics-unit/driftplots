@@ -1,0 +1,14 @@
+{
+    "info": {
+        "class": "spikeinterface.postprocessing.spike_amplitudes.ComputeSpikeAmplitudes",
+        "module": "spikeinterface",
+        "version": "0.103.3"
+    },
+    "params": {
+        "peak_sign": "neg"
+    },
+    "run_info": {
+        "run_completed": true,
+        "runtime_s": 4.344103000010364
+    }
+}

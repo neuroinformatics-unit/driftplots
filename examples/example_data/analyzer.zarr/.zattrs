@@ -1,0 +1,10 @@
+{
+    "settings": {
+        "return_in_uV": true
+    },
+    "spikeinterface_info": {
+        "dev_mode": true,
+        "object": "SortingAnalyzer",
+        "version": "0.103.3"
+    }
+}

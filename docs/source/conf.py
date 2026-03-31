@@ -46,6 +46,7 @@ extensions = [
     "sphinx_sitemap",
     "myst_parser",
     "nbsphinx",
+    "sphinx_design",
 ]
 
 # Configure the myst parser to enable cool markdown features
@@ -64,6 +65,8 @@ myst_enable_extensions = [
     "strikethrough",
     "substitution",
     "tasklist",
+    "attrs_block",
+    "attrs_inline",
 ]
 # Automatically add anchors to markdown headings
 myst_heading_anchors = 3
@@ -122,4 +125,10 @@ sitemap_url_scheme = "{link}"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ['_static']
+html_static_path = ['_static']
+
+html_css_files = [
+    'css/custom.css',
+]
+
+html_show_sourcelink = False

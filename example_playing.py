@@ -1,8 +1,8 @@
-from driftmap_viewer.mpl_plotting.driftmapviewer_new import get_drift_map_plot, _plot_kilosort_drift_map_raster
+from driftmap_viewer.mpl_plotting import get_drift_map_plot, _plot_matplotlib
 import matplotlib.pyplot as plt
-from driftmap_viewer.ks_extractors import kilosort1_3
-from driftmap_viewer.ks_extractors import kilosort_4
-from driftmap_viewer.ks_extractors import helpers
+from driftmap_viewer.extractors import kilosort1_3
+from driftmap_viewer.extractors import kilosort_4
+from driftmap_viewer.extractors import kilosort_helpers
 from pathlib import Path
 import numpy as np
 from driftmap_viewer.interactive.driftmap_plot_widget import DriftmapPlotWidget
@@ -97,18 +97,22 @@ for file in FILES: #[
     # False or None for filter_amplitude_values
     # better error if all spikes are filtered
     # handle filter_amplitude_values if filter_amplitude_mode is not None
-    fig = plotter.drift_map_plot_interactive(
+    # drift_map_plot_interactive
+    fig = plotter._drift_map_plot_matplotlib(
         decimate=False, # 10,
         exclude_noise=False,
         amplitude_scaling=None, # (min_, max_),
         n_color_bins=25,
         filter_amplitude_mode="percentile", # "percentile", # "absolute",  # "percentile",
         filter_amplitude_values=(0, 99), # (0, 95), # (min_, max_)
+        add_histogram_plot=True,
+        weight_histogram_by_amplitude=True
     )
 
     panels.append(fig)
 
-from driftmap_viewer.interactive.multi_session_drift_map import MultiSessionDriftmapWidget
-multi = MultiSessionDriftmapWidget(panels)
+plt.show()
+#from driftmap_viewer.interactive.multi_session_drift_map import MultiSessionDriftmapWidget
+#multi = MultiSessionDriftmapWidget(panels)
 
 app.exec()

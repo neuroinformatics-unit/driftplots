@@ -66,15 +66,15 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         """
         spike_times, spike_depths, spike_amplitudes = self.processed_data.get_scatter_data()
 
+        # set amplitude colors
+        rgba_colors = self.processed_data.compute_amplitude_colors(
+            amplitude_scaling, n_color_bins
+        )
+
         self.p_scatter = win_left.addPlot(row=0, col=0)
         self.p_scatter.setLabel("bottom", "Time (s)")
         self.p_scatter.setLabel("left", "Depth (µm)")
         self.p_scatter.showGrid(x=False, y=False)
-
-        # set amplitude colors
-        rgba_colors = self._compute_amplitude_colors(
-            spike_amplitudes, amplitude_scaling, n_color_bins
-        )
 
         # set axis limits, pad around them slightly
         x_pad = (spike_times.max() - spike_times.min()) * 0.025
@@ -213,46 +213,6 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         image_item.setRect(0, 0, n_samples, n_chans)
         self.panel_plot.setXRange(0, n_samples, padding=0.05)
         self.panel_plot.setYRange(0, n_chans, padding=0.0)
-
-    @staticmethod
-    def _compute_amplitude_colors(spike_amplitudes, amplitude_scaling, n_color_bins):
-        """Map spike amplitudes to RGBA colours via grey-scale binning.
-
-        Parameters
-        ----------
-        spike_amplitudes : np.ndarray
-            (num_spikes,) raw amplitude values.
-        amplitude_scaling : {"linear", "log2", "log10"} | tuple
-            Scaling mode.  A 2-tuple ``(min, max)`` fixes the colour
-            range explicitly.
-        n_color_bins : int
-            Number of grey-scale bins.
-
-        Returns
-        -------
-        np.ndarray
-            (num_spikes, 4) uint8 RGBA values in [0, 255].
-        """
-        amp_values = spike_amplitudes.copy()
-
-        if isinstance(amplitude_scaling, tuple):
-            amp_min, amp_max = amplitude_scaling
-        elif amplitude_scaling == "log2":
-            amp_values = np.log2(amp_values)
-            amp_min, amp_max = amp_values.min(), amp_values.max()
-        elif amplitude_scaling == "log10":
-            amp_values = np.log10(amp_values)
-            amp_min, amp_max = amp_values.min(), amp_values.max()
-        else:  # "linear"
-            amp_min, amp_max = amp_values.min(), amp_values.max()
-
-        color_bins = np.linspace(amp_min, amp_max, n_color_bins)
-        gray_colors = plt.get_cmap("gray")(np.linspace(0, 1, n_color_bins))[::-1]
-        bin_indices = np.clip(
-            np.searchsorted(color_bins, amp_values, side="right") - 1,
-            0, n_color_bins - 2,
-        )
-        return (gray_colors[bin_indices] * 255).astype(np.uint8)
 
     # UI
     # ----------------------------------------------------------------------------------

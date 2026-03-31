@@ -1,0 +1,16 @@
+{
+    "info": {
+        "class": "spikeinterface.core.analyzer_extension_core.ComputeWaveforms",
+        "module": "spikeinterface",
+        "version": "0.103.3"
+    },
+    "params": {
+        "dtype": "<f4",
+        "ms_after": 2.0,
+        "ms_before": 1.0
+    },
+    "run_info": {
+        "run_completed": true,
+        "runtime_s": 4.433115000021644
+    }
+}
