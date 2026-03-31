@@ -121,20 +121,14 @@ class DataModel:
 
         if isinstance(amplitude_scaling, tuple):
             amp_min, amp_max = amplitude_scaling
-
-        elif amplitude_scaling == "log2":
-            amp_values = np.log2(np.maximum(amp_values,  np.finfo(float).eps))
-            amp_min, amp_max = amp_values.min(), amp_values.max()
-
-        elif amplitude_scaling == "log10":
-            amp_values = np.log10(np.maximum(amp_values,  np.finfo(float).eps))
-            amp_min, amp_max = amp_values.min(), amp_values.max()
-
-        elif amplitude_scaling == "linear":
-            amp_min, amp_max = amp_values.min(), amp_values.max()
-
         else:
-            raise ValueError(f"`amplitude_scaling` argument: {amplitude_scaling} is invalid.")
+            if amplitude_scaling == "log2":
+                amp_values = np.log2(np.maximum(amp_values,  np.finfo(float).eps))
+
+            elif amplitude_scaling == "log10":
+                amp_values = np.log10(np.maximum(amp_values,  np.finfo(float).eps))
+
+            amp_min, amp_max = amp_values.min(), amp_values.max()
 
         color_bins = np.linspace(amp_min, amp_max, n_color_bins)
         gray_colors = plt.get_cmap("gray")(np.linspace(0, 1, n_color_bins))[::-1]
@@ -151,7 +145,7 @@ class DataModel:
 
         return colors
 
-    def _compute_activity_histogram(
+    def compute_activity_histogram(
             self, weight_histogram_by_amplitude: bool
     ) -> tuple[np.ndarray, ...]:
         """

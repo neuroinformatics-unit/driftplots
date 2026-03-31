@@ -17,16 +17,18 @@ from driftmap_viewer.data_model import DataModel
 
 class DataLoader:
     """"""
-    def __init__(self, folder_path: Path) -> None:
+    def __init__(self, path_or_analyzer: Path) -> None:
         """
         """
-        if isinstance(folder_path, si.SortingAnalyzer):
+        self.path_or_analyzer = path_or_analyzer
+
+        if isinstance(path_or_analyzer, si.SortingAnalyzer):
             func = get_sorting_analyzer
 
             self.sorter = "TODO"
         else:
-            folder_path = Path(folder_path)
-            ks_version = self._get_ks_version(folder_path)
+            path_or_analyzer = Path(path_or_analyzer)
+            ks_version = kilosort_helpers.get_ks_version(path_or_analyzer)
 
             func = kilosort_4.get_spikes_info_ks4 if ks_version == "kilosort4" else  kilosort1_3.get_spikes_info_ks1_3
 
@@ -40,7 +42,7 @@ class DataLoader:
             self.templates,
             self.channel_locations,
         ) = func(
-            folder_path
+            path_or_analyzer
         )
 
         assert self._spike_times.size == self._spike_amplitudes.size == self._spike_depths.size == self._spike_templates.size
@@ -52,14 +54,6 @@ class DataLoader:
         self._spike_templates.flags.writeable = False
         self.templates.flags.writeable = False
         self.channel_locations.flags.writeable = False
-
-    def _get_ks_version(self, sorter_path):
-        """
-        """
-        log_file = list(sorter_path.glob("kilosort*.log"))
-        assert len(log_file) == 1
-
-        return Path(log_file[0]).name.split(".")[0]
 
     def get_processed_data(
         self,
@@ -107,8 +101,8 @@ class DataLoader:
         keep_bool_mask = None
 
         if exclude_noise:
-            keep_bool_mask = ~helpers.get_noise_mask(
-                self.sorter_path
+            keep_bool_mask = ~kilosort_helpers.get_noise_mask(
+                self.path_or_analyzer
             )
 
         if filter_amplitude_mode is not None:

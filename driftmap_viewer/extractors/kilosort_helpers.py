@@ -99,17 +99,10 @@ def get_noise_mask(sorter_output: Path) -> np.ndarray:
     return exclude_bool_mask
 
 
-def get_pooled_amplitudes(paths: list[Path]) -> np.ndarray:
-    """Load and concatenate amplitudes.npy from multiple sorter output paths.
-
-    Parameters
-    ----------
-    paths : list of Path
-        List of sorter output directories, each containing amplitudes.npy.
-
-    Returns
-    -------
-    np.ndarray
-        Concatenated amplitudes from all paths.
+def get_ks_version(sorter_path):
     """
-    return np.concatenate([np.load(Path(p) / "amplitudes.npy").ravel() for p in paths])
+    """
+    log_file = list(sorter_path.glob("kilosort*.log"))
+    assert len(log_file) == 1
+
+    return Path(log_file[0]).name.split(".")[0]
