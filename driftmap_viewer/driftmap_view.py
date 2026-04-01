@@ -1,6 +1,12 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+from matplotlib.figure import Figure
+
+from driftmap_viewer import mpl_plotting
 from driftmap_viewer.data_loader import DataLoader
 from driftmap_viewer.interactive.driftmap_plot_widget import DriftmapPlotWidget
-from driftmap_viewer import mpl_plotting
 
 # test ideas:
 # check signatures match default args between itneractive and matplotlib
@@ -16,32 +22,32 @@ class DriftMapView:
 
     Parameters
     ----------
-    sorter_path : str | Path
+    sorter_path
         Path to a Kilosort sorter output directory. Must contain
         exactly one ``kilosort*.log`` file used to detect the KS version.
 
     Attributes
     ----------
-    spike_times : np.ndarray
+    spike_times
         (num_spikes,) spike times (seconds for KS 1-3, samples for KS4).
-    spike_amplitudes : np.ndarray
+    spike_amplitudes
         (num_spikes,) spike amplitudes.
-    spike_depths : np.ndarray
+    spike_depths
         (num_spikes,) spike depths along the probe (µm).
-    spike_clusters : np.ndarray
+    spike_clusters
         (num_spikes,) template index assigned to each spike.
-    templates : np.ndarray
+    templates
         (num_templates, num_samples, num_channels) template waveforms.
-    channel_locations : np.ndarray
+    channel_locations
         (num_channels, 2) x/y positions of each channel on the probe.
     """
 
-    def __init__(self, sorter_path):
+    def __init__(self, sorter_path: str | Path) -> None:
         """Load spike data from a Kilosort output directory.
 
         Parameters
         ----------
-        sorter_path : str | Path
+        sorter_path
             Path to the Kilosort sorter output.
 
         Raises
@@ -50,29 +56,36 @@ class DriftMapView:
             If the directory does not contain exactly one ``kilosort*.log``
             file, or if the loaded spike arrays have mismatched sizes.
         """
-        self.data_loader = DataLoader(sorter_path) # TODO: rename
+        self.data_loader = DataLoader(sorter_path)  # TODO: rename
 
     def drift_map_plot_interactive(
         self,
-        decimate=False,
-        exclude_noise=False,
-        amplitude_scaling="linear",
-        n_color_bins=20,
-        point_size=7.5,
-        filter_amplitude_mode=None,
-        filter_amplitude_values=(),
-    ):
+        decimate: int | bool = False,
+        exclude_noise: bool = False,
+        amplitude_scaling: str | tuple[float, float] = "linear",
+        n_color_bins: int = 20,
+        point_size: float = 7.5,
+        filter_amplitude_mode: str | None = None,
+        filter_amplitude_values: tuple[float, ...] = (),
+    ) -> DriftmapPlotWidget:
         """Create an interactive pyqtgraph-based drift map widget.
 
         Parameters
         ----------
-        decimate :
-        exclude_noise :
-        amplitude_scaling :
-        n_color_bins :
-        point_size :
-        filter_amplitude_mode :
-        filter_amplitude_values : tuple of float
+        decimate
+            Keep every *n*-th spike. ``False`` disables decimation.
+        exclude_noise
+            Remove spikes labelled as noise.
+        amplitude_scaling
+            Colour-scaling mode or explicit ``(min, max)`` range.
+        n_color_bins
+            Number of grey-scale colour bins for amplitude.
+        point_size
+            Scatter-point diameter in pixels.
+        filter_amplitude_mode
+            Amplitude filtering mode.
+        filter_amplitude_values
+            Bounds for amplitude filtering.
 
         Returns
         -------
@@ -95,16 +108,16 @@ class DriftMapView:
 
     def drift_map_plot_matplotlib(
         self,
-        decimate=False,
-        exclude_noise=False,
-        amplitude_scaling="linear",
-        n_color_bins=20,
-        point_size=7.5,
-        filter_amplitude_mode=None,
-        filter_amplitude_values=(),
-        add_histogram_plot=False,
-        weight_histogram_by_amplitude=False,
-    ):
+        decimate: int | bool = False,
+        exclude_noise: bool = False,
+        amplitude_scaling: str | tuple[float, float] = "linear",
+        n_color_bins: int = 20,
+        point_size: float = 7.5,
+        filter_amplitude_mode: str | None = None,
+        filter_amplitude_values: tuple[float, ...] = (),
+        add_histogram_plot: bool = False,
+        weight_histogram_by_amplitude: bool = False,
+    ) -> Figure:
         """"""
         processed_data = self.data_loader.get_processed_data(
             exclude_noise, decimate, filter_amplitude_mode, filter_amplitude_values

@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 import numpy as np
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtWidgets
+
+from driftmap_viewer.data_model import DataModel
 
 pg.setConfigOption("background", "w")
 pg.setConfigOption("foreground", "k")
@@ -12,11 +16,11 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
 
     def __init__(
         self,
-        processed_data,
-        amplitude_scaling="linear",
-        n_color_bins=20,
-        point_size=5.0,
-    ):
+        processed_data: DataModel,
+        amplitude_scaling: str | tuple[float, float] = "linear",
+        n_color_bins: int = 20,
+        point_size: float = 5.0,
+    ) -> None:
         super().__init__()
 
         self.processed_data = processed_data
@@ -48,20 +52,24 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         self.scatter.sigClicked.connect(self.handle_click)
         self._view_radio_group.idToggled.connect(self.handle_view_radio_toggled)
 
-    def _init_scatter_plot(self, win_left, amplitude_scaling, n_color_bins, point_size):
+    def _init_scatter_plot(
+        self,
+        win_left: pg.GraphicsLayoutWidget,
+        amplitude_scaling: str | tuple[float, float],
+        n_color_bins: int,
+        point_size: float,
+    ) -> None:
         """Create the scatter plot on the left panel.
 
         Parameters
         ----------
-        win_left : pg.GraphicsLayoutWidget
+        win_left
             The left graphics area to host the scatter plot.
-        spike_times, spike_amplitudes, spike_depths : np.ndarray
-            Spike data arrays.
-        amplitude_scaling : str | tuple
+        amplitude_scaling
             Colour-scaling mode or explicit (min, max) range.
-        n_color_bins : int
+        n_color_bins
             Number of grey-scale colour bins.
-        point_size : float
+        point_size
             Scatter-point diameter in pixels.
         """
         spike_times, spike_depths, spike_amplitudes = (
@@ -106,12 +114,12 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         )
         self.p_scatter.addItem(self.scatter)
 
-    def _init_panel_plot(self, win_right):
+    def _init_panel_plot(self, win_right: pg.GraphicsLayoutWidget) -> None:
         """Create the template panel plot on the right side.
 
         Parameters
         ----------
-        win_right : pg.GraphicsLayoutWidget
+        win_right
             The right graphics area to host the panel plot.
         """
         self.panel_plot = win_right.addPlot(row=0, col=0)
@@ -119,7 +127,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         self.panel_plot.setLabel("left", "amplitude")
         self.panel_plot.showGrid(x=False, y=False)
 
-    def handle_view_radio_toggled(self, button_id, checked):
+    def handle_view_radio_toggled(self, button_id: int, checked: bool) -> None:
         if not checked:
             return
 
@@ -134,17 +142,17 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         if self.selected_spot is not None:
             self.update_panel(int(self.selected_spot.data()))
 
-    def handle_y_spinbox_min(self, value):
+    def handle_y_spinbox_min(self, value: float) -> None:
         self.cfgs["left_panel_y_axis"]["y_min"] = value
         if self.selected_spot is not None:
             self.update_panel(int(self.selected_spot.data()))
 
-    def handle_y_spinbox_max(self, value):
+    def handle_y_spinbox_max(self, value: float) -> None:
         self.cfgs["left_panel_y_axis"]["y_max"] = value
         if self.selected_spot is not None:
             self.update_panel(int(self.selected_spot.data()))
 
-    def handle_fix_ylim_cb(self, active):
+    def handle_fix_ylim_cb(self, active: bool) -> None:
         self.ymin_spin.setEnabled(active)
         self.ymax_spin.setEnabled(active)
         self.cfgs["left_panel_y_axis"]["on"] = active
@@ -152,7 +160,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
             return
         self.update_panel(int(self.selected_spot.data()))
 
-    def handle_click(self, _, points, __):
+    def handle_click(self, _, points, __) -> None:
         if points is None or len(points) <= 0:
             return
 
@@ -167,14 +175,14 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         idx = int(spot.data())
         self.update_panel(idx)
 
-    def update_panel(self, spike_idx):
+    def update_panel(self, spike_idx: int) -> None:
         self.panel_plot.setTitle(
             f"Template {self.processed_data.get_template_id(spike_idx)}"
         )
 
         self._draw_template_heatmap_on_panel(spike_idx)
 
-    def _draw_template_heatmap_on_panel(self, spike_index):
+    def _draw_template_heatmap_on_panel(self, spike_index: int) -> None:
         """ """
         template_waveform_2d = self.processed_data.get_template_heatmap(
             spike_index, self.cfgs["right_panel_view_mode"]
@@ -223,7 +231,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
     # UI
     # ----------------------------------------------------------------------------------
 
-    def _connect_signals(self):
+    def _connect_signals(self) -> None:
         """Wire up Qt signal/slot connections."""
         self.ymin_spin.valueChanged.connect(self.handle_y_spinbox_min)
         self.ymax_spin.valueChanged.connect(self.handle_y_spinbox_max)
@@ -231,14 +239,14 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         self.scatter.sigClicked.connect(self.handle_click)
         self._view_radio_group.idToggled.connect(self.handle_view_radio_toggled)
 
-    def _init_ui(self):
+    def _init_ui(self) -> tuple[pg.GraphicsLayoutWidget, pg.GraphicsLayoutWidget]:
         """Build the widget layout: splitter, controls bar, radio buttons, spinboxes.
 
         Returns
         -------
-        win_left : pg.GraphicsLayoutWidget
+        win_left
             Left graphics area (for the scatter plot).
-        win_right : pg.GraphicsLayoutWidget
+        win_right
             Right graphics area (for the template panel).
         """
         # Core layout

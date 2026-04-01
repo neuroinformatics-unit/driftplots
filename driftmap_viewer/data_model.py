@@ -57,7 +57,7 @@ class DataModel:
         if np.any(
             np.logical_and(chan_x_spacings > COL_CUTOFF_UM, chan_x_spacings < 150)
         ):
-            warnings.warns(
+            warnings.warn(
                 f"The spacings between x-locations: {chan_x_spacings} makes it difficult to distinguish"
                 f"between channel and shank spacing. The cutoff is {COL_CUTOFF_UM}, less than"
                 f"this is assumed to be two columns of channels on the same shank."
@@ -174,7 +174,6 @@ class DataModel:
         bin_centers = (bins[:-1] + bins[1:]) / 2
 
         if weight_histogram_by_amplitude:
-
             bin_indices = np.digitize(self.spike_depths, bins, right=True) - 1
             values = np.zeros(bin_indices.max() + 1, dtype=np.float64)
 

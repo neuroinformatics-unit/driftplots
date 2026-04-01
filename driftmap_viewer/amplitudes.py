@@ -1,32 +1,35 @@
+from __future__ import annotations
+
 from pathlib import Path
 
 import numpy as np
 import spikeinterface as si
 
-from driftmap_viewer.extractors import (  # TODO: remove underscorw?
-    kilosort_4,
-    kilosort_helpers,
-)
+from driftmap_viewer import DataLoader
+
 
 def get_amplitudes(
-    list_of_path_or_analyzer: list[Path | si.SortingAnalyzer], concatenate=False
-) -> np.ndarray:
+    list_of_path_or_analyzer: list[Path | si.SortingAnalyzer],
+    exclude_noise=False,
+    concatenate: bool = False,
+) -> np.ndarray | list[np.ndarray]:
     """Load and concatenate amplitudes.npy from multiple sorter output paths.
 
     Parameters
     ----------
-    paths : list of Path
+    list_of_path_or_analyzer
         List of sorter output directories, each containing amplitudes.npy.
+    concatenate
+        If ``True``, concatenate all amplitudes into a single array.
 
     Returns
     -------
-    np.ndarray
+    np.ndarray or list of np.ndarray
         Concatenated amplitudes from all paths.
     """
     all_spike_amplitudes = []
 
     for path_or_analyzer in list_of_path_or_analyzer:
-
         loader = DataLoader(path_or_analyzer)
 
         processed_data = loader.get_processed_data(exclude_noise)

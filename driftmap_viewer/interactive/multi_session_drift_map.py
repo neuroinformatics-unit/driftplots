@@ -14,14 +14,14 @@ class MultiSessionDriftmapWidget(QtWidgets.QWidget):
 
     Parameters
     ----------
-    panels : list[DriftmapPlotWidget]
+    panels
         Drift-map widgets to arrange in the grid.
-    grid : tuple[int, int] | None
+    grid
         Explicit ``(n_rows, n_cols)`` layout. If ``None``, a roughly
         square layout is computed automatically.
-    width : int
+    width
         Width allocated per panel column (pixels).
-    height : int
+    height
         Height allocated per panel row (pixels).
     """
 
@@ -53,15 +53,16 @@ class MultiSessionDriftmapWidget(QtWidgets.QWidget):
 
         Parameters
         ----------
-        num_panels : int
+        num_panels
             Total number of panels to arrange.
-        grid : tuple[int, int] | None
+        grid
             User-specified ``(n_rows, n_cols)``. If ``None``, a roughly
             square grid is computed automatically.
 
         Returns
         -------
-        n_rows, n_cols : int
+        tuple of int
+            (n_rows, n_cols).
         """
         if grid is not None:
             n_rows, n_cols = grid
@@ -86,9 +87,9 @@ class MultiSessionDriftmapWidget(QtWidgets.QWidget):
 
         Parameters
         ----------
-        panels : list[DriftmapPlotWidget]
+        panels
             Widgets to add.
-        n_rows, n_cols : int
+        n_rows, n_cols
             Grid dimensions.
         """
         grid_layout = QtWidgets.QGridLayout(self)
@@ -113,7 +114,7 @@ class MultiSessionDriftmapWidget(QtWidgets.QWidget):
 
         Parameters
         ----------
-        panels : list[DriftmapPlotWidget]
+        panels
             Must contain at least one panel.
         """
         ref = panels[0].p_scatter

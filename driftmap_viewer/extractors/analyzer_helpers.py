@@ -1,8 +1,14 @@
+from __future__ import annotations
+
+import warnings
+
 import numpy as np
 import spikeinterface as si
 
 
-def get_sorting_analyzer(analyzer):
+def get_sorting_analyzer(
+    analyzer: si.SortingAnalyzer,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Get the required data from the sorting analyzer. Note that this
     will not get all detected spikes, but rather the number of spikes
@@ -16,11 +22,13 @@ def get_sorting_analyzer(analyzer):
         spike_vector["sample_index"][random_spike_indices]
         / analyzer.sorting.get_sampling_frequency()
     )
-    spike_amplitudes = np.abs(analyzer.get_extension("spike_amplitudes").data["amplitudes"])
+    spike_amplitudes = np.abs(
+        analyzer.get_extension("spike_amplitudes").data["amplitudes"]
+    )
 
-    spike_depths = analyzer.get_extension(
-        "spike_locations"
-    ).data["spike_locations"]["y"]
+    spike_depths = analyzer.get_extension("spike_locations").data["spike_locations"][
+        "y"
+    ]
     spike_clusters = spike_vector["unit_index"][random_spike_indices]
 
     # Get the templates, assume only one method was used. If multiple
@@ -51,14 +59,15 @@ def get_sorting_analyzer(analyzer):
 def get_noise_mask(
     exclude_noise: str,
     spike_clusters: np.ndarray,
-    analyzer: si.SortingAnalyzer
-) -> np.ndarray[np.bool]:
-    """
-    """
+    analyzer: si.SortingAnalyzer,
+) -> np.ndarray:
+    """ """
     if exclude_noise is True:
-        raise ValueError(f"When using SortingAnalyzer, `exclude_noise` must be a string of the "
-                         f"name of the labels to use, passed to `analyzer.get_sorting_property()."
-                         f"Properties on this analyzer are: {analyzer.sorting.get_property_keys()}")
+        raise ValueError(
+            f"When using SortingAnalyzer, `exclude_noise` must be a string of the "
+            f"name of the labels to use, passed to `analyzer.get_sorting_property()."
+            f"Properties on this analyzer are: {analyzer.sorting.get_property_keys()}"
+        )
 
     assert isinstance(exclude_noise, str), "`exclude_noise` must be a string"
     labels = analyzer.get_sorting_property(exclude_noise)

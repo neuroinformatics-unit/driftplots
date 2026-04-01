@@ -6,31 +6,30 @@ import numpy as np
 import pandas as pd
 
 
-def load_cluster_groups(cluster_path: Path) -> tuple[np.ndarray, ...]:
-    """
-    Load kilosort `cluster_groups` file, that contains a table of
-    quality assignments, one per unit. These can be "noise", "mua", "good"
-    or "unsorted".
+def load_cluster_groups(cluster_path: Path) -> tuple[np.ndarray, np.ndarray]:
+    """Load kilosort ``cluster_groups`` file.
 
-    There is some slight formatting differences between the `.tsv` and `.csv`
-    versions, presumably from different kilosort versions.
+    Contains a table of quality assignments, one per unit. These can be
+    "noise", "mua", "good" or "unsorted".
 
-    This function was ported from Nick Steinmetz's `spikes` repository MATLAB code,
-    https://github.com/cortex-lab/spikes
+    There are slight formatting differences between the ``.tsv`` and
+    ``.csv`` versions, presumably from different kilosort versions.
+
+    This function was ported from Nick Steinmetz's ``spikes`` repository
+    MATLAB code, https://github.com/cortex-lab/spikes
 
     Parameters
     ----------
-    cluster_path : Path
-        The full filepath to the `cluster_groups` tsv or csv file.
+    cluster_path
+        The full filepath to the ``cluster_groups`` tsv or csv file.
 
     Returns
     -------
-    cluster_ids : np.ndarray
+    cluster_ids
         (num_clusters,) Array of (integer) unit IDs.
-
-    cluster_groups : np.ndarray
-        (num_clusters,) Array of (integer) unit quality assignments, see code
-        below for mapping to "noise", "mua", "good" and "unsorted".
+    cluster_groups
+        (num_clusters,) Array of (integer) unit quality assignments, see
+        code below for mapping to "noise", "mua", "good" and "unsorted".
     """
     cluster_groups_table = pd.read_csv(cluster_path, sep="\t")
 
@@ -54,14 +53,15 @@ def load_cluster_groups(cluster_path: Path) -> tuple[np.ndarray, ...]:
 def get_noise_mask(spike_clusters: np.ndarray, sorter_output: Path) -> np.ndarray:
     """Build a boolean mask identifying spikes that belong to noise clusters.
 
-    Loads ``spike_clusters.npy`` and the cluster-groups file
-    (``cluster_groups.csv`` or ``cluster_group.tsv``) from the sorter
-    output directory.  Spikes whose cluster is labelled *noise*
-    (group == 0) are marked ``True``.
+    Loads the cluster-groups file (``cluster_groups.csv`` or
+    ``cluster_group.tsv``) from the sorter output directory.  Spikes
+    whose cluster is labelled *noise* (group == 0) are marked ``True``.
 
     Parameters
     ----------
-    sorter_output : Path
+    spike_clusters
+        (num_spikes,) cluster assignment per spike.
+    sorter_output
         Path to the Kilosort sorter output directory.
 
     Returns
@@ -72,8 +72,6 @@ def get_noise_mask(spike_clusters: np.ndarray, sorter_output: Path) -> np.ndarra
 
     Raises
     ------
-    FileNotFoundError
-        If ``spike_clusters.npy`` is not found.
     ValueError
         If neither ``cluster_groups.csv`` nor ``cluster_group.tsv``
         exists in ``sorter_output``.
@@ -96,7 +94,7 @@ def get_noise_mask(spike_clusters: np.ndarray, sorter_output: Path) -> np.ndarra
     return exclude_bool_mask
 
 
-def get_ks_version(sorter_path):
+def get_ks_version(sorter_path: Path) -> str:
     """ """
     log_file = list(sorter_path.glob("kilosort*.log"))
     assert len(log_file) == 1
