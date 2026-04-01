@@ -10,7 +10,7 @@ from driftmap_viewer import DataLoader
 
 def get_amplitudes(
     list_of_path_or_analyzer: list[Path | si.SortingAnalyzer],
-    exclude_noise=False,
+    exclude_noise: bool = False,
     concatenate: bool = False,
 ) -> np.ndarray | list[np.ndarray]:
     """Load and concatenate amplitudes.npy from multiple sorter output paths.

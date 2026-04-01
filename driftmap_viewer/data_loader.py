@@ -4,12 +4,8 @@ import numpy as np
 import spikeinterface as si
 
 from driftmap_viewer.data_model import DataModel
-from driftmap_viewer.extractors import (
-    analyzer_helpers,
-    kilosort1_3,
-    kilosort_4,
-    kilosort_helpers,
-)
+from driftmap_viewer.extractors import kilosort1_3, kilosort4, kilosort_helpers
+from driftmap_viewer.extractors import analyzer_helpers
 
 
 class DataLoader:
@@ -23,9 +19,11 @@ class DataLoader:
         if isinstance(path_or_analyzer, si.SortingAnalyzer):
             func = analyzer_helpers.get_sorting_analyzer
         else:
-            ks_version = kilosort_helpers.get_ks_version(Path(path_or_analyzer))
+            ks_version = kilosort_helpers.get_ks_version(
+                Path(path_or_analyzer)
+            )
             func = (
-                kilosort_4.get_spikes_info_ks4
+                kilosort4.get_spikes_info_ks4
                 if ks_version == "kilosort4"
                 else kilosort1_3.get_spikes_info_ks1_3
             )
@@ -99,13 +97,9 @@ class DataLoader:
         # First, exclude spikes from units labeled as "noise"
         if exclude_noise:
             if isinstance(self.path_or_analyzer, si.SortingAnalyzer):
-                keep_bool_mask = ~analyzer_helpers.get_noise_mask(
-                    exclude_noise, spike_clusters, self.path_or_analyzer
-                )
+                keep_bool_mask = ~analyzer_helpers.get_noise_mask(exclude_noise, spike_clusters, self.path_or_analyzer)
             else:
-                keep_bool_mask = ~kilosort_helpers.get_noise_mask(
-                    spike_clusters, self.path_or_analyzer
-                )
+                keep_bool_mask = ~kilosort_helpers.get_noise_mask(spike_clusters, self.path_or_analyzer)
 
         # Next, filter spikes based on amplitude
         if filter_amplitude_mode is not None:
