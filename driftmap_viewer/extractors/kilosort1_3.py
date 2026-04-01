@@ -54,7 +54,7 @@ def get_spikes_info_ks1_3(
     pc_features = pc_features**2
 
     # Get the channel indexes corresponding to the 32 channels from the PC.
-    spike_features_indices = params["pc_features_indices"][params["spike_templates"], :]
+    spike_features_indices = params["pc_features_indices"][params["spike_clusters"], :]
 
     ycoords = params["channel_positions"][:, 1]
     spike_feature_ycoords = ycoords[spike_features_indices]
@@ -68,7 +68,7 @@ def get_spikes_info_ks1_3(
     spike_amplitudes, white_templates = _template_positions_amplitudes(
         params["templates"],
         params["whitening_matrix_inv"],
-        params["spike_templates"],
+        params["spike_clusters"],
         params["temp_scaling_amplitudes"],
     )
 
@@ -76,7 +76,7 @@ def get_spikes_info_ks1_3(
         params["spike_times"],
         spike_amplitudes,
         spike_depths,
-        params["spike_templates"].squeeze(),
+        params["spike_clusters"].squeeze(),
         white_templates,
         params["channel_positions"],
     )
@@ -85,7 +85,7 @@ def get_spikes_info_ks1_3(
 def _template_positions_amplitudes(
     templates: np.ndarray,
     inverse_whitening_matrix: np.ndarray,
-    spike_templates: np.ndarray,
+    spike_clusters: np.ndarray,
     template_scaling_amplitudes: np.ndarray,
 ) -> tuple[np.ndarray, ...]:
     """
@@ -103,7 +103,7 @@ def _template_positions_amplitudes(
         unwhiten templates.
     ycoords : np.ndarray
         (num_channels,) array of the y-axis (depth) channel positions.
-    spike_templates : np.ndarray
+    spike_clusters : np.ndarray
         (num_spikes,) array indicating the template associated with each spike.
     template_scaling_amplitudes : np.ndarray
         (num_spikes,) array holding the scaling amplitudes, by which the
@@ -145,7 +145,7 @@ def _template_positions_amplitudes(
     # amplitudes as the average of the spike amplitudes ('since
     # tempScalingAmps are equal mean for all templates')
     spike_amplitudes = (
-        template_amplitudes_unscaled[spike_templates] * template_scaling_amplitudes
+        template_amplitudes_unscaled[spike_clusters] * template_scaling_amplitudes
     )
 
     return (
@@ -189,7 +189,7 @@ def _load_ks_dir(sorter_output: Path, load_pcs: bool = False) -> dict:
     params = read_python(sorter_output / "params.py")
 
     spike_times = np.load(sorter_output / "spike_times.npy") / params["sample_rate"]
-    spike_templates = np.load(sorter_output / "spike_templates.npy")
+    spike_clusters = kilosort_helpers.load_spike_clusters(sorter_output)
 
     temp_scaling_amplitudes = np.load(sorter_output / "amplitudes.npy")
 
@@ -201,7 +201,7 @@ def _load_ks_dir(sorter_output: Path, load_pcs: bool = False) -> dict:
 
     new_params = {
         "spike_times": spike_times.squeeze(),
-        "spike_templates": spike_templates.squeeze(),
+        "spike_clusters": spike_clusters.squeeze(),
         "pc_features": pc_features,
         "pc_features_indices": pc_features_indices,
         "temp_scaling_amplitudes": temp_scaling_amplitudes.squeeze(),

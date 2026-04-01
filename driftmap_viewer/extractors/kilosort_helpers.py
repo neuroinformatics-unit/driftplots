@@ -51,7 +51,7 @@ def load_cluster_groups(cluster_path: Path) -> tuple[np.ndarray, ...]:
     return cluster_ids, cluster_groups
 
 
-def get_noise_mask(sorter_output: Path) -> np.ndarray:
+def get_noise_mask(spike_clusters: np.ndarray, sorter_output: Path) -> np.ndarray:
     """Build a boolean mask identifying spikes that belong to noise clusters.
 
     Loads ``spike_clusters.npy`` and the cluster-groups file
@@ -78,11 +78,6 @@ def get_noise_mask(sorter_output: Path) -> np.ndarray:
         If neither ``cluster_groups.csv`` nor ``cluster_group.tsv``
         exists in ``sorter_output``.
     """
-    if (cluster_path := sorter_output / "spike_clusters.npy").is_file():
-        spike_clusters = np.load(cluster_path)
-    else:
-        raise FileNotFoundError("spike_clusters.npy does not exist.")
-
     if not (
         (cluster_path := sorter_output / "cluster_groups.csv").is_file()
         or (cluster_path := sorter_output / "cluster_group.tsv").is_file()
@@ -107,3 +102,11 @@ def get_ks_version(sorter_path):
     assert len(log_file) == 1
 
     return Path(log_file[0]).name.split(".")[0]
+
+
+def load_spike_clusters(sorter_path: Path) -> np.ndarray:
+    if (path_ := sorter_path / "spike_clusters.npy").is_file():
+        spike_clusters = np.load(path_)
+    else:
+        spike_clusters = np.load(sorter_path / "spike_templates.npy")
+    return spike_clusters

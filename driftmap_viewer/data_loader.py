@@ -5,10 +5,7 @@ import spikeinterface as si
 
 from driftmap_viewer.data_model import DataModel
 from driftmap_viewer.extractors import kilosort1_3, kilosort_4, kilosort_helpers
-from driftmap_viewer.extractors.analyzer import (  # TODO: better import
-    get_noise_mask,
-    get_sorting_analyzer,
-)
+from driftmap_viewer.extractors import analyzer_helpers
 
 
 class DataLoader:
@@ -20,11 +17,11 @@ class DataLoader:
 
         # Get the data loading function depending on if we are analyzer or kilosort output
         if isinstance(path_or_analyzer, si.SortingAnalyzer):
-            func = get_sorting_analyzer
+            func = analyzer_helpers.get_sorting_analyzer
         else:
-            path_or_analyzer = Path(path_or_analyzer)
-            ks_version = kilosort_helpers.get_ks_version(path_or_analyzer)
-
+            ks_version = kilosort_helpers.get_ks_version(
+                Path(path_or_analyzer)
+            )
             func = (
                 kilosort_4.get_spikes_info_ks4
                 if ks_version == "kilosort4"
@@ -36,7 +33,7 @@ class DataLoader:
             self._spike_times,
             self._spike_amplitudes,
             self._spike_depths,
-            self._spike_templates,
+            self._spike_clusters,
             self.templates,
             self.channel_locations,
         ) = func(path_or_analyzer)
@@ -45,14 +42,14 @@ class DataLoader:
             self._spike_times.size
             == self._spike_amplitudes.size
             == self._spike_depths.size
-            == self._spike_templates.size
+            == self._spike_clusters.size
         )
         assert self.channel_locations.shape[0] > self.channel_locations.shape[1]
 
         self._spike_times.flags.writeable = False
         self._spike_amplitudes.flags.writeable = False
         self._spike_depths.flags.writeable = False
-        self._spike_templates.flags.writeable = False
+        self._spike_clusters.flags.writeable = False
         self.templates.flags.writeable = False
         self.channel_locations.flags.writeable = False
 
@@ -85,7 +82,7 @@ class DataLoader:
         spike_times : np.ndarray
         spike_amplitudes : np.ndarray
         spike_depths : np.ndarray
-        spike_templates : np.ndarray
+        spike_clusters : np.ndarray
             Filtered copies (views when no filtering is needed) of the
             corresponding instance arrays.
         """
@@ -93,16 +90,18 @@ class DataLoader:
         spike_times = self._spike_times
         spike_amplitudes = self._spike_amplitudes
         spike_depths = self._spike_depths
-        spike_templates = self._spike_templates
+        spike_clusters = self._spike_clusters
 
         keep_bool_mask = None
 
+        # First, exclude spikes from units labeled as "noise"
         if exclude_noise:
             if isinstance(self.path_or_analyzer, si.SortingAnalyzer):
-                keep_bool_mask = ~get_noise_mask(self.path_or_analyzer)
+                keep_bool_mask = ~analyzer_helpers.get_noise_mask(self.path_or_analyzer)
             else:
-                keep_bool_mask = ~kilosort_helpers.get_noise_mask(self.path_or_analyzer)
+                keep_bool_mask = ~kilosort_helpers.get_noise_mask(spike_clusters, self.path_or_analyzer)
 
+        # Next, filter spikes based on amplitude
         if filter_amplitude_mode is not None:
             assert filter_amplitude_mode in ["percentile", "absolute"]
 
@@ -119,24 +118,24 @@ class DataLoader:
             keep_bool_mask[spike_amplitudes < min_val] = False
             keep_bool_mask[spike_amplitudes > max_val] = False
 
+        # mask exclude_noise / filtered amplitudes
         if keep_bool_mask is not None:
             spike_times = spike_times[keep_bool_mask]
             spike_amplitudes = spike_amplitudes[keep_bool_mask]
             spike_depths = spike_depths[keep_bool_mask]
-            spike_templates = spike_templates[keep_bool_mask]
+            spike_clusters = spike_clusters[keep_bool_mask]
 
         if decimate:
             spike_times = spike_times[::decimate]
             spike_amplitudes = spike_amplitudes[::decimate]
             spike_depths = spike_depths[::decimate]
-            spike_templates = spike_templates[::decimate]
+            spike_clusters = spike_clusters[::decimate]
 
         return DataModel(
-            self.sorter,
             spike_times,
             spike_amplitudes,
             spike_depths,
-            spike_templates,
+            spike_clusters,
             self.templates,
             self.channel_locations,
         )

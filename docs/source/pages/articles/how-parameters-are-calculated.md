@@ -15,3 +15,7 @@ For spikeinterface,t he tempalte is the . For KS, it is thre XXX. It is possible
 to unwhiten the temptes. However, for KS2.5 and Ks3, this matris is not save dproperly.
 Therefore, for consistent whitetneied tempaltes are always used. If you would like unwhitented
 tempaltes, please get in touch.
+
+
+NOTE THAT SPIKE_CLUSTERS IS ATTEMPTED TO BE USED
+NOTE THAT AMPLITUDES ARE ALWAYS POSITIVE

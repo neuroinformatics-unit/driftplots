@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from driftmap_viewer.data_model import DataModel
 
 
-def _plot_matplotlib(
+def plot_matplotlib(
     processed_data: DataModel,
     amplitude_scaling: str | tuple[float, float],
     n_color_bins: int,

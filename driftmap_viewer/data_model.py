@@ -7,19 +7,17 @@ import numpy as np
 class DataModel:
     def __init__(
         self,
-        sorter,
         spike_times,
         spike_amplitudes,
         spike_depths,
-        spike_templates,
+        spike_clusters,
         templates,
         channel_locations,
     ):
-        self.sorter = sorter
         self.spike_times = spike_times
         self.spike_depths = spike_depths
         self.spike_amplitudes = spike_amplitudes
-        self.spike_templates = spike_templates
+        self.spike_clusters = spike_clusters
         self.templates = templates
         self.channel_locations = channel_locations
 
@@ -27,12 +25,12 @@ class DataModel:
         return self.spike_times, self.spike_depths, self.spike_amplitudes
 
     def get_template_id(self, spike_idx):
-        return self.spike_templates[spike_idx]
+        return self.spike_clusters[spike_idx]
 
     def get_template_heatmap(self, spike_index, view_mode):
         """ """
         # Extract the template for this spike
-        template_idx = self.spike_templates[spike_index]
+        template_idx = self.spike_clusters[spike_index]
         template = self.templates[template_idx, :, :]
         mid_idx = int(template.shape[0] / 2)
 
@@ -176,11 +174,14 @@ class DataModel:
         bin_centers = (bins[:-1] + bins[1:]) / 2
 
         if weight_histogram_by_amplitude:
+
             bin_indices = np.digitize(self.spike_depths, bins, right=True) - 1
             values = np.zeros(bin_indices.max() + 1, dtype=np.float64)
+
             scaled_spike_amplitudes = (
                 spike_amplitudes - spike_amplitudes.min()
             ) / np.ptp(spike_amplitudes)
+
             np.add.at(values, bin_indices, scaled_spike_amplitudes)
 
         return bin_centers, values

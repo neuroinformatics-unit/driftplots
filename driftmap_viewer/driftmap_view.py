@@ -1,5 +1,6 @@
 from driftmap_viewer.data_loader import DataLoader
 from driftmap_viewer.interactive.driftmap_plot_widget import DriftmapPlotWidget
+from driftmap_viewer import mpl_plotting
 
 # test ideas:
 # check signatures match default args between itneractive and matplotlib
@@ -27,7 +28,7 @@ class DriftMapView:
         (num_spikes,) spike amplitudes.
     spike_depths : np.ndarray
         (num_spikes,) spike depths along the probe (µm).
-    spike_templates : np.ndarray
+    spike_clusters : np.ndarray
         (num_spikes,) template index assigned to each spike.
     templates : np.ndarray
         (num_templates, num_samples, num_channels) template waveforms.
@@ -49,7 +50,7 @@ class DriftMapView:
             If the directory does not contain exactly one ``kilosort*.log``
             file, or if the loaded spike arrays have mismatched sizes.
         """
-        self.data_loader = DataLoader(sorter_path)
+        self.data_loader = DataLoader(sorter_path) # TODO: rename
 
     def drift_map_plot_interactive(
         self,
@@ -104,6 +105,7 @@ class DriftMapView:
         add_histogram_plot=False,
         weight_histogram_by_amplitude=False,
     ):
+        """"""
         processed_data = self.data_loader.get_processed_data(
             exclude_noise, decimate, filter_amplitude_mode, filter_amplitude_values
         )
