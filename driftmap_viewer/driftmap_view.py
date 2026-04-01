@@ -109,7 +109,7 @@ class DriftMapView:
     def drift_map_plot_matplotlib(
         self,
         decimate: int | bool = False,
-        exclude_noise: bool = False,
+        exclude_noise: bool | str = False,
         amplitude_scaling: str | tuple[float, float] = "linear",
         n_color_bins: int = 20,
         point_size: float = 7.5,

@@ -11,11 +11,12 @@ KS4
 
 # Why are whitened templates show for KS output?
 
-For spikeinterface,t he tempalte is the . For KS, it is thre XXX. It is possible
-to unwhiten the temptes. However, for KS2.5 and Ks3, this matris is not save dproperly.
-Therefore, for consistent whitetneied tempaltes are always used. If you would like unwhitented
-tempaltes, please get in touch.
+For spikeinterface, the template is the . For KS, it is the XXX. It is possible
+to unwhiten the templates. However, for KS2.5 and Ks3, this matrix is not save dproperly.
+Therefore, for consistent whitetneied templates are always used. If you would like unwhitented
+templates, please get in touch.
 
 
 NOTE THAT SPIKE_CLUSTERS IS ATTEMPTED TO BE USED
 NOTE THAT AMPLITUDES ARE ALWAYS POSITIVE
+TODO: these amplitudes are not scaled by gain / offset, but this doesn't matter for our purposes

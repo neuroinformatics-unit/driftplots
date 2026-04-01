@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import warnings
 
 import matplotlib.pyplot as plt
@@ -9,13 +7,13 @@ import numpy as np
 class DataModel:
     def __init__(
         self,
-        spike_times: np.ndarray,
-        spike_amplitudes: np.ndarray,
-        spike_depths: np.ndarray,
-        spike_clusters: np.ndarray,
-        templates: np.ndarray,
-        channel_locations: np.ndarray,
-    ) -> None:
+        spike_times,
+        spike_amplitudes,
+        spike_depths,
+        spike_clusters,
+        templates,
+        channel_locations,
+    ):
         self.spike_times = spike_times
         self.spike_depths = spike_depths
         self.spike_amplitudes = spike_amplitudes
@@ -23,13 +21,13 @@ class DataModel:
         self.templates = templates
         self.channel_locations = channel_locations
 
-    def get_scatter_data(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def get_scatter_data(self):
         return self.spike_times, self.spike_depths, self.spike_amplitudes
 
-    def get_template_id(self, spike_idx: int) -> int:
+    def get_template_id(self, spike_idx):
         return self.spike_clusters[spike_idx]
 
-    def get_template_heatmap(self, spike_index: int, view_mode: str) -> np.ndarray:
+    def get_template_heatmap(self, spike_index, view_mode):
         """ """
         # Extract the template for this spike
         template_idx = self.spike_clusters[spike_index]
@@ -60,9 +58,10 @@ class DataModel:
             np.logical_and(chan_x_spacings > COL_CUTOFF_UM, chan_x_spacings < 150)
         ):
             warnings.warn(
-                f"The spacings between x-locations: {chan_x_spacings} makes it difficult to distinguish"
-                f"between channel and shank spacing. The cutoff is {COL_CUTOFF_UM}, less than"
-                f"this is assumed to be two columns of channels on the same shank."
+                f"The spacings between x-locations: {chan_x_spacings} makes "
+                f"it difficult to distinguish between channel and shank spacing. "
+                f"The cutoff is {COL_CUTOFF_UM}, less than this is assumed to be "
+                f"two columns of channels on the same shank."
             )
 
         valid_pos = chan_x_locs[np.abs(chan_x_locs - max_signal_x_loc) < COL_CUTOFF_UM]
@@ -95,20 +94,18 @@ class DataModel:
 
         return template
 
+    # TODO: CHECK THIS
     def compute_amplitude_colors(
-        self,
-        amplitude_scaling: str | tuple[float, float],
-        n_color_bins: int,
-        unit_normalise: bool = False,
-    ) -> np.ndarray:
+        self, amplitude_scaling, n_color_bins, unit_normalise=False
+    ):
         """Map spike amplitudes to RGBA colours via grey-scale binning.
 
         Parameters
         ----------
-        amplitude_scaling
+        amplitude_scaling : {"linear", "log2", "log10"} | tuple
             Scaling mode.  A 2-tuple ``(min, max)`` fixes the colour
             range explicitly.
-        n_color_bins
+        n_color_bins : int
             Number of grey-scale bins.
 
         Returns
@@ -147,25 +144,29 @@ class DataModel:
 
     def compute_activity_histogram(
         self, weight_histogram_by_amplitude: bool
-    ) -> tuple[np.ndarray, np.ndarray]:
-        """Compute the activity histogram for the drift map's left-side plot.
+    ) -> tuple[np.ndarray, ...]:
+        """
+        Compute the activity histogram for the kilosort drift map's left-side plot.
 
         Parameters
         ----------
-        weight_histogram_by_amplitude
-            If ``True``, the spike amplitudes are taken into consideration
-            when generating the histogram. The amplitudes are scaled to the
-            range [0, 1] then summed for each bin. If ``False``, counts
+        weight_histogram_by_amplitude : bool
+            If `True`, the spike amplitudes are taken into
+            consideration when generating the histogram.
+            The amplitudes are scaled to the range [0, 1]
+            then summed for each bin, to generate the
+            histogram values. If `False`, counts
             (i.e. num spikes per bin) are used.
 
         Returns
         -------
-        bin_centers
+        bin_centers : np.ndarray
             The spatial bin centers (probe depth) for the histogram.
-        values
-            The histogram values. If ``weight_histogram_by_amplitude`` is
-            ``False``, these are raw counts; otherwise they are counts
-            weighted by amplitude.
+        values : np.ndarray
+            The histogram values. If
+            `weight_histogram_by_amplitude` is `False`,
+            these values represent are counts, otherwise
+            they are counts weighted by amplitude.
         """
         # `spike amplitudes should be high precision as many values are summed.
         spike_amplitudes = self.spike_amplitudes.astype(np.float64)

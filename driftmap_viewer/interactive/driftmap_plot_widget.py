@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtWidgets
@@ -25,7 +27,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
 
         self.processed_data = processed_data
 
-        self.cfgs = {
+        self.cfgs: dict[str, Any] = {
             "right_panel_view_mode": "heatmap",
             "left_panel_y_axis": {
                 "on": False,
@@ -97,7 +99,8 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
             yMax=spike_depths.max() + y_pad,
         )
 
-        # create plot — each point stores its spike index in 'data' for click/tooltip lookup
+        # create plot — each point stores its spike index
+        # in 'data' for click/tooltip lookup
         self.scatter = pg.ScatterPlotItem(
             spike_times,
             spike_depths,
@@ -273,7 +276,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         splitter.setSizes([int(total * 0.75), int(total * 0.25)])
 
         # Controls Bar — below the full splitter
-        # --------------------------------------------------------------------------------------------------------------
+        # -------------------------------------------------------
         controls_widget = QtWidgets.QWidget()
         controls_layout = QtWidgets.QVBoxLayout(controls_widget)
         controls_layout.setContentsMargins(6, 6, 6, 6)

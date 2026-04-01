@@ -1,27 +1,32 @@
 from pathlib import Path
+from typing import Callable
 
 import numpy as np
 import spikeinterface as si
 
 from driftmap_viewer.data_model import DataModel
-from driftmap_viewer.extractors import kilosort1_3, kilosort4, kilosort_helpers
-from driftmap_viewer.extractors import analyzer_helpers
+from driftmap_viewer.extractors import (
+    analyzer_helpers,
+    kilosort1_3,
+    kilosort4,
+    kilosort_helpers,
+)
 
 
 class DataLoader:
     """"""
 
-    def __init__(self, path_or_analyzer: Path) -> None:
+    def __init__(self, path_or_analyzer: Path | si.SortingAnalyzer) -> None:
         """ """
         self.path_or_analyzer = path_or_analyzer
 
-        # Get the data loading function depending on if we are analyzer or kilosort output
+        # Get the data loading function depending on if
+        # we are analyzer or kilosort output
+        func: Callable
         if isinstance(path_or_analyzer, si.SortingAnalyzer):
             func = analyzer_helpers.get_sorting_analyzer
         else:
-            ks_version = kilosort_helpers.get_ks_version(
-                Path(path_or_analyzer)
-            )
+            ks_version = kilosort_helpers.get_ks_version(Path(path_or_analyzer))
             func = (
                 kilosort4.get_spikes_info_ks4
                 if ks_version == "kilosort4"
@@ -64,7 +69,7 @@ class DataLoader:
 
         Parameters
         ----------
-        exclude_noise : bool
+        exclude_noise :
             If ``True``, spikes belonging to clusters labelled "noise" in
             the Kilosort cluster groups file are removed.
         decimate : int | False
@@ -97,9 +102,13 @@ class DataLoader:
         # First, exclude spikes from units labeled as "noise"
         if exclude_noise:
             if isinstance(self.path_or_analyzer, si.SortingAnalyzer):
-                keep_bool_mask = ~analyzer_helpers.get_noise_mask(exclude_noise, spike_clusters, self.path_or_analyzer)
+                keep_bool_mask = ~analyzer_helpers.get_noise_mask(
+                    exclude_noise, spike_clusters, self.path_or_analyzer
+                )
             else:
-                keep_bool_mask = ~kilosort_helpers.get_noise_mask(spike_clusters, self.path_or_analyzer)
+                keep_bool_mask = ~kilosort_helpers.get_noise_mask(
+                    spike_clusters, self.path_or_analyzer
+                )
 
         # Next, filter spikes based on amplitude
         if filter_amplitude_mode is not None:

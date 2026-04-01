@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import spikeinterface as si
 
-from driftmap_viewer import DataLoader
+from driftmap_viewer.data_loader import DataLoader
 
 
 def get_amplitudes(
@@ -32,7 +32,12 @@ def get_amplitudes(
     for path_or_analyzer in list_of_path_or_analyzer:
         loader = DataLoader(path_or_analyzer)
 
-        processed_data = loader.get_processed_data(exclude_noise)
+        processed_data = loader.get_processed_data(
+            exclude_noise,
+            decimate=False,
+            filter_amplitude_mode=None,
+            filter_amplitude_values=None,
+        )
 
         all_spike_amplitudes.append(processed_data.spike_amplitudes)
 

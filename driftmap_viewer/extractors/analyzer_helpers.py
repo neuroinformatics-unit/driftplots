@@ -57,7 +57,7 @@ def get_sorting_analyzer(
 
 
 def get_noise_mask(
-    exclude_noise: str,
+    exclude_noise: bool | str,
     spike_clusters: np.ndarray,
     analyzer: si.SortingAnalyzer,
 ) -> np.ndarray:

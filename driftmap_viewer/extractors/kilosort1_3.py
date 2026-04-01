@@ -1,37 +1,46 @@
 from __future__ import annotations
 
-from pathlib import Path
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    import numpy as np
 import numpy as np
 from spikeinterface.core import read_python
+
+from driftmap_viewer.extractors import kilosort_helpers
 
 
 def get_spikes_info_ks1_3(
     sorter_output: str | Path,
 ) -> tuple[np.ndarray, ...]:
-    """Compute the amplitude and depth of all detected spikes from the kilosort output.
+    """
+    Compute the amplitude and depth of all detected spikes from the kilosort output.
 
-    This function was ported from Nick Steinmetz's ``spikes`` repository
+    This function was ported from Nick Steinmetz's `spikes` repository
     MATLAB code, https://github.com/cortex-lab/spikes
 
     Parameters
     ----------
-    sorter_output
+    sorter_output : str | Path
         Path to the kilosort run sorting output.
 
     Returns
     -------
-    spike_times
+    spike_times : np.ndarray
         (num_spikes,) array of spike times.
-    spike_amplitudes
+    spike_amplitudes : np.ndarray
         (num_spikes,) array of corresponding spike amplitudes.
-    spike_depths
+    spike_depths : np.ndarray
         (num_spikes,) array of corresponding depths (probe y-axis location).
 
     Notes
     -----
-    In `_template_positions_amplitudes` spike depths is calculated as simply the template
-    depth, for each spike (so it is the same for all spikes in a cluster). Here we need
+    In `_template_positions_amplitudes` spike depths is
+    calculated as simply the template depth, for each spike
+    (so it is the same for all spikes in a cluster). Here
+    we need
     to find the depth of each individual spike, using its low-dimensional projection.
     `pc_features` (num_spikes, num_PC, num_channels) holds the PC values for each spike.
     Taking the first component, the subset of 32 channels associated with this
@@ -59,7 +68,6 @@ def get_spikes_info_ks1_3(
         pc_features, axis=1
     )
 
-    # Compute amplitudes, scale if required and drop un-localised spikes before returning.
     spike_amplitudes, white_templates = _template_positions_amplitudes(
         params["templates"],
         params["whitening_matrix_inv"],
@@ -83,29 +91,36 @@ def _template_positions_amplitudes(
     spike_clusters: np.ndarray,
     template_scaling_amplitudes: np.ndarray,
 ) -> tuple[np.ndarray, ...]:
-    """Calculate the amplitude and depths of (unwhitened) templates and spikes.
+    """
+    Calculate the amplitude and depths of (unwhitened) templates and spikes.
 
-    This function was ported from Nick Steinmetz's ``spikes`` repository
+    This function was ported from Nick Steinmetz's `spikes` repository
     MATLAB code, https://github.com/cortex-lab/spikes
 
     Parameters
     ----------
-    templates
+    templates : np.ndarray
         (num_clusters, num_samples, num_channels) array of templates.
-    inverse_whitening_matrix
+    inverse_whitening_matrix: np.ndarray
         Inverse of the whitening matrix used in KS preprocessing, used to
         unwhiten templates.
-    spike_clusters
+    ycoords : np.ndarray
+        (num_channels,) array of the y-axis (depth) channel positions.
+    spike_clusters : np.ndarray
         (num_spikes,) array indicating the template associated with each spike.
-    template_scaling_amplitudes
+    template_scaling_amplitudes : np.ndarray
         (num_spikes,) array holding the scaling amplitudes, by which the
         template was scaled to match each spike.
 
     Returns
     -------
-    spike_amplitudes
+    spike_amplitudes : np.ndarray
         (num_spikes,) array of the amplitude of each spike.
-    white_templates
+    spike_depths : np.ndarray
+        (num_spikes,) array of the depth (probe y-axis) of each spike. Note
+        this is just the template depth for each spike (i.e. depth of all spikes
+        from the same cluster are identical).
+    white_templates : np.ndarray
         Whitened templates (num_clusters, num_samples, num_channels).
     """
     # Unwhiten the template waveforms
@@ -143,23 +158,27 @@ def _template_positions_amplitudes(
 
 
 def _load_ks_dir(sorter_output: Path, load_pcs: bool = False) -> dict:
-    """Load the output of Kilosort into a ``params`` dict.
+    """
+    Loads the output of Kilosort into a `params` dict.
 
-    This function was ported from Nick Steinmetz's ``spikes`` repository
-    MATLAB code, https://github.com/cortex-lab/spikes
+    This function was ported from Nick Steinmetz's `spikes` repository MATLAB
+    code, https://github.com/cortex-lab/spikes
 
     Parameters
     ----------
-    sorter_output
+    sorter_output : Path
         Path to the kilosort run sorting output.
-    load_pcs
-        If ``True``, principal component (PC) features are loaded.
+    exclude_noise : bool
+        If `True`, units labelled as "noise` are removed from all
+        returned arrays (i.e. both units and associated spikes are dropped).
+    load_pcs : bool
+        If `True`, principal component (PC) features are loaded.
 
-    Returns
-    -------
-    params
-        A dictionary of parameters combining both the kilosort ``params.py``
-        file and data loaded from ``npy`` files. The contents of the ``npy``
+    Parameters
+    ----------
+    params : dict
+        A dictionary of parameters combining both the kilosort `params.py`
+        file as data loaded from `npy` files. The contents of the `npy`
         files can be found in the Phy documentation.
 
     Notes

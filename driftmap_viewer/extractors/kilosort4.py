@@ -15,8 +15,8 @@ def compute_spike_amplitudes(
     spike_clusters: np.ndarray,
     amplitudes: np.ndarray,
 ) -> np.ndarray:
-    # This is based on https://github.com/MouseLand/Kilosort/issues/804, need to double check it
-    # TODO: these amplitudes are not scaled by gain / offset, but this doesn't matter for our purposes
+    # This is based on https://github.com/MouseLand/Kilosort/issues/804,
+    # need to double check it
     template_ptp = np.max(templates, axis=1) - np.min(templates, axis=1)
     template_max_peaks = np.max(template_ptp, axis=1)
     spike_amplitudes = template_max_peaks[spike_clusters] * amplitudes

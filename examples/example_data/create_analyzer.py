@@ -29,7 +29,9 @@ analyzer = si.create_sorting_analyzer(sort, rec)
 analyzer.compute(
     "random_spikes",
     method="uniform",
-    max_spikes_per_unit=1_000_000,  # This determines the number of spikes that will appear on the SI drift plot
+    # This determines the number of spikes that
+    # will appear on the SI drift plot
+    max_spikes_per_unit=1_000_000,
 )
 analyzer.compute("waveforms", ms_before=1.0, ms_after=2.0)
 analyzer.compute("templates", operators=["average"])
