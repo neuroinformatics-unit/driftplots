@@ -1,18 +1,46 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+
+if TYPE_CHECKING:
+    from driftmap_viewer.data_model import DataModel
 
 
 def _plot_matplotlib(
-    processed_data,
-    amplitude_scaling,
-    n_color_bins,
-    point_size,
-    add_histogram_plot,
-    weight_histogram_by_amplitude,
-) -> None:
+    processed_data: DataModel,
+    amplitude_scaling: str | tuple[float, float],
+    n_color_bins: int,
+    point_size: float,
+    add_histogram_plot: bool,
+    weight_histogram_by_amplitude: bool,
+) -> Figure:
+    """Render a static matplotlib drift-map figure from pre-processed data.
 
+    Parameters
+    ----------
+    processed_data :
+    amplitude_scaling :
+
+    n_color_bins :
+
+    point_size :
+
+    add_histogram_plot :
+
+    weight_histogram_by_amplitude :
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        The drift-map figure.
+    """
     # Setup axis and plot the raster drift map
     fig = plt.figure(figsize=(10, 10 * (6 / 8)))
 
+    # Set up the axes
     if add_histogram_plot:
         gs = fig.add_gridspec(1, 2, width_ratios=[1, 5])
         hist_axis = fig.add_subplot(gs[0])
@@ -20,9 +48,9 @@ def _plot_matplotlib(
     else:
         raster_axis = fig.add_subplot()
 
+    # Plot the raster plot
     spike_times, spike_depths, _ = processed_data.get_scatter_data()
 
-    # set amplitude colors
     rgba_colors = processed_data.compute_amplitude_colors(
         amplitude_scaling, n_color_bins, unit_normalise=True
     )
@@ -40,8 +68,7 @@ def _plot_matplotlib(
         raster_axis.set_ylabel("y position")
         return fig
 
-    # If the histogram plot is requested, plot it alongside
-    # it's peak colouring, bounds display and drift point display.
+    # Plot the histogram on the left-hand subplot
     hist_axis.set_xlabel("count")
     raster_axis.set_xlabel("time")
     hist_axis.set_ylabel("y position")

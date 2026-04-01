@@ -1,6 +1,8 @@
 from driftmap_viewer.data_loader import DataLoader
 from driftmap_viewer.interactive.driftmap_plot_widget import DriftmapPlotWidget
-from driftmap_viewer.mpl_plotting import _plot_matplotlib
+
+# test ideas:
+# check signatures match default args between itneractive and matplotlib
 
 
 class DriftMapView:
@@ -31,11 +33,6 @@ class DriftMapView:
         (num_templates, num_samples, num_channels) template waveforms.
     channel_locations : np.ndarray
         (num_channels, 2) x/y positions of each channel on the probe.
-
-    TODO
-    ----
-    - Evaluate memory cost of holding all arrays; consider lazy / mmap loading.
-    - Harmonise spike_times units (seconds everywhere).
     """
 
     def __init__(self, sorter_path):
@@ -57,7 +54,7 @@ class DriftMapView:
     def drift_map_plot_interactive(
         self,
         decimate=False,
-        exclude_noise=True,
+        exclude_noise=False,
         amplitude_scaling="linear",
         n_color_bins=20,
         point_size=7.5,
@@ -68,26 +65,19 @@ class DriftMapView:
 
         Parameters
         ----------
-        decimate : int | False
-            Keep every *n*-th spike. ``False`` disables decimation.
-        exclude_noise : bool
-            Remove spikes labelled as noise.
-        amplitude_scaling : {"linear", "log2", "log10"} | tuple
-            Colour-scaling mode. A 2-tuple ``(min, max)`` fixes the
-            colour range explicitly.
-        n_color_bins : int
-            Number of grey-scale colour bins for amplitude.
-        point_size : float
-            Scatter-point diameter in pixels.
-        filter_amplitude_mode : {"percentile", "absolute"} | None
-            Amplitude filtering mode (see ``_process_data``).
+        decimate :
+        exclude_noise :
+        amplitude_scaling :
+        n_color_bins :
+        point_size :
+        filter_amplitude_mode :
         filter_amplitude_values : tuple of float
-            Bounds for amplitude filtering.
 
         Returns
         -------
         DriftmapPlotWidget
-            The pyqtgraph widget (already populated but not yet shown).
+            The pyqtgraph widget. This is already populated but not yet
+            shown, use app.exec() to display.
         """
         processed_data = self.data_loader.get_processed_data(
             exclude_noise, decimate, filter_amplitude_mode, filter_amplitude_values
@@ -102,14 +92,10 @@ class DriftMapView:
 
         return self.plot
 
-    # ----------------------------------------------------------------------------------
-    # TODO MATPLOTLIB
-    # ----------------------------------------------------------------------------------
-
     def drift_map_plot_matplotlib(
         self,
         decimate=False,
-        exclude_noise=True,
+        exclude_noise=False,
         amplitude_scaling="linear",
         n_color_bins=20,
         point_size=7.5,
@@ -122,7 +108,7 @@ class DriftMapView:
             exclude_noise, decimate, filter_amplitude_mode, filter_amplitude_values
         )
 
-        fig = _plot_matplotlib(
+        fig = mpl_plotting.plot_matplotlib(
             processed_data,
             amplitude_scaling,
             n_color_bins,

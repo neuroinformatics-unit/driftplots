@@ -15,7 +15,7 @@ from driftmap_viewer import DriftMapView, get_amplitudes
 data_path = Path(__file__).parent / "example_data"
 analyzer = si.load_sorting_analyzer(data_path / "analyzer.zarr")
 sorting_output_path = data_path / "sorting" / "sorter_output"
-breakpoint()
+
 all_spike_amplitudes = get_amplitudes(
     [analyzer, sorting_output_path], concatenate=False
 )
@@ -37,6 +37,7 @@ for path_or_analzyer in [analyzer, sorting_output_path]:
         amplitude_scaling=(min_cutoff, max_cutoff),
         n_color_bins=25,
         filter_amplitude_mode=None,
+        exclude_noise="KSLabel",
     )
 
     plt.show()

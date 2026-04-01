@@ -44,3 +44,25 @@ def get_sorting_analyzer(analyzer):
         templates,
         channel_locations,
     )
+
+
+#  TODO: USE SPIKE CLUSTERS
+#  PASS SPIKE CLUSTERS TO GET_NOISE_MASK
+
+
+def get_noise_mask(
+    exclude_noise: str, spike_templates: np.ndarray, analyzer: si.SortingAnalyzer
+) -> np.ndarray[np.bool]:
+    """ """
+    if exclude_noise is True:
+        raise ValueError(
+            f"When using SortingAnalyzer, `exclude_noise` must be a string of the "
+            f"name of the labels to use, passed to `analyzer.get_sorting_property()."
+            f"Properties on this analyzer are: {analyzer.sorting.get_property_keys()}"
+        )
+
+    assert isinstance(exclude_noise, str), "`exclude_noise` must be a string"
+    labels = analyzer.get_sorting_property(exclude_noise)
+    noise_mask = (labels == "noise")[spike_templates]  # TODO: make sure to test this
+
+    return noise_mask

@@ -5,7 +5,10 @@ import spikeinterface as si
 
 from driftmap_viewer.data_model import DataModel
 from driftmap_viewer.extractors import kilosort1_3, kilosort_4, kilosort_helpers
-from driftmap_viewer.extractors.analyzer import get_sorting_analyzer
+from driftmap_viewer.extractors.analyzer import (  # TODO: better import
+    get_noise_mask,
+    get_sorting_analyzer,
+)
 
 
 class DataLoader:
@@ -15,10 +18,9 @@ class DataLoader:
         """ """
         self.path_or_analyzer = path_or_analyzer
 
+        # Get the data loading function depending on if we are analyzer or kilosort output
         if isinstance(path_or_analyzer, si.SortingAnalyzer):
             func = get_sorting_analyzer
-
-            self.sorter = "TODO"
         else:
             path_or_analyzer = Path(path_or_analyzer)
             ks_version = kilosort_helpers.get_ks_version(path_or_analyzer)
@@ -29,8 +31,7 @@ class DataLoader:
                 else kilosort1_3.get_spikes_info_ks1_3
             )
 
-            self.sorter = ks_version
-
+        # Load the required data and check sizes match (one entry per spike)
         (
             self._spike_times,
             self._spike_amplitudes,
@@ -97,7 +98,10 @@ class DataLoader:
         keep_bool_mask = None
 
         if exclude_noise:
-            keep_bool_mask = ~kilosort_helpers.get_noise_mask(self.path_or_analyzer)
+            if isinstance(self.path_or_analyzer, si.SortingAnalyzer):
+                keep_bool_mask = ~get_noise_mask(self.path_or_analyzer)
+            else:
+                keep_bool_mask = ~kilosort_helpers.get_noise_mask(self.path_or_analyzer)
 
         if filter_amplitude_mode is not None:
             assert filter_amplitude_mode in ["percentile", "absolute"]
