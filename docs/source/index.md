@@ -26,7 +26,7 @@ plots that can be used to save PDF over an entire experiment for quick checking
 :link: pages/articles/index
 :link-type: doc
 
-Guides for the interactive and matplotlib viewers, and how drift-map parameters are calculated.
+How to use the driftmap viewer and details on how features are calculated.
 :::
 
 :::{grid-item-card} {fas}`lightbulb;sd-text-primary` Examples

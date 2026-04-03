@@ -6,18 +6,11 @@
 ::::{grid} 1 1 2 2
 :gutter: 4
 
-:::{grid-item-card} {fas}`desktop;sd-text-primary` Using the interactive viewer
-:link: interactive-viewer
+:::{grid-item-card} {fas}`desktop;sd-text-primary` Using driftmap viewer
+:link: how-to-use-driftmapviewer
 :link-type: doc
 
-Launch and navigate the pyqtgraph-based interactive drift map.
-:::
-
-:::{grid-item-card} {fas}`chart-line;sd-text-primary` Using the matplotlib viewer
-:link: matplotlib-viewer
-:link-type: doc
-
-Generate static drift map figures with matplotlib.
+How to use the interactive and matplotlib driftmap viewer
 :::
 
 :::{grid-item-card} {fas}`calculator;sd-text-primary` How parameters are calculated
@@ -34,7 +27,6 @@ Details on how spike depths, amplitudes and colour scaling are derived.
 :caption: Articles
 :hidden:
 
-interactive-viewer
-matplotlib-viewer
 how-parameters-are-calculated
+how-to-use-driftmapviewer
 ```

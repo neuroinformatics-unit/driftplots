@@ -19,7 +19,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
     def __init__(
         self,
         processed_data: DataModel,
-        amplitude_scaling: str | tuple[float, float] = "linear",
+        amplitude_cmap_scaling: str | tuple[float, float] = "linear",
         n_color_bins: int = 20,
         point_size: float = 5.0,
     ) -> None:
@@ -43,7 +43,9 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         # Instantiate UI and scatter plot
         win_left, win_right = self._init_ui()
 
-        self._init_scatter_plot(win_left, amplitude_scaling, n_color_bins, point_size)
+        self._init_scatter_plot(
+            win_left, amplitude_cmap_scaling, n_color_bins, point_size
+        )
 
         self._init_panel_plot(win_right)
 
@@ -57,7 +59,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
     def _init_scatter_plot(
         self,
         win_left: pg.GraphicsLayoutWidget,
-        amplitude_scaling: str | tuple[float, float],
+        amplitude_cmap_scaling: str | tuple[float, float],
         n_color_bins: int,
         point_size: float,
     ) -> None:
@@ -67,7 +69,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         ----------
         win_left
             The left graphics area to host the scatter plot.
-        amplitude_scaling
+        amplitude_cmap_scaling
             Colour-scaling mode or explicit (min, max) range.
         n_color_bins
             Number of grey-scale colour bins.
@@ -80,7 +82,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
 
         # set amplitude colors
         rgba_colors = self.processed_data.compute_amplitude_colors(
-            amplitude_scaling, n_color_bins
+            amplitude_cmap_scaling, n_color_bins
         )
 
         self.p_scatter = win_left.addPlot(row=0, col=0)

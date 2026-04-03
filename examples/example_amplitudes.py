@@ -34,9 +34,10 @@ for path_or_analzyer in [analyzer, sorting_output_path]:
     plotter = DriftMapView(analyzer)
 
     plot = plotter.drift_map_plot_matplotlib(
-        amplitude_scaling=(min_cutoff, max_cutoff),
+        amplitude_cmap_scaling=(min_cutoff, max_cutoff),
         n_color_bins=25,
-        filter_amplitude_mode=None,
+        filter_amplitude_mode="absolute",
+        filter_amplitude_values=(min_cutoff, max_cutoff),
         exclude_noise="KSLabel",
     )
 

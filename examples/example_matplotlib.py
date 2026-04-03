@@ -12,10 +12,10 @@ analyzer = si.load_sorting_analyzer(data_path / "analyzer.zarr")
 
 plotter = DriftMapView(analyzer)
 
-plot = plotter.drift_map_plot_matplotlib(
+fig = plotter.drift_map_plot_matplotlib(
     decimate=False,
     exclude_noise=False,
-    amplitude_scaling="linear",
+    amplitude_cmap_scaling="linear",
     n_color_bins=25,
     filter_amplitude_mode="percentile",
     filter_amplitude_values=(0, 99),

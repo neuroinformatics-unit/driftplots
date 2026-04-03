@@ -62,7 +62,7 @@ class DriftMapView:
         self,
         decimate: int | bool = False,
         exclude_noise: bool = False,
-        amplitude_scaling: str | tuple[float, float] = "linear",
+        amplitude_cmap_scaling: str | tuple[float, float] = "linear",
         n_color_bins: int = 20,
         point_size: float = 7.5,
         filter_amplitude_mode: str | None = None,
@@ -76,7 +76,7 @@ class DriftMapView:
             Keep every *n*-th spike. ``False`` disables decimation.
         exclude_noise
             Remove spikes labelled as noise.
-        amplitude_scaling
+        amplitude_cmap_scaling
             Colour-scaling mode or explicit ``(min, max)`` range.
         n_color_bins
             Number of grey-scale colour bins for amplitude.
@@ -99,7 +99,7 @@ class DriftMapView:
 
         self.plot = DriftmapPlotWidget(
             processed_data,
-            amplitude_scaling=amplitude_scaling,
+            amplitude_cmap_scaling=amplitude_cmap_scaling,
             n_color_bins=n_color_bins,
             point_size=point_size,
         )
@@ -110,7 +110,7 @@ class DriftMapView:
         self,
         decimate: int | bool = False,
         exclude_noise: bool | str = False,
-        amplitude_scaling: str | tuple[float, float] = "linear",
+        amplitude_cmap_scaling: str | tuple[float, float] = "linear",
         n_color_bins: int = 20,
         point_size: float = 7.5,
         filter_amplitude_mode: str | None = None,
@@ -125,7 +125,7 @@ class DriftMapView:
 
         fig = mpl_plotting.plot_matplotlib(
             processed_data,
-            amplitude_scaling,
+            amplitude_cmap_scaling,
             n_color_bins,
             point_size,
             add_histogram_plot,

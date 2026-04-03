@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 def plot_matplotlib(
     processed_data: DataModel,
-    amplitude_scaling: str | tuple[float, float],
+    amplitude_cmap_scaling: str | tuple[float, float],
     n_color_bins: int,
     point_size: float,
     add_histogram_plot: bool,
@@ -22,7 +22,7 @@ def plot_matplotlib(
     Parameters
     ----------
     processed_data :
-    amplitude_scaling :
+    amplitude_cmap_scaling :
 
     n_color_bins :
 
@@ -52,7 +52,7 @@ def plot_matplotlib(
     spike_times, spike_depths, _ = processed_data.get_scatter_data()
 
     rgba_colors = processed_data.compute_amplitude_colors(
-        amplitude_scaling, n_color_bins, unit_normalise=True
+        amplitude_cmap_scaling, n_color_bins, unit_normalise=True
     )
 
     raster_axis.scatter(

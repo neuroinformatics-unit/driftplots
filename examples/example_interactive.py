@@ -28,7 +28,7 @@ for path_or_analyzer in [analyzer, sorting_output_path]:
         exclude_noise=False,
         filter_amplitude_mode="percentile",
         filter_amplitude_values=(1, 99),
-        amplitude_scaling="linear",
+        amplitude_cmap_scaling="linear",
         n_color_bins=25,
     )
 

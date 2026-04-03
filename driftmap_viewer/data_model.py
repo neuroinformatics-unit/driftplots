@@ -96,13 +96,13 @@ class DataModel:
 
     # TODO: CHECK THIS
     def compute_amplitude_colors(
-        self, amplitude_scaling, n_color_bins, unit_normalise=False
+        self, amplitude_cmap_scaling, n_color_bins, unit_normalise=False
     ):
         """Map spike amplitudes to RGBA colours via grey-scale binning.
 
         Parameters
         ----------
-        amplitude_scaling : {"linear", "log2", "log10"} | tuple
+        amplitude_cmap_scaling : {"linear", "log2", "log10"} | tuple
             Scaling mode.  A 2-tuple ``(min, max)`` fixes the colour
             range explicitly.
         n_color_bins : int
@@ -115,13 +115,13 @@ class DataModel:
         """
         amp_values = np.abs(self.spike_amplitudes)
 
-        if isinstance(amplitude_scaling, tuple):
-            amp_min, amp_max = amplitude_scaling
+        if isinstance(amplitude_cmap_scaling, tuple):
+            amp_min, amp_max = amplitude_cmap_scaling
         else:
-            if amplitude_scaling == "log2":
+            if amplitude_cmap_scaling == "log2":
                 amp_values = np.log2(np.maximum(amp_values, np.finfo(float).eps))
 
-            elif amplitude_scaling == "log10":
+            elif amplitude_cmap_scaling == "log10":
                 amp_values = np.log10(np.maximum(amp_values, np.finfo(float).eps))
 
             amp_min, amp_max = amp_values.min(), amp_values.max()
