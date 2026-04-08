@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
 if TYPE_CHECKING:
-    from driftmap_viewer.data_model import DataModel
+    from driftplots.data_model import DataModel
 
 
 def plot_matplotlib(

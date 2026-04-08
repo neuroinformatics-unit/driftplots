@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 import numpy as np
 
-from driftmap_viewer.extractors import kilosort_helpers
+from driftplots.extractors import kilosort_helpers
 
 
 def compute_spike_amplitudes(

@@ -6,7 +6,7 @@ import numpy as np
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtWidgets
 
-from driftmap_viewer.data_model import DataModel
+from driftplots.data_model import DataModel
 
 pg.setConfigOption("background", "w")
 pg.setConfigOption("foreground", "k")

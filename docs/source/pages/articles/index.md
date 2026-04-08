@@ -6,11 +6,11 @@
 ::::{grid} 1 1 2 2
 :gutter: 4
 
-:::{grid-item-card} {fas}`desktop;sd-text-primary` Using driftmap viewer
-:link: how-to-use-driftmapviewer
+:::{grid-item-card} {fas}`desktop;sd-text-primary` Using driftplots
+:link: how-to-use-driftplots
 :link-type: doc
 
-How to use the interactive and matplotlib driftmap viewer
+How to use the interactive and matplotlib driftplots
 :::
 
 :::{grid-item-card} {fas}`calculator;sd-text-primary` How parameters are calculated
@@ -28,5 +28,5 @@ Details on how spike depths, amplitudes and colour scaling are derived.
 :hidden:
 
 how-parameters-are-calculated
-how-to-use-driftmapviewer
+how-to-use-driftplots
 ```

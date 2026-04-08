@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 import spikeinterface as si
 from matplotlib.backends.backend_pdf import PdfPages
 
-from driftmap_viewer import DriftMapView
+from driftplots import DriftPlotter
 
 # ---------- configure paths ----------
 project_path = Path("/path/to/my_project")
@@ -44,7 +44,7 @@ with PdfPages(output_path) as pdf:
 
             analyzer = si.load_sorting_analyzer(analyzer_path)
 
-            plotter = DriftMapView(analyzer)
+            plotter = DriftPlotter(analyzer)
 
             fig = plotter.drift_map_plot_matplotlib(
                 add_histogram_plot=True,

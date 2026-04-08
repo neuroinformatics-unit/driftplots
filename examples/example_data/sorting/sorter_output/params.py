@@ -4,5 +4,5 @@ sample_rate = 30000.0
 dtype = "int16"
 hp_filtered = False
 dat_path = [
-    "C:/Users/Jzimi/git-repos/driftmap_viewer/examples/example_data/sorting/sorter_output/recording.dat"
+    "C:/Users/Jzimi/git-repos/driftplots/examples/example_data/sorting/sorter_output/recording.dat"
 ]

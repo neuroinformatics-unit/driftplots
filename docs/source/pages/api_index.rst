@@ -3,8 +3,8 @@
 API Reference
 =============
 
-.. currentmodule:: driftmap_viewer.interactive.driftmap_view
+.. currentmodule:: driftplots.driftplotter
 
-.. autoclass:: DriftMapView
+.. autoclass:: DriftPlotter
    :members:
    :undoc-members:

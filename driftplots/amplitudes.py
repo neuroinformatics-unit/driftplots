@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import spikeinterface as si
 
-from driftmap_viewer.data_loader import DataLoader
+from driftplots.data_loader import DataLoader
 
 
 def get_amplitudes(

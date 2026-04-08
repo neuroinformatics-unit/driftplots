@@ -1,6 +1,6 @@
 # Using the interactive viewer
 
-Driftmap viewer is a lightweight tool. It has two modes, interactive mode and matplotlib mode. It can
+driftplots is a lightweight tool. It has two modes, interactive mode and matplotlib mode. It can
 take as input a path to a kilosort sorting output or a SpikeInterface sortinganalyzer
 (which must have the extensions computed as here XXX).
 
@@ -38,7 +38,7 @@ how the displayed spikes can be processed (e.g. to cut down their number, or exc
 Show code for single data. Link to example for multiple data.
 
 ```python
-from driftmap_viewer import DriftMapView
+from driftplots import DriftMapView
 
 plotter = DriftMapView(
     "/path/to/kilosort/output",
@@ -56,7 +56,7 @@ as XXX (e.g. for processing spikes (Link)), alongside additional arguments that 
 import matplotlib.pyplot as plt
 import spikeinterface as si
 
-from driftmap_viewer import DriftMapView
+from driftplots import DriftMapView
 
 analyzer = si.load_sorting_analyzer("/path/to/analyzer.zarr")
 

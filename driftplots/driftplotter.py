@@ -4,15 +4,15 @@ from pathlib import Path
 
 from matplotlib.figure import Figure
 
-from driftmap_viewer import mpl_plotting
-from driftmap_viewer.data_loader import DataLoader
-from driftmap_viewer.interactive.driftmap_plot_widget import DriftmapPlotWidget
+from driftplots import mpl_plotting
+from driftplots.data_loader import DataLoader
+from driftplots.interactive.driftmap_plot_widget import DriftmapPlotWidget
 
 # test ideas:
-# check signatures match default args between itneractive and matplotlib
+# check signatures match default args between interactive and matplotlib
 
 
-class DriftMapView:
+class DriftPlotter:
     """Load Kilosort sorter output and provide interactive or static drift map plots.
 
     On construction, spike data is loaded from a Kilosort output directory

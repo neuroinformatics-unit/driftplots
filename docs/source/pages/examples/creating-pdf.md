@@ -8,7 +8,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import spikeinterface as si
 
-from driftmap_viewer import DriftMapView
+from driftplots import DriftMapView
 
 project_path = Path("/path/to/my_project")
 pdf_name = f"{sub_dir.name}_{ses_dir.name}_drift_map.pdf"

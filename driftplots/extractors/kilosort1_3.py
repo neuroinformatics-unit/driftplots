@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 import numpy as np
 from spikeinterface.core import read_python
 
-from driftmap_viewer.extractors import kilosort_helpers
+from driftplots.extractors import kilosort_helpers
 
 
 def get_spikes_info_ks1_3(

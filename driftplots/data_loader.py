@@ -4,8 +4,8 @@ from typing import Callable
 import numpy as np
 import spikeinterface as si
 
-from driftmap_viewer.data_model import DataModel
-from driftmap_viewer.extractors import (
+from driftplots.data_model import DataModel
+from driftplots.extractors import (
     analyzer_helpers,
     kilosort1_3,
     kilosort4,

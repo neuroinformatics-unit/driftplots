@@ -3,14 +3,14 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import spikeinterface as si
 
-from driftmap_viewer import DriftMapView
+from driftplots import DriftPlotter
 
 # Load the data. In this example we load as a sorting analyzer
 # or from the raw kilosort output to demonstrate both methods
 data_path = Path(__file__).parent / "example_data"
 analyzer = si.load_sorting_analyzer(data_path / "analyzer.zarr")
 
-plotter = DriftMapView(analyzer)
+plotter = DriftPlotter(analyzer)
 
 fig = plotter.drift_map_plot_matplotlib(
     decimate=False,

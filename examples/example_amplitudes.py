@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import spikeinterface as si
 
-from driftmap_viewer import DriftMapView, get_amplitudes
+from driftplots import DriftPlotter, get_amplitudes
 
 # Getting the amplitudes across a set of sorting outputs can be useful to
 # compute absolute amplitudes used for filtering spikes based
@@ -31,7 +31,7 @@ concat_spike_amplitudes = np.concatenate(all_spike_amplitudes)
 min_cutoff, max_cutoff = concat_spike_amplitudes.min(), concat_spike_amplitudes.max()
 
 for path_or_analzyer in [analyzer, sorting_output_path]:
-    plotter = DriftMapView(analyzer)
+    plotter = DriftPlotter(analyzer)
 
     plot = plotter.drift_map_plot_matplotlib(
         amplitude_cmap_scaling=(min_cutoff, max_cutoff),

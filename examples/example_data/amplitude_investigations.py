@@ -49,10 +49,10 @@ amplitudes_si = np.abs(analyzer.get_extension("spike_amplitudes").data["amplitud
 
 # amplitudes.npy
 sorter_output = Path(
-    r"C:\Users\Jzimi\git-repos\driftmap_viewer\examples\example_data\sorting\sorter_output"
+    r"C:\Users\Jzimi\git-repos\driftplots\examples\example_data\sorting\sorter_output"
 )
 amplitudes_npy = np.load(
-    r"C:\Users\Jzimi\git-repos\driftmap_viewer\examples\example_data\sorting\sorter_output\amplitudes.npy"
+    r"C:\Users\Jzimi\git-repos\driftplots\examples\example_data\sorting\sorter_output\amplitudes.npy"
 )
 
 # Kilosort method from XXX
@@ -65,7 +65,7 @@ kilosort_method_1 = template_max_peaks[spike_clusters] * amplitudes
 
 # Kilosort reconstruction of waveforms (Chris Halcrow)
 ops = np.load(
-    r"C:\Users\Jzimi\git-repos\driftmap_viewer\examples\example_data\sorting\sorter_output\ops.npy",
+    r"C:\Users\Jzimi\git-repos\driftplots\examples\example_data\sorting\sorter_output\ops.npy",
     allow_pickle=True,
 )
 wPCA = ops.tolist()["wPCA"]
