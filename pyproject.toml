@@ -3,7 +3,7 @@ name = "driftplots"
 authors = [{name = "Joseph Ziminski", email= "joseph.j.ziminski@gmail.com"}]
 description = "Interactive visualise kilosort drift maps for checking inter-session alignment."
 readme = "README.md"
-requires-python = ">=3.11.0"
+requires-python = ">=3.10.0"
 dynamic = ["version"]
 
 dependencies = [
