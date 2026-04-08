@@ -58,3 +58,7 @@ For spikeinterface, the template is the . For KS, it is the XXX. It is possible
 to unwhiten the templates. However, for KS2.5 and Ks3, this matrix is not save dproperly.
 Therefore, for consistent whitetneied templates are always used. If you would like unwhitented
 templates, please get in touch.
+
+# Depths
+!!! 
+NOTE: interpretability across sessions depends on a lot! versions etc

@@ -1,27 +1,27 @@
 {
     "class": "spikeinterface.preprocessing.common_reference.CommonReferenceRecording",
     "module": "spikeinterface",
-    "version": "0.103.3",
+    "version": "0.104.0",
     "kwargs": {
         "recording": {
             "class": "spikeinterface.preprocessing.filter.BandpassFilterRecording",
             "module": "spikeinterface",
-            "version": "0.103.3",
+            "version": "0.104.0",
             "kwargs": {
                 "recording": {
                     "class": "spikeinterface.preprocessing.phase_shift.PhaseShiftRecording",
                     "module": "spikeinterface",
-                    "version": "0.103.3",
+                    "version": "0.104.0",
                     "kwargs": {
                         "recording": {
                             "class": "spikeinterface.extractors.neoextractors.spikeglx.SpikeGLXRecordingExtractor",
                             "module": "spikeinterface",
-                            "version": "0.103.3",
+                            "version": "0.104.0",
                             "kwargs": {
                                 "all_annotations": false,
                                 "stream_name": "imec0.ap",
                                 "use_names_as_ids": false,
-                                "folder_path": "C:\\Users\\Jzimi\\git-repos\\driftmap_viewer\\examples\\example_data\\recording",
+                                "folder_path": "C:\\Users\\Joe\\work\\git-repos\\driftplots\\examples\\example_data\\recording",
                                 "load_sync_channel": false
                             },
                             "annotations": {
@@ -11978,6 +11978,7 @@
             30.0,
             55.0
         ],
+        "min_local_neighbors": 5,
         "dtype": "<i2"
     },
     "annotations": {

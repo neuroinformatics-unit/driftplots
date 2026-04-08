@@ -3,8 +3,14 @@
 API Reference
 =============
 
-.. currentmodule:: driftplots.driftplotter
+.. currentmodule:: driftplots
 
 .. autoclass:: DriftPlotter
    :members:
    :undoc-members:
+
+.. autoclass:: MultiSessionDriftmapWidget
+   :members:
+   :undoc-members:
+
+.. autofunction:: get_amplitudes

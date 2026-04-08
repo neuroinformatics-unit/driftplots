@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 import numpy as np
 import pyqtgraph as pg
@@ -19,12 +19,14 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
     def __init__(
         self,
         processed_data: DataModel,
+        app,
         amplitude_cmap_scaling: str | tuple[float, float] = "linear",
         n_color_bins: int = 20,
         point_size: float = 5.0,
     ) -> None:
         super().__init__()
 
+        self.app = app
         self.processed_data = processed_data
 
         self.cfgs: dict[str, Any] = {
@@ -55,6 +57,10 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         self._fix_limits_cb.toggled.connect(self.handle_fix_ylim_cb)
         self.scatter.sigClicked.connect(self.handle_click)
         self._view_radio_group.idToggled.connect(self.handle_view_radio_toggled)
+
+    def plot(self):
+        self.show()
+        self.app.exec()
 
     def _init_scatter_plot(
         self,

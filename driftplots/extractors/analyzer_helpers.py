@@ -71,6 +71,10 @@ def get_noise_mask(
 
     assert isinstance(exclude_noise, str), "`exclude_noise` must be a string"
     labels = analyzer.get_sorting_property(exclude_noise)
+
+    if labels is None:
+        raise ValueError(f"The analyzer does not contain a sorting property called: {exclude_noise}")
+
     noise_mask = (labels == "noise")[spike_clusters]  # TODO: make sure to test this
 
     return noise_mask

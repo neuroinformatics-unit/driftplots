@@ -33,6 +33,16 @@ class MultiSessionDriftmapWidget(QtWidgets.QWidget):
         height: int = 820,
     ):
         super().__init__()
+
+        app = QtWidgets.QApplication.instance()
+
+        if app is None:
+            raise RuntimeError(
+                "Qt Application must be created before using this widget. "
+                "Generate an individual plot first with "
+                "`drift_map_plot_interactive()`."
+            )
+        self.app = app
         self.setWindowTitle("Drift map — multi session")
 
         num_panels = len(panels)
@@ -42,7 +52,9 @@ class MultiSessionDriftmapWidget(QtWidgets.QWidget):
         self._populate_grid(panels, n_rows, n_cols)
         self._link_y_axes(panels)
 
+    def plot(self):
         self.show()
+        self.app.exec()
 
     @staticmethod
     def _compute_grid_dimensions(

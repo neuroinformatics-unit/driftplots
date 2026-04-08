@@ -7,6 +7,7 @@ from matplotlib.figure import Figure
 from driftplots import mpl_plotting
 from driftplots.data_loader import DataLoader
 from driftplots.interactive.driftmap_plot_widget import DriftmapPlotWidget
+from pyqtgraph.Qt import QtWidgets
 
 # test ideas:
 # check signatures match default args between interactive and matplotlib
@@ -60,11 +61,11 @@ class DriftPlotter:
 
     def drift_map_plot_interactive(
         self,
-        decimate: int | bool = False,
+        decimate: int | bool | None | Literal["estimate"] = "estimate",
         exclude_noise: bool = False,
         amplitude_cmap_scaling: str | tuple[float, float] = "linear",
         n_color_bins: int = 20,
-        point_size: float = 7.5,
+        point_size: float = 5.0,
         filter_amplitude_mode: str | None = None,
         filter_amplitude_values: tuple[float, ...] = (),
     ) -> DriftmapPlotWidget:
@@ -73,7 +74,10 @@ class DriftPlotter:
         Parameters
         ----------
         decimate
-            Keep every *n*-th spike. ``False`` disables decimation.
+            Keep every *n*-th spike. Too many spikes will slow down the plot.
+            if ``"estimate"` the number of spikes will be decimated to a reasonable
+            range (e.g. 50,000). ``False``, ``None`` or ``0`` disables decimation.`
+            Otherwise pass an integer e.g. 2 to keep every 2nd spike.
         exclude_noise
             Remove spikes labelled as noise.
         amplitude_cmap_scaling
@@ -93,12 +97,15 @@ class DriftPlotter:
             The pyqtgraph widget. This is already populated but not yet
             shown, use app.exec() to display.
         """
+        app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+
         processed_data = self.data_loader.get_processed_data(
             exclude_noise, decimate, filter_amplitude_mode, filter_amplitude_values
         )
 
         self.plot = DriftmapPlotWidget(
             processed_data,
+            app,
             amplitude_cmap_scaling=amplitude_cmap_scaling,
             n_color_bins=n_color_bins,
             point_size=point_size,
@@ -108,11 +115,11 @@ class DriftPlotter:
 
     def drift_map_plot_matplotlib(
         self,
-        decimate: int | bool = False,
+        decimate: int | bool | None | Literal["estimate"] = "estimate",
         exclude_noise: bool | str = False,
         amplitude_cmap_scaling: str | tuple[float, float] = "linear",
         n_color_bins: int = 20,
-        point_size: float = 7.5,
+        point_size: float = 5.0,
         filter_amplitude_mode: str | None = None,
         filter_amplitude_values: tuple[float, ...] = (),
         add_histogram_plot: bool = False,

@@ -2,8 +2,9 @@
 
 # driftplots
 
-driftplots (TODO: NAME) is a tool to visualise and save drift maps from kilosort
-or SpikeInterface and interactively compare these across sessions.
+`driftplots` is a tool for visualising and saving drift maps from 
+Kilosort or SpikeInterface. It can be used to assess data quality through 
+static matplotlib figures or an interactive viewer:
 
 ```{image} /_static/driftmap-viewer.gif
 :align: center
@@ -12,29 +13,37 @@ or SpikeInterface and interactively compare these across sessions.
 
 <br>
 
-The main use case of driftplots is to check the alignment of sessions prior to
-performing inter-session Unit Matching or data concatenation. In the below example,
-(XXX) it is clear the two sessions are well aligned, with drift maps looking similar and
-templates clearly matching at the same position of the probe.
+Interactive mode can be used to check alignment between recording 
+sessions before inter-session matching e.g. with UnitMatch. In the above example,
+it is clear the recordings (chronically recorded Neuropixel sessions with a gap 
+between them of 2 hours) are well aligned, as the driftmap and templates 
+look similar across the recording depth.
 
-driftplots can be used in this interactive view () or through matplotlib
-plots that can be used to save PDF over an entire experiment for quick checking
+Matplotlib mode can also be used to get an overview of the data quality
+across many sessions, for example by [collating these into a PDF](pages/examples/creating-pdf).
 
 ::::{grid} 1 1 3 3
 :gutter: 4
 
-:::{grid-item-card} {fas}`book;sd-text-primary` Articles
-:link: pages/articles/index
+:::{grid-item-card} {fas}`book;sd-text-primary` Using `driftplots`
+:link: pages/how-to-use-driftmapviewer
 :link-type: doc
 
-How to use the driftplots and details on how features are calculated.
+Get started with `driftplots`
+:::
+
+:::{grid-item-card} {fas}`book;sd-text-primary` Implementation Details
+:link: pages/how-parameters-are-calculated
+:link-type: doc
+
+Details on how the parameters are calculated.
 :::
 
 :::{grid-item-card} {fas}`lightbulb;sd-text-primary` Examples
 :link: pages/examples/index
 :link-type: doc
 
-Worked examples using ``driftplots`` in practice.
+Using `driftplots` in practice
 :::
 
 :::{grid-item-card} {fas}`code;sd-text-primary` API
@@ -46,9 +55,6 @@ Full Python API reference.
 
 ::::
 
-``driftplots`` loads Kilosort sorter output and creates
-interactive (pyqtgraph) or static (matplotlib) drift map plots,
-making it easy to inspect electrode drift across a recording session.
 
 ```{toctree}
 :maxdepth: 2

@@ -18,15 +18,16 @@ class DataLoader:
 
     def __init__(self, path_or_analyzer: Path | si.SortingAnalyzer) -> None:
         """ """
-        self.path_or_analyzer = path_or_analyzer
 
         # Get the data loading function depending on if
         # we are analyzer or kilosort output
         func: Callable
         if isinstance(path_or_analyzer, si.SortingAnalyzer):
+            self.path_or_analyzer = path_or_analyzer
             func = analyzer_helpers.get_sorting_analyzer
         else:
-            ks_version = kilosort_helpers.get_ks_version(Path(path_or_analyzer))
+            self.path_or_analyzer = Path(path_or_analyzer)
+            ks_version = kilosort_helpers.get_ks_version(self.path_or_analyzer)
             func = (
                 kilosort4.get_spikes_info_ks4
                 if ks_version == "kilosort4"
@@ -41,7 +42,7 @@ class DataLoader:
             self._spike_clusters,
             self.templates,
             self.channel_locations,
-        ) = func(path_or_analyzer)
+        ) = func(self.path_or_analyzer)
 
         assert (
             self._spike_times.size
@@ -135,10 +136,20 @@ class DataLoader:
             spike_clusters = spike_clusters[keep_bool_mask]
 
         if decimate:
-            spike_times = spike_times[::decimate]
-            spike_amplitudes = spike_amplitudes[::decimate]
-            spike_depths = spike_depths[::decimate]
-            spike_clusters = spike_clusters[::decimate]
+            num_spikes = spike_times.size
+            if decimate == "estimate":
+                ideal_num_spikes = 100_000
+                decimation_factor = int(num_spikes // ideal_num_spikes)
+            else:
+                decimation_factor = int(decimate)
+
+            if decimation_factor > 1:
+                spike_times = spike_times[::decimation_factor]
+                spike_amplitudes = spike_amplitudes[::decimation_factor]
+                spike_depths = spike_depths[::decimation_factor]
+                spike_clusters = spike_clusters[::decimation_factor]
+
+                print(f"Decimated {num_spikes} spikes down to {spike_times.size} with factor {decimation_factor}.")
 
         return DataModel(
             spike_times,

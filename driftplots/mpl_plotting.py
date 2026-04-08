@@ -64,14 +64,14 @@ def plot_matplotlib(
     )
 
     if not add_histogram_plot:
-        raster_axis.set_xlabel("time")
-        raster_axis.set_ylabel("y position")
+        raster_axis.set_xlabel("Time (s)")
+        raster_axis.set_ylabel("Depth (μm)")
         return fig
 
     # Plot the histogram on the left-hand subplot
-    hist_axis.set_xlabel("count")
-    raster_axis.set_xlabel("time")
-    hist_axis.set_ylabel("y position")
+    hist_axis.set_xlabel("Count")
+    raster_axis.set_xlabel("Time (s)")
+    hist_axis.set_ylabel("Depth (μm)")
 
     bin_centers, counts = processed_data.compute_activity_histogram(
         weight_histogram_by_amplitude

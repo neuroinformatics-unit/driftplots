@@ -1,15 +1,6 @@
 from pathlib import Path
-
 import spikeinterface as si
-from PySide6 import QtWidgets
-
-from driftplots import DriftPlotter
-from driftplots.interactive.multi_session_drift_map import (
-    MultiSessionDriftmapWidget,
-)
-
-# In interactive mode, we must create a Qt instance before generating any plot.
-app = QtWidgets.QApplication([])
+from driftplots import DriftPlotter, MultiSessionDriftmapWidget
 
 # Load the data. In this example we load as a sorting analyzer
 # or from the raw kilosort output to demonstrate both methods
@@ -36,9 +27,4 @@ for path_or_analyzer in [analyzer, sorting_output_path]:
 
 multi = MultiSessionDriftmapWidget(panels)
 
-# We must start the Qt event loop for the plots to appear
-app.exec()
-
-# You will notice the plots and templates look different, even
-# though the underlying data is the same. This is because kilosort
-# and SpikeInterface use different methods to compute amplitudes, depths and templates
+multi.plot()
