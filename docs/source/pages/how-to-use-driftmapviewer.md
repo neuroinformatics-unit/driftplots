@@ -72,21 +72,28 @@ multiple interactive plots at once. In this mode, the y-axis
 is aligned when zooming. See [below](amplitudes) for details
 on how to ensure amplitude scaling is consistent.
 
+```{image} /_static/interactive-multi-example.png
+   :align: center
+   :width: 850px
+```
+
 ```python
-from pathlib import Path
 import spikeinterface as si
 from driftplots import DriftPlotter, MultiSessionDriftmapWidget
 
 # Load the data. In this example we load as a sorting analyzer
 # or from the raw kilosort output to demonstrate both methods
-data_path = Path(__file__).parent / "example_data"
+data_path = "/path/to/example_data"
 analyzer = si.load_sorting_analyzer(data_path / "analyzer.zarr")
 sorting_output_path = data_path / "sorting" / "sorter_output"
 
 # Create a list of interactive plots, and collect them
 # into a single plot using MultiSessionDriftmapWidget
 panels = []
-for path_or_analyzer in [analyzer, sorting_output_path]:
+for title, path_or_analyzer in zip(
+        ["Session 1", "Session 2"],
+        [analyzer, sorting_output_path]
+):
     plotter = DriftPlotter(path_or_analyzer)
 
     plot = plotter.drift_map_plot_interactive()

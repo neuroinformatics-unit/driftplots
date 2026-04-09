@@ -23,11 +23,13 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         amplitude_cmap_scaling: str | tuple[float, float] = "linear",
         n_color_bins: int = 20,
         point_size: float = 5.0,
+        title: bool | str = None
     ) -> None:
         super().__init__()
 
         self.app = app
         self.processed_data = processed_data
+        self.title = title
 
         self.cfgs: dict[str, Any] = {
             "right_panel_view_mode": "heatmap",
@@ -123,6 +125,8 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
                 f"x={x:.3f}\ny={y:.1f}\namp={spike_amplitudes[int(data)]:.2f}"
             ),
         )
+        if self.title:
+            self.p_scatter.setTitle(self.title, size="15pt")
         self.p_scatter.addItem(self.scatter)
 
     def _init_panel_plot(self, win_right: pg.GraphicsLayoutWidget) -> None:

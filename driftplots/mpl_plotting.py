@@ -16,6 +16,7 @@ def plot_matplotlib(
     point_size: float,
     add_histogram_plot: bool,
     weight_histogram_by_amplitude: bool,
+    title: bool | str = None,
 ) -> Figure:
     """Render a static matplotlib drift-map figure from pre-processed data.
 
@@ -31,6 +32,8 @@ def plot_matplotlib(
     add_histogram_plot :
 
     weight_histogram_by_amplitude :
+
+    title :
 
     Returns
     -------
@@ -66,16 +69,19 @@ def plot_matplotlib(
     if not add_histogram_plot:
         raster_axis.set_xlabel("Time (s)")
         raster_axis.set_ylabel("Depth (μm)")
-        return fig
 
-    # Plot the histogram on the left-hand subplot
-    hist_axis.set_xlabel("Count")
-    raster_axis.set_xlabel("Time (s)")
-    hist_axis.set_ylabel("Depth (μm)")
+    else:
+        # Plot the histogram on the left-hand subplot
+        hist_axis.set_xlabel("Count")
+        raster_axis.set_xlabel("Time (s)")
+        hist_axis.set_ylabel("Depth (μm)")
 
-    bin_centers, counts = processed_data.compute_activity_histogram(
-        weight_histogram_by_amplitude
-    )
-    hist_axis.plot(counts, bin_centers, color="black", linewidth=1)
+        bin_centers, counts = processed_data.compute_activity_histogram(
+            weight_histogram_by_amplitude
+        )
+        hist_axis.plot(counts, bin_centers, color="black", linewidth=1)
+
+    if title:
+        fig.suptitle(title if isinstance(title, str) else "Drift Map")
 
     return fig

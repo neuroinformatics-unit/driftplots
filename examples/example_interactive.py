@@ -11,7 +11,10 @@ sorting_output_path = data_path / "sorting" / "sorter_output"
 # Create a list of interactive plots, and collect them
 # into a single plot using MultiSessionDriftmapWidget
 panels = []
-for path_or_analyzer in [analyzer, sorting_output_path]:
+for title, path_or_analyzer in zip(
+        ["Session 1", "Session 2"],
+        [analyzer, sorting_output_path]
+):
     plotter = DriftPlotter(path_or_analyzer)
 
     plot = plotter.drift_map_plot_interactive(
@@ -21,6 +24,7 @@ for path_or_analyzer in [analyzer, sorting_output_path]:
         filter_amplitude_values=(1, 99),
         amplitude_cmap_scaling="linear",
         n_color_bins=25,
+        title=title
     )
 
     panels.append(plot)
@@ -28,3 +32,6 @@ for path_or_analyzer in [analyzer, sorting_output_path]:
 multi = MultiSessionDriftmapWidget(panels)
 
 multi.plot()
+# You will notice the plots and templates look different, even
+# though the underlying data is the same. This is because kilosort
+# and SpikeInterface use different methods to compute amplitudes, depths and templates

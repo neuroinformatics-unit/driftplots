@@ -62,12 +62,13 @@ class DriftPlotter:
     def drift_map_plot_interactive(
         self,
         decimate: int | bool | None | Literal["estimate"] = "estimate",
-        exclude_noise: bool = False,
+        exclude_noise: bool | str = False,
         amplitude_cmap_scaling: str | tuple[float, float] = "linear",
         n_color_bins: int = 20,
         point_size: float = 5.0,
         filter_amplitude_mode: str | None = None,
         filter_amplitude_values: tuple[float, ...] = (),
+        title: bool | str = None,
     ) -> DriftmapPlotWidget:
         """Create an interactive pyqtgraph-based drift map widget.
 
@@ -90,6 +91,8 @@ class DriftPlotter:
             Amplitude filtering mode.
         filter_amplitude_values
             Bounds for amplitude filtering.
+        title
+            Title of the plot
 
         Returns
         -------
@@ -109,6 +112,7 @@ class DriftPlotter:
             amplitude_cmap_scaling=amplitude_cmap_scaling,
             n_color_bins=n_color_bins,
             point_size=point_size,
+            title=title,
         )
 
         return self.plot
@@ -124,6 +128,7 @@ class DriftPlotter:
         filter_amplitude_values: tuple[float, ...] = (),
         add_histogram_plot: bool = False,
         weight_histogram_by_amplitude: bool = False,
+        title: bool | str = None,
     ) -> Figure:
         """"""
         processed_data = self.data_loader.get_processed_data(
@@ -137,6 +142,7 @@ class DriftPlotter:
             point_size,
             add_histogram_plot,
             weight_histogram_by_amplitude,
+            title=title
         )
 
         return fig
