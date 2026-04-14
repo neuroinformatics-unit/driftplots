@@ -26,7 +26,7 @@ across many sessions, for example by [collating these into a PDF](pages/examples
 :gutter: 4
 
 :::{grid-item-card} {fas}`book;sd-text-primary` Using `driftplots`
-:link: pages/how-to-use-driftmapviewer
+:link: pages/how-to-use-driftplots
 :link-type: doc
 
 Get started with `driftplots`

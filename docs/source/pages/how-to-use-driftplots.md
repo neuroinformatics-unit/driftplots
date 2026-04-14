@@ -1,20 +1,24 @@
 # Using `driftplots` 
 
-`driftplots` can be used to generate static Matplotlib figures or an interactive viewer (using Qt). 
+`driftplots` can be used to generate static [Matplotlib](https://matplotlib.org/) figures or an interactive viewer (built on Qt). 
 In the interactive viewer, clicking a spike will display the *template* (unscaled, whitened) for 
 the cluster to which that spike was assigned.
-
-`driftplots` accepts a path to Kilosort's output or a SpikeInterface `SortingAnalyzer` as input.
 
 Below we will cover the main ways to use `driftplots`. 
 See the [API Reference](/pages/api_index) for a full list of arguments.
 
+:::{note}
+See [here](terminology) for a glossary of key terms.
+:::
+
 ## Inputs
 
-Kilosort 1-4 are supported when passing a path to Kilosort output 
-(see [here](/pages/how-parameters-are-calculated) for details on how features 
-are computed across versions). By default, `spike_clusters.npy` is used to assign the
-template for each spike (i.e. this file reflects any changes made in Phy). 
+`driftplots` accepts a path to Kilosort's output or a SpikeInterface `SortingAnalyzer` as input.
+
+If passing a path directly to a sorting output, Kilosort 1-4 are supported.
+See [here](/pages/how-parameters-are-calculated) for details on how spike amplitudes,
+depths and unit templates are computed across Kilosort versions). By default, `spike_clusters.npy` 
+is used to assign the template for each spike (i.e. this file reflects any changes made in Phy). 
 If no changes were made in Phy, the file does not exist and Kilosort's original
 clusters are used instead (`spike_templates.npy`).
 
@@ -24,18 +28,18 @@ have already been computed. See
 for the required extensions. Note that the number of spikes displayed will depend 
 on the argument set for `max_spikes_per_unit` used when computing `"random_spikes"`.
 
-By default, the number of spikes displayed will be decimated to `100,000`.
+By default, the number of spikes displayed will be decimated to around `100,000`.
 
 ::: {warning}
-`driftplots` was designed and tested with Neuropixels probes, but it should also work with other probe types.
+`driftplots` was designed and tested with Neuropixels probes, but it should also work with most other probe types.
 :::
 
 
 ## Interactive Viewer
 
-The interactive viewer opens a Qt interface that allows you to select
-individual spikes on the driftmap. Once selected, the template for that spike will
-be displayed on the right-hand side.
+{py:meth}`~driftplots.DriftPlotter.drift_map_plot_matplotlib` generates an interactive viewer 
+allowing selection of individual spikes on the driftmap. Once selected, the template for that 
+spike will be displayed on the right-hand side.
 
 ```{image} /_static/interactive-single-example.png
    :align: center
@@ -57,20 +61,19 @@ driftmap.plot()
 
 ```
 
-It is important to remember that the displayed heatmap shows the *template*
-associated with that spike, i.e. it will appear the same for all spikes
-within the same cluster. The template is whitened and is not scaled to each individual spike.
-This is due to the difficulty of reconstructing individual waveforms from
-Kilosort outputs across versions, and because the main purpose of the interactive mode is to check that templates are identifiable
-across sessions (rather than inspect individual, noisy waveforms). 
-See [here](/pages/how-parameters-are-calculated) for details.
+The displayed templates are whitened and are not scaled per-spike  i.e. the template will
+appear the same for all spikes within the same cluster. The template is whitened and is not 
+scaled to each individual spike. This approach was chosen for two main reasons:This is due to the difficulty of reconstructing individual waveforms from
+1) it is not always possible to reconstruct the waveforms or their amplitudes across kilosort versions (see [here](/pages/how-parameters-are-calculated))
+2) the main purpose of the interactive mode is to check that templates are identifiably similar
+across sessions, to ensure little drift has occured. This is easier with templates rather than noisier spike waveforms.
 
 ### Interactive Viewer with Multiple Plots
 
 {py:class}`~driftplots.MultiSessionDriftmapWidget` can be used to display 
 multiple interactive plots at once. In this mode, the y-axis
-is aligned when zooming. See [below](amplitudes) for details
-on how to ensure amplitude scaling is consistent.
+zoom is linked across plots.See [the amplitudes section](amplitudes) for details
+on how to ensure amplitude scaling is consistent across sessions.
 
 ```{image} /_static/interactive-multi-example.png
    :align: center
@@ -108,7 +111,7 @@ multi.plot()
 ## Matplotlib Mode
 
 {py:meth}`~driftplots.DriftPlotter.drift_map_plot_matplotlib` returns a static Matplotlib figure. It
-takes all the same arguments as {py:meth}`~driftplots.DriftPlotter.drift_map_plot_interactive`
+takes all the same arguments as the interactive viewer
 but can additionally plot a 1D activity histogram next to the driftmap.
 
 ```{image} /_static/matplotlib-example.png
@@ -117,7 +120,7 @@ but can additionally plot a 1D activity histogram next to the driftmap.
 ```
 
 See [this example](/pages/examples/creating-pdf) for how to stitch Matplotlib figures together across 
-a project to quickly assess recording quality and stability.
+an experimental project to quickly assess recording quality and stability.
 
 ```python
 import matplotlib.pyplot as plt
@@ -143,13 +146,14 @@ plt.show()
 ## Aligning Amplitudes Across Sessions
 
 `driftplots` provides options for excluding spikes based on their
-amplitudes and setting the colour scaling on the scatter plot.
-This can be useful when a small number of high- or low-amplitude spikes dominate.
+amplitudes and scaling the color of the scatter points by amplitude.
+This can be useful when a small number of high- or low-amplitude spikes dominate
+the color scaling, with a few very light/dark spots with the rest grey.
 
-When comparing multiple sessions, it is useful to apply the same amplitude cutoff
-for discarding spikes and colour scaling. {py:func}`~driftplots.get_amplitudes` can be used 
-to pool amplitudes across sessions, allowing cutoffs to be calculated
-and applied to all plots.
+As such it is useful to apply the same amplitude filtering and colormap
+scaling to all plots when comparing multiple sessions. {py:func}`~driftplots.get_amplitudes` 
+can be used to pool amplitudes across sessions, allowing cutoffs to be calculated
+across all sessions and applied to all plots.
 
 ```python
 import numpy as np

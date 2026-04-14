@@ -36,7 +36,7 @@ def get_spikes_info_ks4(
     spike_depths = np.load(sorter_output / "spike_positions.npy")[:, 1]
     spike_clusters = kilosort_helpers.load_spike_clusters(sorter_output)
 
-    templates = np.load(sorter_output / "templates.npy")  # rename unwhiten?
+    templates = np.load(sorter_output / "templates.npy")
     channel_positions = np.load(sorter_output / "channel_positions.npy")
     spike_amplitudes = compute_spike_amplitudes(templates, spike_clusters, amplitudes)
 

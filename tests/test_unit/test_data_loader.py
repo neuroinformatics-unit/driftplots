@@ -2,86 +2,76 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+import spikeinterface as si
 
 from driftplots.data_loader import DataLoader
-from driftplots.extractors.kilosort4 import compute_spike_amplitudes
-from driftplots.extractors.kilosort_helpers import load_spike_clusters
 
-SORTER_OUTPUT = Path(__file__).parent.parent.parent / "examples" / "example_data" / "sorting" / "sorter_output"
+ANALYZER_PATH = Path(__file__).parent.parent.parent / "examples" / "example_data" / "analyzer.zarr"
 
-NUM_SPIKES = 100
-NUM_CLUSTERS = 5
-NUM_CHANNELS = 10
-TEMPLATE_SAMPLES = 61
-NOISE_CLUSTER_IDS = [0, 2]
-
-
-@pytest.fixture()
-def loader():
-    return DataLoader(SORTER_OUTPUT)
-
-
-@pytest.fixture()
-def synthetic_sorter_output(tmp_path):
-    """Create a minimal KS4-style sorter output with noise clusters."""
-    rng = np.random.default_rng(42)
-
-    spike_times = np.sort(rng.integers(0, 30000, size=NUM_SPIKES)).astype(np.int64)
-    amplitudes = rng.uniform(0.5, 5.0, size=NUM_SPIKES).astype(np.float32)
-    spike_positions = rng.uniform(0, 3000, size=(NUM_SPIKES, 2)).astype(np.float32)
-    spike_clusters = rng.integers(0, NUM_CLUSTERS, size=NUM_SPIKES).astype(np.int32)
-    templates = rng.standard_normal((NUM_CLUSTERS, TEMPLATE_SAMPLES, NUM_CHANNELS)).astype(np.float32)
-    channel_positions = np.column_stack([
-        np.zeros(NUM_CHANNELS),
-        np.arange(NUM_CHANNELS) * 20.0,
-    ]).astype(np.float32)
-
-    np.save(tmp_path / "spike_times.npy", spike_times)
-    np.save(tmp_path / "amplitudes.npy", amplitudes)
-    np.save(tmp_path / "spike_positions.npy", spike_positions)
-    np.save(tmp_path / "spike_clusters.npy", spike_clusters)
-    np.save(tmp_path / "templates.npy", templates)
-    np.save(tmp_path / "channel_positions.npy", channel_positions)
-
-    # cluster_group.tsv with noise labels
-    lines = ["cluster_id\tKSLabel\n"]
-    for i in range(NUM_CLUSTERS):
-        label = "noise" if i in NOISE_CLUSTER_IDS else "good"
-        lines.append(f"{i}\t{label}\n")
-    (tmp_path / "cluster_group.tsv").write_text("".join(lines))
-
-    # KS4 log file (triggers KS4 version detection)
-    (tmp_path / "kilosort4.log").write_text("")
-
-    return tmp_path
+pytestmark = pytest.mark.filterwarnings(
+    "ignore::pytest.PytestUnraisableExceptionWarning",
+)
 
 
 # ---------------------------------------------------------------------------
-# Raw loading – check values match the .npy files on disk
+# Loading from sorter output – values match known synthetic data
 # ---------------------------------------------------------------------------
-class TestRawLoading:
-    """Loaded arrays should exactly match the raw .npy files."""
+class TestFromSorterOutput:
+    """DataLoader should correctly load and compute arrays from KS4 on-disk output."""
 
-    def test_spike_times(self, loader):
-        expected = np.load(SORTER_OUTPUT / "spike_times.npy")
-        np.testing.assert_array_equal(loader._spike_times, expected)
+    def test_loaded_arrays_match_known_values_and_are_read_only(self, synthetic_ks4_output, synthetic_data):
+        loader = DataLoader(synthetic_ks4_output)
 
-    def test_spike_depths(self, loader):
-        expected = np.load(SORTER_OUTPUT / "spike_positions.npy")[:, 1]
-        np.testing.assert_array_equal(loader._spike_depths, expected)
+        # Spike times and depths should match what was written
+        np.testing.assert_array_equal(loader._spike_times, synthetic_data["spike_times"])
+        np.testing.assert_array_almost_equal(loader._spike_depths, synthetic_data["spike_depths"])
+        np.testing.assert_array_equal(loader._spike_clusters, synthetic_data["spike_clusters"])
 
-    def test_spike_clusters(self, loader):
-        expected = load_spike_clusters(SORTER_OUTPUT)
-        np.testing.assert_array_equal(loader._spike_clusters, expected)
+        # Templates are loaded as-is (whitened) from templates.npy
+        np.testing.assert_array_equal(loader.templates, synthetic_data["whitened_templates"])
 
-    def test_spike_amplitudes(self, loader):
-        templates = np.load(SORTER_OUTPUT / "templates.npy")
-        amplitudes = np.load(SORTER_OUTPUT / "amplitudes.npy")
-        spike_clusters = load_spike_clusters(SORTER_OUTPUT)
-        expected = compute_spike_amplitudes(templates, spike_clusters, amplitudes)
-        np.testing.assert_array_equal(loader._spike_amplitudes, expected)
+        # Channel locations should match exactly
+        np.testing.assert_array_equal(loader.channel_locations, synthetic_data["channel_locations"])
 
-    def test_arrays_are_read_only(self, loader):
+        # All arrays should be read-only
+        for arr in (loader._spike_times, loader._spike_amplitudes,
+                    loader._spike_depths, loader._spike_clusters,
+                    loader.templates, loader.channel_locations):
+            assert not arr.flags.writeable
+
+
+# ---------------------------------------------------------------------------
+# Loading from SortingAnalyzer – values match analyzer extensions
+# ---------------------------------------------------------------------------
+class TestFromSortingAnalyzer:
+    """DataLoader should correctly load arrays from a SortingAnalyzer."""
+
+    def test_loaded_arrays_match_analyzer_extensions_and_are_read_only(self):
+        analyzer = si.load_sorting_analyzer(ANALYZER_PATH)
+        loader = DataLoader(analyzer)
+
+        # Expected values from the analyzer extensions
+        random_spike_indices = analyzer.get_extension("random_spikes").data["random_spikes_indices"]
+        spike_vector = analyzer.sorting.to_spike_vector()
+
+        expected_times = spike_vector["sample_index"][random_spike_indices] / analyzer.sorting.get_sampling_frequency()
+        np.testing.assert_array_equal(loader._spike_times, expected_times)
+
+        expected_amplitudes = np.abs(analyzer.get_extension("spike_amplitudes").data["amplitudes"])
+        np.testing.assert_array_equal(loader._spike_amplitudes, expected_amplitudes)
+
+        expected_depths = analyzer.get_extension("spike_locations").data["spike_locations"]["y"]
+        np.testing.assert_array_equal(loader._spike_depths, expected_depths)
+
+        expected_clusters = spike_vector["unit_index"][random_spike_indices]
+        np.testing.assert_array_equal(loader._spike_clusters, expected_clusters)
+
+        expected_templates = analyzer.get_extension("templates").data["average"]
+        np.testing.assert_array_equal(loader.templates, expected_templates)
+
+        np.testing.assert_array_equal(loader.channel_locations, analyzer.get_channel_locations())
+
+        # All arrays should be read-only
         for arr in (loader._spike_times, loader._spike_amplitudes,
                     loader._spike_depths, loader._spike_clusters,
                     loader.templates, loader.channel_locations):
@@ -94,8 +84,9 @@ class TestRawLoading:
 class TestProcessedData:
     """Each processing option should visibly change the output."""
 
-    def test_no_processing(self, loader):
+    def test_no_processing(self, synthetic_ks4_output):
         """With all processing off, output matches raw arrays."""
+        loader = DataLoader(synthetic_ks4_output)
         result = loader.get_processed_data(
             exclude_noise=False, decimate=False,
             filter_amplitude_mode=None, filter_amplitude_values=(),
@@ -105,8 +96,9 @@ class TestProcessedData:
         np.testing.assert_array_equal(result.spike_depths, loader._spike_depths)
         np.testing.assert_array_equal(result.spike_clusters, loader._spike_clusters)
 
-    def test_decimate_int(self, loader):
+    def test_decimate_int(self, synthetic_ks4_output):
         """Decimation by factor keeps every n-th spike."""
+        loader = DataLoader(synthetic_ks4_output)
         factor = 3
         result = loader.get_processed_data(
             exclude_noise=False, decimate=factor,
@@ -115,19 +107,38 @@ class TestProcessedData:
         assert result.spike_times.size == loader._spike_times[::factor].size
         np.testing.assert_array_equal(result.spike_times, loader._spike_times[::factor])
 
-    def test_decimate_estimate(self, loader):
+    def test_decimate_estimate(self, synthetic_ks4_output):
         """'estimate' decimation targets ~100k spikes."""
+        loader = DataLoader(synthetic_ks4_output)
         result = loader.get_processed_data(
             exclude_noise=False, decimate="estimate",
             filter_amplitude_mode=None, filter_amplitude_values=(),
         )
-        # Test data has 2684 spikes (< 100k), so no decimation should occur
+        # Synthetic data has 50 spikes (< 100k), so no decimation should occur
         assert result.spike_times.size == loader._spike_times.size
 
-    def test_filter_amplitude_absolute(self, loader):
+    def test_decimate_estimate_over_100k(self, synthetic_ks4_output):
+        """'estimate' decimation should downsample when spikes exceed 100k."""
+        loader = DataLoader(synthetic_ks4_output)
+        n = 300_000
+        rng = np.random.default_rng(0)
+        loader._spike_times = np.linspace(0, 1000, n)
+        loader._spike_amplitudes = rng.uniform(1, 10, n)
+        loader._spike_depths = rng.uniform(0, 3840, n)
+        loader._spike_clusters = rng.integers(0, 3, n)
+
+        result = loader.get_processed_data(
+            exclude_noise=False, decimate="estimate",
+            filter_amplitude_mode=None, filter_amplitude_values=(),
+        )
+        expected_factor = n // 100_000  # 3
+        assert result.spike_times.size == n // expected_factor + (1 if n % expected_factor else 0)
+
+    def test_filter_amplitude_absolute(self, synthetic_ks4_output):
         """Absolute amplitude filter removes spikes outside bounds."""
-        amps = loader._spike_amplitudes
-        low, high = np.percentile(amps, (25, 75))
+        loader = DataLoader(synthetic_ks4_output)
+        amplitudes = loader._spike_amplitudes
+        low, high = np.percentile(amplitudes, (25, 75))
 
         result = loader.get_processed_data(
             exclude_noise=False, decimate=False,
@@ -138,30 +149,33 @@ class TestProcessedData:
         assert np.all(result.spike_amplitudes >= low)
         assert np.all(result.spike_amplitudes <= high)
 
-    def test_filter_amplitude_percentile(self, loader):
+    def test_filter_amplitude_percentile(self, synthetic_ks4_output):
         """Percentile amplitude filter removes spikes outside percentile bounds."""
+        loader = DataLoader(synthetic_ks4_output)
         result = loader.get_processed_data(
             exclude_noise=False, decimate=False,
             filter_amplitude_mode="percentile",
             filter_amplitude_values=(10, 90),
         )
-        amps = loader._spike_amplitudes
-        low, high = np.percentile(amps, (10, 90))
+        amplitudes = loader._spike_amplitudes
+        low, high = np.percentile(amplitudes, (10, 90))
 
         assert result.spike_times.size < loader._spike_times.size
         assert np.all(result.spike_amplitudes >= low)
         assert np.all(result.spike_amplitudes <= high)
 
-    def test_exclude_noise(self, loader):
-        """Test data has no noise clusters, so count should be unchanged."""
+    def test_exclude_noise(self, synthetic_ks4_output):
+        """exclude_noise with no noise labels should leave count unchanged."""
+        loader = DataLoader(synthetic_ks4_output)
         result = loader.get_processed_data(
             exclude_noise=True, decimate=False,
             filter_amplitude_mode=None, filter_amplitude_values=(),
         )
         assert result.spike_times.size == loader._spike_times.size
 
-    def test_combined_decimate_and_filter(self, loader):
+    def test_combined_decimate_and_filter(self, synthetic_ks4_output):
         """Combining decimate + amplitude filter reduces spikes further."""
+        loader = DataLoader(synthetic_ks4_output)
         amps = loader._spike_amplitudes
         low, high = np.percentile(amps, (10, 90))
 
@@ -183,8 +197,9 @@ class TestProcessedData:
         assert result.spike_times.size <= only_decimated.spike_times.size
         assert result.spike_times.size <= only_filtered.spike_times.size
 
-    def test_all_arrays_same_length(self, loader):
+    def test_all_arrays_same_length(self, synthetic_ks4_output):
         """All output arrays must have the same length after processing."""
+        loader = DataLoader(synthetic_ks4_output)
         result = loader.get_processed_data(
             exclude_noise=False, decimate=2,
             filter_amplitude_mode="percentile",
@@ -202,32 +217,32 @@ class TestProcessedData:
 class TestExcludeNoise:
     """Test noise exclusion using synthetic data with noise-labelled clusters."""
 
-    def test_noise_spikes_removed(self, synthetic_sorter_output):
-        """Spikes from noise clusters should be excluded."""
-        loader = DataLoader(synthetic_sorter_output)
+    NOISE_CLUSTER_IDS = [0]  # must match conftest.NOISE_CLUSTER_IDS
 
+    @pytest.fixture()
+    def loader(self, synthetic_ks4_output_with_noise):
+        return DataLoader(synthetic_ks4_output_with_noise)
+
+    def test_noise_spikes_removed(self, loader):
+        """Spikes from noise clusters should be excluded."""
         result = loader.get_processed_data(
             exclude_noise=True, decimate=False,
             filter_amplitude_mode=None, filter_amplitude_values=(),
         )
         assert result.spike_times.size < loader._spike_times.size
-        assert not np.any(np.isin(result.spike_clusters, NOISE_CLUSTER_IDS))
+        assert not np.any(np.isin(result.spike_clusters, self.NOISE_CLUSTER_IDS))
 
-    def test_noise_off_keeps_all(self, synthetic_sorter_output):
+    def test_noise_off_keeps_all(self, loader):
         """With exclude_noise=False, noise spikes are kept."""
-        loader = DataLoader(synthetic_sorter_output)
-
         result = loader.get_processed_data(
             exclude_noise=False, decimate=False,
             filter_amplitude_mode=None, filter_amplitude_values=(),
         )
         assert result.spike_times.size == loader._spike_times.size
 
-    def test_noise_spike_count_matches(self, synthetic_sorter_output):
+    def test_noise_spike_count_matches(self, loader):
         """Number of removed spikes should equal the noise spike count."""
-        loader = DataLoader(synthetic_sorter_output)
-
-        noise_count = np.isin(loader._spike_clusters.ravel(), NOISE_CLUSTER_IDS).sum()
+        noise_count = np.isin(loader._spike_clusters.ravel(), self.NOISE_CLUSTER_IDS).sum()
 
         result = loader.get_processed_data(
             exclude_noise=True, decimate=False,
