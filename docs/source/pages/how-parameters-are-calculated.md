@@ -1,21 +1,56 @@
 # How features are calculated
 
-Below we detail how the  features displayed in the plots are calculated. This primarily includes the
-amplitudes and templates, with calculations differing between the SortingAnalzyer and difference KS versions
+The key features computed in `driftplots` are the spike amplitudes, depths alongside the displayed
+templates. Below are detailed on how these are computed, as the methods vary between
+Kilosort, SpikeInterface and different Kilosort versions.
 
-A quick note on terminology. Here a 'spike' is a single action potential. During spike sorting, recorded
-spikes are assigned to 'units', representing a putative real neuron. We can look at the spikes by looking at
-the spike waveform, as recorded. We can visualise this as a single channel, or acrvoss all channels.
-The 'spike waveform' is the recorded waveform of an individual spike. The 'template' is a canonical
-waveform for a unit. In SpikeInterface, this is the average of all of the individual waveforms. In Kilosort,
-this is typically a pre-generated waveform that is fit to individual spikes by scaling it.
 
-<show a picture>
+:::{note}
+A quick note on terminology:
+
+- *spike* : 'a single action potential as recorded on the probe and detected by the sorter.
+- *unit* : a group of spikes, determined by the sorter to come from the same neuron.
+- *spike waveform* : the waveform (i.e. voltage signal as detected on the probe) of a single spike.
+- *template* : the canonical waveform that represents a unit. Can be conceptualised as the average of
+representative spike of a neuron. Individual spike waveforms are similar to their template waveform.
+- *whitened template*
+
+:::
+
+TODO: ADD IMAGE
+
+All data is presented as the values on which the data is stored on disk. For NeuroPixels with Kilosort
+this is `int16`. The data is not scaled to `uV`.
+
+The templates, amplitudes and spike depths calculated in SpikeInterface and Kilosort
+are different.
+
 
 # Amplitudes
 
-In no cases are the mpliatudes provided sacaled in uV. They are the raw int16 values. Tihs is fine for us because
-we are just comparing bewteen sessions
+**SpikeInterface**
+
+In SpikeInterface, the spike amplitude is calculated
+
+**Kilosort**
+
+In Kilosort, the `amplitudes.npy` file is not the true spike amplitude. See below for how this
+value is used to approximate true spike amplitudes across Kilosort versions.
+
+In Kilosort1-3 it is a scalar
+to be applied to the unwhitened template to scale it to best match the spike waveform. Therefore,
+the amplitude of the unwhitened template scaled with the `amplitude.npy` value for the spike
+of interest should be a good approximation of the true spike amplitude. However, issues
+with the saving of the inverse whitening matrix in Kilosort 2.5 and 3 add complications. In Kilosort 4,
+`ampltudesn`
+
+*Kilosort 1, 2*
+
+*Kilosort 2.5, 3*
+
+*Kilosort 4*
+
+
 
 In kilosort, the 'amplitudes.npy' file does not include the true waveform amplitudes (through to peak)
 but instead a scaling variable that needs to be applied to the template to best match the spike of interest.
@@ -60,5 +95,5 @@ Therefore, for consistent whitetneied templates are always used. If you would li
 templates, please get in touch.
 
 # Depths
-!!! 
+!!!
 NOTE: interpretability across sessions depends on a lot! versions etc
