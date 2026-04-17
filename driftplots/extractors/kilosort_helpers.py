@@ -50,8 +50,8 @@ def load_cluster_groups(cluster_path: Path) -> tuple[np.ndarray, np.ndarray]:
     return cluster_ids, cluster_groups
 
 
-def get_noise_mask(spike_clusters: np.ndarray, sorter_output: Path) -> np.ndarray:
-    """Build a boolean mask identifying spikes that belong to noise clusters.
+def get_noise_mask(spike_templates: np.ndarray, sorter_output: Path) -> np.ndarray:
+    """Build a boolean mask identifying spikes that belong to noise-labelled templates.
 
     Loads the cluster-groups file (``cluster_groups.csv`` or
     ``cluster_group.tsv``) from the sorter output directory.  Spikes
@@ -59,8 +59,8 @@ def get_noise_mask(spike_clusters: np.ndarray, sorter_output: Path) -> np.ndarra
 
     Parameters
     ----------
-    spike_clusters
-        (num_spikes,) cluster assignment per spike.
+    spike_templates
+        (num_spikes,) template assignment per spike.
     sorter_output
         Path to the Kilosort sorter output directory.
 
@@ -68,7 +68,7 @@ def get_noise_mask(spike_clusters: np.ndarray, sorter_output: Path) -> np.ndarra
     -------
     np.ndarray
         (num_spikes,) boolean array — ``True`` for spikes belonging to
-        a noise cluster.
+        a noise-labelled template.
 
     Raises
     ------
@@ -89,7 +89,7 @@ def get_noise_mask(spike_clusters: np.ndarray, sorter_output: Path) -> np.ndarra
 
     noise_cluster_ids = cluster_ids[cluster_groups == 0]
 
-    exclude_bool_mask = np.isin(spike_clusters.ravel(), noise_cluster_ids)
+    exclude_bool_mask = np.isin(spike_templates.ravel(), noise_cluster_ids)
 
     return exclude_bool_mask
 
@@ -101,10 +101,3 @@ def get_ks_version(sorter_path: Path) -> str:
 
     return Path(log_file[0]).name.split(".")[0]
 
-
-def load_spike_clusters(sorter_path: Path) -> np.ndarray:
-    if (path_ := sorter_path / "spike_clusters.npy").is_file():
-        spike_clusters = np.load(path_)
-    else:
-        spike_clusters = np.load(sorter_path / "spike_templates.npy")
-    return spike_clusters

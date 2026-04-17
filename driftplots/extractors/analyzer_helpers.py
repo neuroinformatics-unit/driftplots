@@ -29,7 +29,7 @@ def get_sorting_analyzer(
     spike_depths = analyzer.get_extension("spike_locations").data["spike_locations"][
         "y"
     ]
-    spike_clusters = spike_vector["unit_index"][random_spike_indices]
+    spike_templates = spike_vector["unit_index"][random_spike_indices]
 
     # Get the templates, assume only one method was used. If multiple
     # methods were used, use the first and throw a warning. If people
@@ -50,7 +50,7 @@ def get_sorting_analyzer(
         spike_times,
         spike_amplitudes,
         spike_depths,
-        spike_clusters,
+        spike_templates,
         templates,
         channel_locations,
     )
@@ -58,7 +58,7 @@ def get_sorting_analyzer(
 
 def get_noise_mask(
     exclude_noise: bool | str,
-    spike_clusters: np.ndarray,
+    spike_templates: np.ndarray,
     analyzer: si.SortingAnalyzer,
 ) -> np.ndarray:
     """ """
@@ -75,6 +75,6 @@ def get_noise_mask(
     if labels is None:
         raise ValueError(f"The analyzer does not contain a sorting property called: {exclude_noise}")
 
-    noise_mask = (labels == "noise")[spike_clusters]  # TODO: make sure to test this
+    noise_mask = (labels == "noise")[spike_templates]  # TODO: make sure to test this
 
     return noise_mask

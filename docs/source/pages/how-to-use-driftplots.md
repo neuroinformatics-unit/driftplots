@@ -2,7 +2,7 @@
 
 `driftplots` can be used to generate static [Matplotlib](https://matplotlib.org/) figures or an interactive viewer (built on Qt). 
 In the interactive viewer, clicking a spike will display the *template* (unscaled, whitened) for 
-the cluster to which that spike was assigned.
+the template assigned to that spike.
 
 Below we will cover the main ways to use `driftplots`. 
 See the [API Reference](/pages/api_index) for a full list of arguments.
@@ -17,10 +17,9 @@ See [here](terminology) for a glossary of key terms.
 
 If passing a path directly to a sorting output, Kilosort 1-4 are supported.
 See [here](/pages/how-parameters-are-calculated) for details on how spike amplitudes,
-depths and unit templates are computed across Kilosort versions). By default, `spike_clusters.npy` 
-is used to assign the template for each spike (i.e. this file reflects any changes made in Phy). 
-If no changes were made in Phy, the file does not exist and Kilosort's original
-clusters are used instead (`spike_templates.npy`).
+depths and unit templates are computed across Kilosort versions). `spike_templates.npy`
+is used to assign the template for each spike. This follows Kilosort's original per-spike
+template assignment and therefore will not reflect later merges or splits made in Phy.
 
 If passing a `SortingAnalyzer`, it is expected that the required extensions
 have already been computed. See 
@@ -62,7 +61,7 @@ driftmap.plot()
 ```
 
 The displayed templates are whitened and are not scaled per-spike  i.e. the template will
-appear the same for all spikes within the same cluster. The template is whitened and is not 
+appear the same for all spikes assigned to the same template. The template is whitened and is not 
 scaled to each individual spike. This approach was chosen for two main reasons:This is due to the difficulty of reconstructing individual waveforms from
 1) it is not always possible to reconstruct the waveforms or their amplitudes across kilosort versions (see [here](/pages/how-parameters-are-calculated))
 2) the main purpose of the interactive mode is to check that templates are identifiably similar

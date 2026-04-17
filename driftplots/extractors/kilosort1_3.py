@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pathlib import Path
 
-    import numpy as np
 import numpy as np
 from spikeinterface.core import read_python
 
@@ -58,7 +57,7 @@ def get_spikes_info_ks1_3(
     pc_features = pc_features**2
 
     # Get the channel indexes corresponding to the 32 channels from the PC.
-    spike_features_indices = params["pc_features_indices"][params["spike_clusters"], :]
+    spike_features_indices = params["pc_features_indices"][params["spike_templates"], :]
 
     ycoords = params["channel_positions"][:, 1]
     spike_feature_ycoords = ycoords[spike_features_indices]
@@ -71,7 +70,7 @@ def get_spikes_info_ks1_3(
     spike_amplitudes, white_templates = _template_positions_amplitudes(
         params["templates"],
         params["whitening_matrix_inv"],
-        params["spike_clusters"],
+        params["spike_templates"],
         params["temp_scaling_amplitudes"],
     )
 
@@ -79,7 +78,7 @@ def get_spikes_info_ks1_3(
         params["spike_times"],
         spike_amplitudes,
         spike_depths,
-        params["spike_clusters"].squeeze(),
+        params["spike_templates"],
         white_templates,
         params["channel_positions"],
     )
@@ -88,7 +87,7 @@ def get_spikes_info_ks1_3(
 def _template_positions_amplitudes(
     templates: np.ndarray,
     inverse_whitening_matrix: np.ndarray,
-    spike_clusters: np.ndarray,
+    spike_templates: np.ndarray,
     template_scaling_amplitudes: np.ndarray,
 ) -> tuple[np.ndarray, ...]:
     """
@@ -106,7 +105,7 @@ def _template_positions_amplitudes(
         unwhiten templates.
     ycoords : np.ndarray
         (num_channels,) array of the y-axis (depth) channel positions.
-    spike_clusters : np.ndarray
+    spike_templates : np.ndarray
         (num_spikes,) array indicating the template associated with each spike.
     template_scaling_amplitudes : np.ndarray
         (num_spikes,) array holding the scaling amplitudes, by which the
@@ -124,9 +123,7 @@ def _template_positions_amplitudes(
         Whitened templates (num_clusters, num_samples, num_channels).
     """
     # Unwhiten the template waveforms
-    unwhite_templates = np.zeros_like(templates)
-    for idx, template in enumerate(templates):
-        unwhite_templates[idx, :, :] = templates[idx, :, :] @ inverse_whitening_matrix
+    unwhite_templates = templates @ inverse_whitening_matrix
 
     # First, calculate the depth of each template from the amplitude
     # on each channel by the center of mass method.
@@ -148,7 +145,7 @@ def _template_positions_amplitudes(
     # amplitudes as the average of the spike amplitudes ('since
     # tempScalingAmps are equal mean for all templates')
     spike_amplitudes = (
-        template_amplitudes_unscaled[spike_clusters] * template_scaling_amplitudes
+        template_amplitudes_unscaled[spike_templates] * template_scaling_amplitudes
     )
 
     return (
@@ -183,16 +180,14 @@ def _load_ks_dir(sorter_output: Path, load_pcs: bool = False) -> dict:
 
     Notes
     -----
-    When merging and splitting in `Phy`, all changes are made to the
-    `spike_clusters.npy` (cluster assignment per spike) and `cluster_groups`
-    csv/tsv which contains the quality assignment (e.g. "noise") for each cluster.
-    As this function strips the spikes and units based on only these two
-    data structures, they will work following manual reassignment in Phy.
+    Template-backed quantities in driftplots are taken from
+    `spike_templates.npy`, which preserves Kilosort's original template
+    assignment and therefore does not reflect later reassignment in Phy.
     """
     params = read_python(sorter_output / "params.py")
 
     spike_times = np.load(sorter_output / "spike_times.npy") / params["sample_rate"]
-    spike_clusters = kilosort_helpers.load_spike_clusters(sorter_output)
+    spike_templates = np.load(sorter_output / "spike_templates.npy")
 
     temp_scaling_amplitudes = np.load(sorter_output / "amplitudes.npy")
 
@@ -203,11 +198,11 @@ def _load_ks_dir(sorter_output: Path, load_pcs: bool = False) -> dict:
         pc_features = pc_features_indices = None
 
     new_params = {
-        "spike_times": spike_times.squeeze(),
-        "spike_clusters": spike_clusters.squeeze(),
+        "spike_times": np.asarray(spike_times).reshape(-1),
+        "spike_templates": np.asarray(spike_templates).reshape(-1),
         "pc_features": pc_features,
         "pc_features_indices": pc_features_indices,
-        "temp_scaling_amplitudes": temp_scaling_amplitudes.squeeze(),
+        "temp_scaling_amplitudes": np.asarray(temp_scaling_amplitudes).reshape(-1),
         "channel_positions": np.load(sorter_output / "channel_positions.npy"),
         "templates": np.load(sorter_output / "templates.npy"),
         "whitening_matrix_inv": np.load(sorter_output / "whitening_mat_inv.npy"),

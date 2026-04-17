@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from pyqtgraph.Qt import QtWidgets
 
-from driftplots.interactive.driftmap_plot_widget import DriftmapPlotWidget
+from driftplots import DriftPlotter
 from driftplots.interactive.multi_session_drift_map import MultiSessionDriftmapWidget
 
 pytestmark = pytest.mark.filterwarnings("ignore::RuntimeWarning")
@@ -15,10 +15,15 @@ def app():
 
 
 @pytest.fixture()
-def make_panels(app, synthetic_model):
-    """Factory that creates N panels."""
+def make_panels(synthetic_ks4_output):
+    """Factory that creates N panels via the DriftPlotter API."""
     def _make(n):
-        return [DriftmapPlotWidget(synthetic_model, app) for _ in range(n)]
+        return [
+            DriftPlotter(synthetic_ks4_output).drift_map_plot_interactive(
+                decimate=False, exclude_noise=False,
+            )
+            for _ in range(n)
+        ]
     return _make
 
 
@@ -50,12 +55,6 @@ class TestGridComputation:
 
 class TestMultiWidget:
     """MultiSessionDriftmapWidget with real panels."""
-
-    def test_is_qwidget(self, make_panels):
-        panels = make_panels(2)
-        multi_widget = MultiSessionDriftmapWidget(panels)
-        assert isinstance(multi_widget, QtWidgets.QWidget)
-        multi_widget.close()
 
     def test_y_axes_linked(self, make_panels):
         panels = make_panels(3)

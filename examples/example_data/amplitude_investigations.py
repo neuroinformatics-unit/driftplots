@@ -58,10 +58,10 @@ amplitudes_npy = np.load(
 # Kilosort method from XXX
 amplitudes = np.load(sorter_output / "amplitudes.npy")
 templates = np.load(sorter_output / "templates.npy")  # rename unwhiten?
-spike_clusters = np.load(sorter_output / "spike_clusters.npy")
+spike_templates = np.load(sorter_output / "spike_templates.npy")
 template_ptp = np.max(templates, axis=1) - np.min(templates, axis=1)
 template_max_peaks = np.max(template_ptp, axis=1)
-kilosort_method_1 = template_max_peaks[spike_clusters] * amplitudes
+kilosort_method_1 = template_max_peaks[spike_templates] * amplitudes
 
 # Kilosort reconstruction of waveforms (Chris Halcrow)
 ops = np.load(
@@ -72,7 +72,7 @@ wPCA = ops.tolist()["wPCA"]
 pc_inds = np.load(sorter_output / "pc_feature_ind.npy")
 pcs = np.load(Path(sorter_output) / "pc_features.npy")
 wh_inv = np.load(sorter_output / "whitening_mat_inv.npy")
-spike_templates = np.load(sorter_output / "spike_clusters.npy")
+spike_templates = np.load(sorter_output / "spike_templates.npy")
 
 whitened_waveforms = np.einsum("ji,ajk->aik", wPCA, pcs)
 

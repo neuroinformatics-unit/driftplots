@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Literal
 
 from matplotlib.figure import Figure
 
@@ -35,8 +36,8 @@ class DriftPlotter:
         (num_spikes,) spike amplitudes.
     spike_depths
         (num_spikes,) spike depths along the probe (µm).
-    spike_clusters
-        (num_spikes,) template index assigned to each spike.
+    spike_templates
+        (num_spikes,) template or unit id assigned to each spike.
     templates
         (num_templates, num_samples, num_channels) template waveforms.
     channel_locations

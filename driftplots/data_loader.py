@@ -39,7 +39,7 @@ class DataLoader:
             self._spike_times,
             self._spike_amplitudes,
             self._spike_depths,
-            self._spike_clusters,
+            self._spike_templates,
             self.templates,
             self.channel_locations,
         ) = func(self.path_or_analyzer)
@@ -48,14 +48,14 @@ class DataLoader:
             self._spike_times.size
             == self._spike_amplitudes.size
             == self._spike_depths.size
-            == self._spike_clusters.size
+            == self._spike_templates.size
         )
         assert self.channel_locations.shape[0] > self.channel_locations.shape[1]
 
         self._spike_times.flags.writeable = False
         self._spike_amplitudes.flags.writeable = False
         self._spike_depths.flags.writeable = False
-        self._spike_clusters.flags.writeable = False
+        self._spike_templates.flags.writeable = False
         self.templates.flags.writeable = False
         self.channel_locations.flags.writeable = False
 
@@ -88,7 +88,7 @@ class DataLoader:
         spike_times : np.ndarray
         spike_amplitudes : np.ndarray
         spike_depths : np.ndarray
-        spike_clusters : np.ndarray
+        spike_templates : np.ndarray
             Filtered copies (views when no filtering is needed) of the
             corresponding instance arrays.
         """
@@ -96,7 +96,7 @@ class DataLoader:
         spike_times = self._spike_times
         spike_amplitudes = self._spike_amplitudes
         spike_depths = self._spike_depths
-        spike_clusters = self._spike_clusters
+        spike_templates = self._spike_templates
 
         keep_bool_mask = None
 
@@ -104,11 +104,11 @@ class DataLoader:
         if exclude_noise:
             if isinstance(self.path_or_analyzer, si.SortingAnalyzer):
                 keep_bool_mask = ~analyzer_helpers.get_noise_mask(
-                    exclude_noise, spike_clusters, self.path_or_analyzer
+                    exclude_noise, spike_templates, self.path_or_analyzer
                 )
             else:
                 keep_bool_mask = ~kilosort_helpers.get_noise_mask(
-                    spike_clusters, self.path_or_analyzer
+                    spike_templates, self.path_or_analyzer
                 )
 
         # Next, filter spikes based on amplitude
@@ -133,7 +133,7 @@ class DataLoader:
             spike_times = spike_times[keep_bool_mask]
             spike_amplitudes = spike_amplitudes[keep_bool_mask]
             spike_depths = spike_depths[keep_bool_mask]
-            spike_clusters = spike_clusters[keep_bool_mask]
+            spike_templates = spike_templates[keep_bool_mask]
 
         if decimate:
             num_spikes = spike_times.size
@@ -147,15 +147,17 @@ class DataLoader:
                 spike_times = spike_times[::decimation_factor]
                 spike_amplitudes = spike_amplitudes[::decimation_factor]
                 spike_depths = spike_depths[::decimation_factor]
-                spike_clusters = spike_clusters[::decimation_factor]
+                spike_templates = spike_templates[::decimation_factor]
 
-                print(f"Decimated {num_spikes} spikes down to {spike_times.size} with factor {decimation_factor}.")
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.info(f"Decimated {num_spikes} spikes down to {spike_times.size} with factor {decimation_factor}.")
 
         return DataModel(
             spike_times,
             spike_amplitudes,
             spike_depths,
-            spike_clusters,
+            spike_templates,
             self.templates,
             self.channel_locations,
         )

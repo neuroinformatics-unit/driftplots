@@ -10,14 +10,14 @@ class DataModel:
         spike_times,
         spike_amplitudes,
         spike_depths,
-        spike_clusters,
+        spike_templates,
         templates,
         channel_locations,
     ):
         self.spike_times = spike_times
         self.spike_depths = spike_depths
         self.spike_amplitudes = spike_amplitudes
-        self.spike_clusters = spike_clusters
+        self.spike_templates = spike_templates
         self.templates = templates
         self.channel_locations = channel_locations
 
@@ -25,12 +25,12 @@ class DataModel:
         return self.spike_times, self.spike_depths, self.spike_amplitudes
 
     def get_template_id(self, spike_idx):
-        return self.spike_clusters[spike_idx]
+        return self.spike_templates[spike_idx]
 
     def get_template_heatmap(self, spike_index, view_mode):
         """ """
         # Extract the template for this spike
-        template_idx = self.spike_clusters[spike_index]
+        template_idx = self.spike_templates[spike_index]
         template = self.templates[template_idx, :, :]
         mid_idx = int(template.shape[0] / 2)
 
@@ -66,11 +66,7 @@ class DataModel:
 
         valid_pos = chan_x_locs[np.abs(chan_x_locs - max_signal_x_loc) < COL_CUTOFF_UM]
 
-        shank_select = np.zeros(self.channel_locations.shape[0], dtype=bool)
-        for pos in valid_pos:
-            shank_select = np.logical_or(
-                shank_select, self.channel_locations[:, 0] == pos
-            )
+        shank_select = np.isin(self.channel_locations[:, 0], valid_pos)
 
         # Often the contact positions are not organised contiguous
         # along the y-dimension and need resorting
@@ -94,7 +90,6 @@ class DataModel:
 
         return template
 
-    # TODO: CHECK THIS
     def compute_amplitude_colors(
         self, amplitude_cmap_scaling, n_color_bins, unit_normalise=False
     ):
@@ -126,12 +121,12 @@ class DataModel:
 
             amp_min, amp_max = amp_values.min(), amp_values.max()
 
-        color_bins = np.linspace(amp_min, amp_max, n_color_bins)
+        color_bins = np.linspace(amp_min, amp_max, n_color_bins + 1)
         gray_colors = plt.get_cmap("gray")(np.linspace(0, 1, n_color_bins))[::-1]
         bin_indices = np.clip(
             np.searchsorted(color_bins, amp_values, side="right") - 1,
             0,
-            n_color_bins - 2,
+            n_color_bins - 1,
         )
 
         colors = gray_colors[bin_indices]
@@ -175,17 +170,20 @@ class DataModel:
         bins = np.arange(
             self.spike_depths.min() - bin_um, self.spike_depths.max() + bin_um, bin_um
         )
-        values, bins = np.histogram(self.spike_depths, bins=bins)
         bin_centers = (bins[:-1] + bins[1:]) / 2
 
         if weight_histogram_by_amplitude:
-            bin_indices = np.digitize(self.spike_depths, bins, right=True) - 1
-            values = np.zeros(bin_indices.max() + 1, dtype=np.float64)
-
+            # scale to [0, 1]
             scaled_spike_amplitudes = (
                 spike_amplitudes - spike_amplitudes.min()
             ) / np.ptp(spike_amplitudes)
 
-            np.add.at(values, bin_indices, scaled_spike_amplitudes)
+            values, _ = np.histogram(
+                self.spike_depths,
+                bins=bins,
+                weights=scaled_spike_amplitudes,
+            )
+        else:
+            values, bins = np.histogram(self.spike_depths, bins=bins)
 
         return bin_centers, values

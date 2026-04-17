@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, TYPE_CHECKING
+from typing import Any
 
 import numpy as np
 import pyqtgraph as pg
@@ -245,14 +245,6 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
 
     # UI
     # ----------------------------------------------------------------------------------
-
-    def _connect_signals(self) -> None:
-        """Wire up Qt signal/slot connections."""
-        self.ymin_spin.valueChanged.connect(self.handle_y_spinbox_min)
-        self.ymax_spin.valueChanged.connect(self.handle_y_spinbox_max)
-        self._fix_limits_cb.toggled.connect(self.handle_fix_ylim_cb)
-        self.scatter.sigClicked.connect(self.handle_click)
-        self._view_radio_group.idToggled.connect(self.handle_view_radio_toggled)
 
     def _init_ui(self) -> tuple[pg.GraphicsLayoutWidget, pg.GraphicsLayoutWidget]:
         """Build the widget layout: splitter, controls bar, radio buttons, spinboxes.
