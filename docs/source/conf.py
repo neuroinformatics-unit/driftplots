@@ -13,7 +13,7 @@ from importlib.metadata import version as get_version
 
 # Used when building API docs, put the dependencies
 # of any class you are documenting here
-autodoc_mock_imports = []
+autodoc_mock_imports = ["pyqtgraph", "PySide6"]
 
 # Add the module path to sys.path here.
 # If the directory is relative to the documentation root,
@@ -87,6 +87,10 @@ exclude_patterns = [
     # https://github.com/sphinx-doc/sphinx/issues/1965#issuecomment-124732907
     "**/includes/**",
 ]
+
+# GitHub blob pages render line-number anchors via JavaScript, so linkcheck
+# cannot verify them. Skip anchor checking for all GitHub URLs.
+linkcheck_anchors_ignore_for_url = [r"https://github\.com/.*"]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
