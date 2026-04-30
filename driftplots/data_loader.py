@@ -1,0 +1,169 @@
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Callable
+
+import numpy as np
+import spikeinterface as si
+
+from driftplots.data_model import DataModel
+from driftplots.extractors import (
+    analyzer_helpers,
+    kilosort1_3,
+    kilosort4,
+    kilosort_helpers,
+)
+
+
+class DataLoader:
+    """"""
+
+    def __init__(self, path_or_analyzer: Path | si.SortingAnalyzer) -> None:
+        """ """
+
+        # Get the data loading function depending on if
+        # we are analyzer or kilosort output
+        func: Callable
+        if isinstance(path_or_analyzer, si.SortingAnalyzer):
+            self.path_or_analyzer = path_or_analyzer
+            func = analyzer_helpers.get_sorting_analyzer
+        else:
+            self.path_or_analyzer = Path(path_or_analyzer)
+            ks_version = kilosort_helpers.get_ks_version(self.path_or_analyzer)
+            func = (
+                kilosort4.get_spikes_info_ks4
+                if ks_version == "kilosort4"
+                else kilosort1_3.get_spikes_info_ks1_3
+            )
+
+        # Load the required data and check sizes match (one entry per spike)
+        (
+            self._spike_times,
+            self._spike_amplitudes,
+            self._spike_depths,
+            self._spike_templates,
+            self.templates,
+            self.channel_locations,
+        ) = func(self.path_or_analyzer)
+
+        assert (
+            self._spike_times.size
+            == self._spike_amplitudes.size
+            == self._spike_depths.size
+            == self._spike_templates.size
+        )
+        assert self.channel_locations.shape[0] > self.channel_locations.shape[1]
+
+        self._spike_times.flags.writeable = False
+        self._spike_amplitudes.flags.writeable = False
+        self._spike_depths.flags.writeable = False
+        self._spike_templates.flags.writeable = False
+        self.templates.flags.writeable = False
+        self.channel_locations.flags.writeable = False
+
+    def get_processed_data(
+        self, exclude_noise, decimate, filter_amplitude_mode, filter_amplitude_values
+    ):
+        """Filter and subsample the loaded spike data.
+
+        Operations are applied in order: decimation → noise exclusion →
+        amplitude filtering → masking. Decimation is applied first as a
+        performance knob to thin the full dataset before further filtering.
+
+        Parameters
+        ----------
+        exclude_noise :
+            If ``True``, spikes belonging to clusters labelled "noise" in
+            the Kilosort cluster groups file are removed.
+        decimate : int | False
+            Keep every *n*-th spike. Applied first to reduce the dataset
+            before noise/amplitude filters. ``False`` disables decimation.
+        filter_amplitude_mode : {"percentile", "absolute"} | None
+            How ``filter_amplitude_values`` is interpreted.
+            ``None`` disables amplitude filtering.
+        filter_amplitude_values : tuple of float
+            (low, high) bounds. Interpreted as percentile ranks or
+            absolute amplitude values depending on ``filter_amplitude_mode``.
+
+        Returns
+        -------
+        spike_times : np.ndarray
+        spike_amplitudes : np.ndarray
+        spike_depths : np.ndarray
+        spike_templates : np.ndarray
+            Filtered copies (views when no filtering is needed) of the
+            corresponding instance arrays.
+        """
+        # Select a view for now, this may be copied depending on options (e.g. decimate)
+        spike_times = self._spike_times
+        spike_amplitudes = self._spike_amplitudes
+        spike_depths = self._spike_depths
+        spike_templates = self._spike_templates
+
+        keep_bool_mask = None
+
+        # First, exclude spikes from units labeled as "noise"
+        if exclude_noise:
+            if isinstance(self.path_or_analyzer, si.SortingAnalyzer):
+                keep_bool_mask = ~analyzer_helpers.get_noise_mask(
+                    exclude_noise, spike_templates, self.path_or_analyzer
+                )
+            else:
+                keep_bool_mask = ~kilosort_helpers.get_noise_mask(
+                    spike_templates, self.path_or_analyzer
+                )
+
+        # Next, filter spikes based on amplitude
+        if filter_amplitude_mode is not None:
+            assert filter_amplitude_mode in ["percentile", "absolute"]
+
+            if filter_amplitude_mode == "percentile":
+                min_val, max_val = np.percentile(
+                    spike_amplitudes, filter_amplitude_values
+                )
+            else:
+                min_val, max_val = filter_amplitude_values
+
+            if keep_bool_mask is None:
+                keep_bool_mask = np.ones(spike_amplitudes.size, dtype=bool)
+
+            keep_bool_mask[spike_amplitudes < min_val] = False
+            keep_bool_mask[spike_amplitudes > max_val] = False
+
+        # mask exclude_noise / filtered amplitudes
+        if keep_bool_mask is not None:
+            spike_times = spike_times[keep_bool_mask]
+            spike_amplitudes = spike_amplitudes[keep_bool_mask]
+            spike_depths = spike_depths[keep_bool_mask]
+            spike_templates = spike_templates[keep_bool_mask]
+
+        if decimate:
+            num_spikes = spike_times.size
+            if decimate == "estimate":
+                ideal_num_spikes = 100_000
+                decimation_factor = int(num_spikes // ideal_num_spikes)
+            else:
+                decimation_factor = int(decimate)
+
+            if decimation_factor > 1:
+                spike_times = spike_times[::decimation_factor]
+                spike_amplitudes = spike_amplitudes[::decimation_factor]
+                spike_depths = spike_depths[::decimation_factor]
+                spike_templates = spike_templates[::decimation_factor]
+
+                import logging
+
+                logger = logging.getLogger(__name__)
+                logger.info(
+                    f"Decimated {num_spikes} spikes down to "
+                    f"{spike_times.size} with factor {decimation_factor}."
+                )
+
+        return DataModel(
+            spike_times,
+            spike_amplitudes,
+            spike_depths,
+            spike_templates,
+            self.templates,
+            self.channel_locations,
+        )

@@ -1,9 +1,11 @@
--e . # required to build API docs
+-e .
 linkify-it-py
 myst-parser
 nbsphinx
+numpydoc
 pydata-sphinx-theme
-setuptools-scm
+setuptools_scm
 sphinx
-sphinx-autodoc-typehints
-sphinx-sitemap
+sphinx-design
+sphinx_autodoc_typehints
+sphinx_sitemap

@@ -1,9 +1,9 @@
 [project]
-name = "driftmap_viewer"
+name = "driftplots"
 authors = [{name = "Joseph Ziminski", email= "joseph.j.ziminski@gmail.com"}]
 description = "Interactive visualise kilosort drift maps for checking inter-session alignment."
 readme = "README.md"
-requires-python = ">=3.11.0"
+requires-python = ">=3.10.0"
 dynamic = ["version"]
 
 dependencies = [
@@ -11,7 +11,9 @@ dependencies = [
     "scipy",
     "numpy",
     "pandas",
-    "spikeinterface"
+    "spikeinterface",
+    "pyqtgraph",
+    "PySide6" # TODO: let user install own?
 ]
 
 license = "MIT"
@@ -53,12 +55,12 @@ build-backend = "setuptools.build_meta"
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["driftmap_viewer*"]
+include = ["driftplots*"]
 exclude = ["tests", "docs*"]
 
 
 [tool.pytest.ini_options]
-addopts = "--cov=driftmap_viewer"
+addopts = "--cov=driftplots"
 filterwarnings = [
     "error",
 ]

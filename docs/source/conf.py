@@ -20,7 +20,7 @@ autodoc_mock_imports = []
 # use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath("../.."))
 
-project = "driftmap_viewer"
+project = "driftplots"
 copyright = "2022, Joseph Ziminski"
 author = "Joseph Ziminski"
 try:
@@ -46,6 +46,7 @@ extensions = [
     "sphinx_sitemap",
     "myst_parser",
     "nbsphinx",
+    "sphinx_design",
 ]
 
 # Configure the myst parser to enable cool markdown features
@@ -64,6 +65,8 @@ myst_enable_extensions = [
     "strikethrough",
     "substitution",
     "tasklist",
+    "attrs_block",
+    "attrs_inline",
 ]
 # Automatically add anchors to markdown headings
 myst_heading_anchors = 3
@@ -88,7 +91,7 @@ exclude_patterns = [
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 html_theme = "pydata_sphinx_theme"
-html_title = "driftmap_viewer"
+html_title = "driftplots"
 
 # Customize the theme
 html_theme_options = {
@@ -122,4 +125,10 @@ sitemap_url_scheme = "{link}"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ['_static']
+html_static_path = ['_static']
+
+html_css_files = [
+    'css/custom.css',
+]
+
+html_show_sourcelink = False

@@ -1,0 +1,22 @@
+{
+    "info": {
+        "class": "spikeinterface.postprocessing.spike_locations.ComputeSpikeLocations",
+        "module": "spikeinterface",
+        "version": "0.103.3"
+    },
+    "params": {
+        "method": "center_of_mass",
+        "method_kwargs": {},
+        "ms_after": 0.5,
+        "ms_before": 0.5,
+        "spike_retriver_kwargs": {
+            "channel_from_template": true,
+            "peak_sign": "neg",
+            "radius_um": 50
+        }
+    },
+    "run_info": {
+        "run_completed": true,
+        "runtime_s": 4.579255299991928
+    }
+}
