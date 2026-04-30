@@ -8,8 +8,6 @@ if TYPE_CHECKING:
 import numpy as np
 from spikeinterface.core import read_python
 
-from driftplots.extractors import kilosort_helpers
-
 
 def compute_spike_amplitudes(
     templates: np.ndarray,

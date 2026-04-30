@@ -16,7 +16,7 @@ def plot_matplotlib(
     point_size: float,
     add_histogram_plot: bool,
     weight_histogram_by_amplitude: bool,
-    title: bool | str = None,
+    title: bool | str | None = None,
 ) -> Figure:
     """Render a static matplotlib drift-map figure from pre-processed data.
 

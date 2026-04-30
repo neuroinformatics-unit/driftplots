@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 
 from driftplots.amplitudes import get_amplitudes
 
@@ -15,7 +14,9 @@ class TestGetAmplitudes:
         assert isinstance(result[0], np.ndarray)
         np.testing.assert_array_almost_equal(result[0], expected)
 
-    def test_single_session_values_match_expected(self, synthetic_ks4_output, synthetic_data):
+    def test_single_session_values_match_expected(
+        self, synthetic_ks4_output, synthetic_data
+    ):
         """Single-session amplitudes must match ground-truth spike amplitudes."""
         result = get_amplitudes([synthetic_ks4_output], concatenate=True)
         expected = synthetic_data["spike_amplitudes"]
@@ -23,7 +24,9 @@ class TestGetAmplitudes:
 
         np.testing.assert_array_almost_equal(result, expected)
 
-    def test_two_sessions_list(self, synthetic_ks4_output, synthetic_ks4_output_second, synthetic_data):
+    def test_two_sessions_list(
+        self, synthetic_ks4_output, synthetic_ks4_output_second, synthetic_data
+    ):
         """Two sessions should return a list of two distinct arrays."""
         result = get_amplitudes([synthetic_ks4_output, synthetic_ks4_output_second])
         assert len(result) == 2
@@ -36,10 +39,13 @@ class TestGetAmplitudes:
         # The two sessions have different amplitude jitter — values must differ
         assert not np.array_equal(result[0], result[1])
 
-    def test_two_sessions_concatenated(self, synthetic_ks4_output, synthetic_ks4_output_second, synthetic_data):
+    def test_two_sessions_concatenated(
+        self, synthetic_ks4_output, synthetic_ks4_output_second, synthetic_data
+    ):
         """Concatenated output should be [session1, session2] in order."""
         result = get_amplitudes(
-            [synthetic_ks4_output, synthetic_ks4_output_second], concatenate=True,
+            [synthetic_ks4_output, synthetic_ks4_output_second],
+            concatenate=True,
         )
         expected_1 = synthetic_data["spike_amplitudes"]
         expected_2 = synthetic_data["spike_amplitudes_second"]
@@ -54,10 +60,12 @@ class TestGetAmplitudes:
         """exclude_noise=True should remove noise spikes from both sessions."""
         result = get_amplitudes(
             [synthetic_ks4_output, synthetic_ks4_output_second],
-            exclude_noise=True, concatenate=True,
+            exclude_noise=True,
+            concatenate=True,
         )
         full = get_amplitudes(
             [synthetic_ks4_output, synthetic_ks4_output_second],
-            exclude_noise=False, concatenate=True,
+            exclude_noise=False,
+            concatenate=True,
         )
         assert result.size < full.size

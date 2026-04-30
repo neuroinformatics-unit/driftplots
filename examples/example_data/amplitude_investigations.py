@@ -43,7 +43,7 @@ if True:
 analyzer = si.load_sorting_analyzer(folder=base_path / "analyzer.zarr", format="zarr")
 
 # SI
-import numpy as np
+import numpy as np  # noqa: E402
 
 amplitudes_si = np.abs(analyzer.get_extension("spike_amplitudes").data["amplitudes"])
 
@@ -99,8 +99,8 @@ kilosort_method_wavs = np.max(np.max(unwhite_waveforms, axis=1), axis=1)
 # compare
 
 
-import matplotlib.pyplot as plt
-import numpy as np
+import matplotlib.pyplot as plt  # noqa: E402
+import numpy as np  # noqa: E402
 
 # Flatten in case some arrays are shaped (n, 1)
 amps = {

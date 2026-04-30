@@ -46,8 +46,10 @@ class TestComputeAmplitudeColors:
     def processed(self, synthetic_ks4_output):
         plotter = DriftPlotter(synthetic_ks4_output)
         return plotter.data_loader.get_processed_data(
-            exclude_noise=False, decimate=False,
-            filter_amplitude_mode=None, filter_amplitude_values=(),
+            exclude_noise=False,
+            decimate=False,
+            filter_amplitude_mode=None,
+            filter_amplitude_values=(),
         )
 
     @pytest.mark.parametrize("scaling", SCALINGS)
@@ -64,7 +66,9 @@ class TestComputeAmplitudeColors:
     @pytest.mark.parametrize("scaling", SCALINGS)
     def test_colors_match_ground_truth_unit_normalised(self, processed, scaling):
         """unit_normalise=True returns float RGBA in [0, 1]."""
-        result = processed.compute_amplitude_colors(scaling, N_BINS, unit_normalise=True)
+        result = processed.compute_amplitude_colors(
+            scaling, N_BINS, unit_normalise=True
+        )
         expected = _expected_colors(processed.spike_amplitudes, scaling, N_BINS, True)
 
         assert result.dtype == np.float64

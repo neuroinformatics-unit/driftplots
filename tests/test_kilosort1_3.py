@@ -68,9 +68,12 @@ def ks13_data(tmp_path):
 
 def _load_data_model(sorter_output) -> DataModel:
     return DataLoader(sorter_output).get_processed_data(
-        exclude_noise=False, decimate=False,
-        filter_amplitude_mode=None, filter_amplitude_values=None,
+        exclude_noise=False,
+        decimate=False,
+        filter_amplitude_mode=None,
+        filter_amplitude_values=None,
     )
+
 
 def _write_ks13_sorter_output(sorter_output, data) -> None:
     """Write the synthetic KS1-3 data to disk in sorter-output format."""
@@ -115,17 +118,13 @@ def _build_whitened_templates(template_samples: int, num_channels: int) -> np.nd
     templates = np.zeros((2, template_samples, num_channels), dtype=np.float64)
     mid = template_samples // 2
 
-    waveform_0 = np.array(
-        [-2.0, -6.0, -3.0, 1.0, 5.0, 11.0, 4.0], dtype=np.float64
-    )
-    templates[0, mid - 3: mid + 4, 1] = waveform_0
-    templates[0, mid - 3: mid + 4, 2] = 0.6 * waveform_0
+    waveform_0 = np.array([-2.0, -6.0, -3.0, 1.0, 5.0, 11.0, 4.0], dtype=np.float64)
+    templates[0, mid - 3 : mid + 4, 1] = waveform_0
+    templates[0, mid - 3 : mid + 4, 2] = 0.6 * waveform_0
 
-    waveform_1 = np.array(
-        [4.0, 9.0, 3.0, -2.0, -7.0, -10.0, -5.0], dtype=np.float64
-    )
-    templates[1, mid - 3: mid + 4, 0] = waveform_1
-    templates[1, mid - 3: mid + 4, 3] = 0.4 * waveform_1
+    waveform_1 = np.array([4.0, 9.0, 3.0, -2.0, -7.0, -10.0, -5.0], dtype=np.float64)
+    templates[1, mid - 3 : mid + 4, 0] = waveform_1
+    templates[1, mid - 3 : mid + 4, 3] = 0.4 * waveform_1
 
     return templates
 
@@ -146,12 +145,13 @@ def _build_whitening_mat_inv():
         dtype=np.float64,
     )
 
+
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
 
-class TestKilosort1_3:
 
+class TestKilosort1_3:
     def test_spike_depth_from_pc_centre_of_mass(self, ks13_data):
         """Spike depths should match the fixture's weighted depth centres of mass."""
         data_model = _load_data_model(ks13_data["sorter_output"])
@@ -178,7 +178,10 @@ class TestKilosort1_3:
 
         per_channel = np.max(unwhitened, axis=1) - np.min(unwhitened, axis=1)
         template_amplitudes = np.max(per_channel, axis=1)
-        expected = template_amplitudes[ks13_data["spike_template_ids"]] * ks13_data["spike_scaling_amplitudes"]
+        expected = (
+            template_amplitudes[ks13_data["spike_template_ids"]]
+            * ks13_data["spike_scaling_amplitudes"]
+        )
 
         np.testing.assert_allclose(data_model.spike_amplitudes, expected)
 
@@ -190,7 +193,8 @@ class TestKilosort1_3:
         np.testing.assert_allclose(data_model.spike_times, expected)
 
     def test_heatmap_from_data_model(self, ks13_data):
-        """Heatmap should contain the whitened template values for channels with signal."""
+        """Heatmap should contain the whitened template values for channels with
+        signal."""
         data_model = _load_data_model(ks13_data["sorter_output"])
 
         for spike_index in range(data_model.spike_times.size):

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path
 from typing import Callable
 
@@ -150,8 +152,12 @@ class DataLoader:
                 spike_templates = spike_templates[::decimation_factor]
 
                 import logging
+
                 logger = logging.getLogger(__name__)
-                logger.info(f"Decimated {num_spikes} spikes down to {spike_times.size} with factor {decimation_factor}.")
+                logger.info(
+                    f"Decimated {num_spikes} spikes down to "
+                    f"{spike_times.size} with factor {decimation_factor}."
+                )
 
         return DataModel(
             spike_times,

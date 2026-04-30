@@ -128,9 +128,7 @@ def ks13_data_model(tmp_path):
     np.save(tmp_path / "pc_feature_ind.npy", pc_feature_ind)
 
     # cluster_group.tsv — single cluster, labelled "good"
-    (tmp_path / "cluster_group.tsv").write_text(
-        "cluster_id\tKSLabel\n0\tgood\n"
-    )
+    (tmp_path / "cluster_group.tsv").write_text("cluster_id\tKSLabel\n0\tgood\n")
 
     # KS version detection — any kilosort*.log that isn't kilosort4.log
     (tmp_path / "kilosort3.log").write_text("")

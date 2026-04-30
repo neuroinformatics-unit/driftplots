@@ -23,7 +23,7 @@ class DriftmapPlotWidget(QtWidgets.QWidget):
         amplitude_cmap_scaling: str | tuple[float, float] = "linear",
         n_color_bins: int = 20,
         point_size: float = 5.0,
-        title: bool | str = None
+        title: bool | str | None = None,
     ) -> None:
         super().__init__()
 

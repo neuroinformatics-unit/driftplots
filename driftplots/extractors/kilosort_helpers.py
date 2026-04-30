@@ -100,4 +100,3 @@ def get_ks_version(sorter_path: Path) -> str:
     assert len(log_file) == 1
 
     return Path(log_file[0]).name.split(".")[0]
-

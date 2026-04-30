@@ -85,19 +85,16 @@ def _generate_positions_and_templates(rng):
 
     # Cluster definitions: (shank_indices, shank_y, peak_depth, amplitude)
     cluster_defs = [
-        (shank0_idx, shank0_y, 2.0, 5.0),   # cluster 0 — noise, moderate amp
-        (shank0_idx, shank0_y, 5.0, 10.0),   # cluster 1 — shank 0
-        (shank1_idx, shank1_y, 7.0, 15.0),   # cluster 2 — shank 1
+        (shank0_idx, shank0_y, 2.0, 5.0),  # cluster 0 — noise, moderate amp
+        (shank0_idx, shank0_y, 5.0, 10.0),  # cluster 1 — shank 0
+        (shank1_idx, shank1_y, 7.0, 15.0),  # cluster 2 — shank 1
     ]
 
-    templates = rng.standard_normal(
-        (NUM_CLUSTERS, TEMPLATE_SAMPLES, 40)
-    ).astype(np.float32) * 0.01
-    expected_heatmaps = {}
-
-    for cluster_id, (shank_idx, shank_y, peak_y, amplitude) in enumerate(
-        cluster_defs
-    ):
+    templates = (
+        rng.standard_normal((NUM_CLUSTERS, TEMPLATE_SAMPLES, 40)).astype(np.float32)
+        * 0.01
+    )
+    for cluster_id, (shank_idx, shank_y, peak_y, amplitude) in enumerate(cluster_defs):
         # Spatial profile: Gaussian decay in depth from peak
         spatial = amplitude * np.exp(-((shank_y - peak_y) ** 2) / (2 * 2.0**2))
 
@@ -135,8 +132,7 @@ def synthetic_data():
     # Derive peak channels from templates (channel with max abs signal)
     mid_t = templates.shape[1] // 2
     peak_channels = [
-        int(np.argmax(np.abs(templates[c, mid_t, :])))
-        for c in range(num_clusters)
+        int(np.argmax(np.abs(templates[c, mid_t, :]))) for c in range(num_clusters)
     ]
 
     # Whiten the templates
@@ -147,9 +143,7 @@ def synthetic_data():
 
     # Build expected heatmaps from whitened templates (what KS4 stores on
     # disk and what DataModel.get_template_heatmap operates on).
-    expected_heatmaps = _build_expected_heatmaps(
-        whitened_templates, channel_locations
-    )
+    expected_heatmaps = _build_expected_heatmaps(whitened_templates, channel_locations)
 
     spike_templates = np.array(
         [i % num_clusters for i in range(NUM_SPIKES)], dtype=np.int32
@@ -159,10 +153,9 @@ def synthetic_data():
     spike_times_samples = np.rint(spike_times * SAMPLE_RATE).astype(np.int64)
     spike_times = spike_times_samples / SAMPLE_RATE
 
-    spike_depths = (
-        channel_locations[np.array(peak_channels)[spike_templates], 1]
-        + rng.uniform(-0.1, 0.1, NUM_SPIKES)
-    )
+    spike_depths = channel_locations[
+        np.array(peak_channels)[spike_templates], 1
+    ] + rng.uniform(-0.1, 0.1, NUM_SPIKES)
 
     # Per-spike template-scaling factors (what KS4 saves in amplitudes.npy).
     # Jittered around 1.0 so each spike differs from its template.
@@ -176,8 +169,12 @@ def synthetic_data():
     )
     template_max_peaks = np.max(template_ptp, axis=1)
 
-    spike_amplitudes = template_max_peaks[spike_templates] * scaling_factors_first_session
-    spike_amplitudes_second = template_max_peaks[spike_templates] * scaling_factors_second_session
+    spike_amplitudes = (
+        template_max_peaks[spike_templates] * scaling_factors_first_session
+    )
+    spike_amplitudes_second = (
+        template_max_peaks[spike_templates] * scaling_factors_second_session
+    )
 
     return {
         "spike_times": spike_times,
@@ -217,10 +214,12 @@ def _write_ks4_output(out, data, scaling_factors_first_session_key):
         f"n_channels_dat = {data['channel_locations'].shape[0]}\n"
     )
 
-    spike_positions = np.column_stack([
-        np.zeros(data["spike_depths"].size),
-        data["spike_depths"],
-    ])
+    spike_positions = np.column_stack(
+        [
+            np.zeros(data["spike_depths"].size),
+            data["spike_depths"],
+        ]
+    )
     np.save(out / "spike_positions.npy", spike_positions)
     np.save(out / "amplitudes.npy", data[scaling_factors_first_session_key])
 
@@ -311,4 +310,3 @@ def _make_whitening_matrix(rng, n_channels):
     whitening_mat_inv = chol.T
 
     return whitening_mat, whitening_mat_inv
-

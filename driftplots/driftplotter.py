@@ -4,11 +4,11 @@ from pathlib import Path
 from typing import Literal
 
 from matplotlib.figure import Figure
+from pyqtgraph.Qt import QtWidgets
 
 from driftplots import mpl_plotting
 from driftplots.data_loader import DataLoader
 from driftplots.interactive.driftmap_plot_widget import DriftmapPlotWidget
-from pyqtgraph.Qt import QtWidgets
 
 # test ideas:
 # check signatures match default args between interactive and matplotlib
@@ -69,7 +69,7 @@ class DriftPlotter:
         point_size: float = 5.0,
         filter_amplitude_mode: str | None = None,
         filter_amplitude_values: tuple[float, ...] = (),
-        title: bool | str = None,
+        title: bool | str | None = None,
     ) -> DriftmapPlotWidget:
         """Create an interactive pyqtgraph-based drift map widget.
 
@@ -129,7 +129,7 @@ class DriftPlotter:
         filter_amplitude_values: tuple[float, ...] = (),
         add_histogram_plot: bool = False,
         weight_histogram_by_amplitude: bool = False,
-        title: bool | str = None,
+        title: bool | str | None = None,
     ) -> Figure:
         """"""
         processed_data = self.data_loader.get_processed_data(
@@ -143,7 +143,7 @@ class DriftPlotter:
             point_size,
             add_histogram_plot,
             weight_histogram_by_amplitude,
-            title=title
+            title=title,
         )
 
         return fig

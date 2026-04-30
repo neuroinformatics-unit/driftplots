@@ -2,8 +2,8 @@
 
 # driftplots
 
-`driftplots` is a tool for visualising and saving drift maps from 
-Kilosort or SpikeInterface. It can be used to assess data quality through 
+`driftplots` is a tool for visualising and saving drift maps from
+Kilosort or SpikeInterface. It can be used to assess data quality through
 static matplotlib figures or an interactive viewer:
 
 ```{image} /_static/driftmap-viewer.gif
@@ -13,10 +13,10 @@ static matplotlib figures or an interactive viewer:
 
 <br>
 
-Interactive mode can be used to check alignment between recording 
+Interactive mode can be used to check alignment between recording
 sessions before inter-session matching e.g. with UnitMatch. In the above example,
-it is clear the recordings (chronically recorded Neuropixel sessions with a gap 
-between them of 2 hours) are well aligned, as the driftmap and templates 
+it is clear the recordings (chronically recorded Neuropixel sessions with a gap
+between them of 2 hours) are well aligned, as the driftmap and templates
 look similar across the recording depth.
 
 Matplotlib mode can also be used to get an overview of the data quality

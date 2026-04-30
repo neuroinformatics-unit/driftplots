@@ -1,6 +1,6 @@
 import numpy as np
-import pytest
 import pyqtgraph as pg
+import pytest
 
 from driftplots.driftplotter import DriftPlotter
 
@@ -22,18 +22,26 @@ class TestScatterData:
     def test_spike_times_match_synthetic(self, widget_and_data):
         widget, data = widget_and_data
         np.testing.assert_array_equal(widget.scatter.data["x"], data["spike_times"])
-        np.testing.assert_array_equal(widget.processed_data.spike_times, data["spike_times"])
+        np.testing.assert_array_equal(
+            widget.processed_data.spike_times, data["spike_times"]
+        )
 
     def test_spike_depths_match_synthetic(self, widget_and_data):
         widget, data = widget_and_data
-        np.testing.assert_array_almost_equal(widget.scatter.data["y"], data["spike_depths"])
-        np.testing.assert_array_almost_equal(widget.processed_data.spike_depths, data["spike_depths"])
+        np.testing.assert_array_almost_equal(
+            widget.scatter.data["y"], data["spike_depths"]
+        )
+        np.testing.assert_array_almost_equal(
+            widget.processed_data.spike_depths, data["spike_depths"]
+        )
 
     def test_scatter_data_field_stores_spike_index(self, widget_and_data):
         """Each scatter point's data field should be its spike index."""
         widget, _ = widget_and_data
         stored_indices = np.array([point.data() for point in widget.scatter.points()])
-        np.testing.assert_array_equal(stored_indices, np.arange(widget.processed_data.spike_times.size))
+        np.testing.assert_array_equal(
+            stored_indices, np.arange(widget.processed_data.spike_times.size)
+        )
 
 
 class TestConstructorParameters:
@@ -41,30 +49,52 @@ class TestConstructorParameters:
 
     def test_custom_point_size(self, synthetic_ks4_output):
         plotter = DriftPlotter(synthetic_ks4_output)
-        widget = plotter.drift_map_plot_interactive(decimate=False, exclude_noise=False, point_size=12.0)
+        widget = plotter.drift_map_plot_interactive(
+            decimate=False, exclude_noise=False, point_size=12.0
+        )
         assert widget.scatter.opts["size"] == 12.0
         widget.close()
 
-    @pytest.mark.parametrize("scaling, n_bins", [
-        ("linear", 20),
-        ("log2", 20),
-        ("log10", 20),
-        ((5.0, 15.0), 20),
-        ("linear", 10),
-    ])
-    def test_brush_colors_match_compute_amplitude_colors(self, synthetic_ks4_output, scaling, n_bins):
-        """Scatter brush RGBA should exactly match compute_amplitude_colors for every scaling/bins combo."""
+    @pytest.mark.parametrize(
+        "scaling, n_bins",
+        [
+            ("linear", 20),
+            ("log2", 20),
+            ("log10", 20),
+            ((5.0, 15.0), 20),
+            ("linear", 10),
+        ],
+    )
+    def test_brush_colors_match_compute_amplitude_colors(
+        self, synthetic_ks4_output, scaling, n_bins
+    ):
+        """Scatter brush RGBA should exactly match compute_amplitude_colors
+        for every scaling/bins combo."""
         plotter = DriftPlotter(synthetic_ks4_output)
-        widget = plotter.drift_map_plot_interactive(decimate=False, exclude_noise=False, amplitude_cmap_scaling=scaling, n_color_bins=n_bins)
-        expected_colors = widget.processed_data.compute_amplitude_colors(scaling, n_bins)
+        widget = plotter.drift_map_plot_interactive(
+            decimate=False,
+            exclude_noise=False,
+            amplitude_cmap_scaling=scaling,
+            n_color_bins=n_bins,
+        )
+        expected_colors = widget.processed_data.compute_amplitude_colors(
+            scaling, n_bins
+        )
         for i, point in enumerate(widget.scatter.points()):
             brush_color = point.brush().color()
-            assert (brush_color.red(), brush_color.green(), brush_color.blue(), brush_color.alpha()) == tuple(expected_colors[i])
+            assert (
+                brush_color.red(),
+                brush_color.green(),
+                brush_color.blue(),
+                brush_color.alpha(),
+            ) == tuple(expected_colors[i])
         widget.close()
 
     def test_title_set(self, synthetic_ks4_output):
         plotter = DriftPlotter(synthetic_ks4_output)
-        widget = plotter.drift_map_plot_interactive(decimate=False, exclude_noise=False, title="Test Title")
+        widget = plotter.drift_map_plot_interactive(
+            decimate=False, exclude_noise=False, title="Test Title"
+        )
         assert widget.p_scatter.titleLabel.text == "Test Title"
         widget.close()
 
@@ -149,7 +179,9 @@ class TestClickUpdatesPanel:
         template_id = data["spike_templates"][spike_idx]
         expected = data["expected_heatmaps"][template_id]
 
-        image_item = [item for item in widget.panel_plot.items if hasattr(item, "image")][0]
+        image_item = [
+            item for item in widget.panel_plot.items if hasattr(item, "image")
+        ][0]
         np.testing.assert_array_almost_equal(image_item.image, expected)
 
     @SPIKE_INDICES_PARAMETERISATION
@@ -168,7 +200,8 @@ class TestClickUpdatesPanel:
         assert widget.selected_spot is None
 
     def test_second_click_replaces_first(self, widget_and_data):
-        """Clicking a second spike should update selected_spot and reset the first pen."""
+        """Clicking a second spike should update selected_spot and reset the first
+        pen."""
         widget, _ = widget_and_data
         self._click_spike(widget, 0)
         first_spot = widget.selected_spot
@@ -186,15 +219,21 @@ class TestClickUpdatesPanel:
 
         # Switch to all_channels mode — has more channels (includes zeroed outer rows)
         widget.radio_heatmap_all.setChecked(True)
-        expected_all_chans = widget.processed_data.get_template_heatmap(0, "heatmap_all_channels")
-        image_item = [item for item in widget.panel_plot.items if hasattr(item, "image")][0]
+        expected_all_chans = widget.processed_data.get_template_heatmap(
+            0, "heatmap_all_channels"
+        )
+        image_item = [
+            item for item in widget.panel_plot.items if hasattr(item, "image")
+        ][0]
         np.testing.assert_array_equal(image_item.image, expected_all_chans)
 
         # Switch back to signal-only mode — fewer channels, compare against ground truth
         widget.radio_heatmap.setChecked(True)
         template_id = data["spike_templates"][0]
         expected_signal_chans = data["expected_heatmaps"][template_id]
-        image_item = [item for item in widget.panel_plot.items if hasattr(item, "image")][0]
+        image_item = [
+            item for item in widget.panel_plot.items if hasattr(item, "image")
+        ][0]
         np.testing.assert_array_almost_equal(image_item.image, expected_signal_chans)
 
         # The two modes must produce different shapes (outer rows are zero)
@@ -212,12 +251,15 @@ class TestClickUpdatesPanel:
         assert widget.panel_plot.getAxis("left").labelText == "channel"
 
     def test_fix_limits_applies_image_levels(self, widget_and_data):
-        """Enabling fix limits and setting spinboxes should apply levels to the image."""
+        """Enabling fix limits and setting spinboxes should apply levels to the
+        image."""
         widget, _ = widget_and_data
         self._click_spike(widget, 0)
 
         # Without fix_limits, levels span the full data range
-        image_item = [item for item in widget.panel_plot.items if hasattr(item, "image")][0]
+        image_item = [
+            item for item in widget.panel_plot.items if hasattr(item, "image")
+        ][0]
         full_min, full_max = image_item.levels
         assert full_min < full_max
 
@@ -227,7 +269,9 @@ class TestClickUpdatesPanel:
         widget.ymax_spin.setValue(1.0)
         self._click_spike(widget, 0)
 
-        image_item = [item for item in widget.panel_plot.items if hasattr(item, "image")][0]
+        image_item = [
+            item for item in widget.panel_plot.items if hasattr(item, "image")
+        ][0]
         assert image_item.levels[0] == pytest.approx(-1.0)
         assert image_item.levels[1] == pytest.approx(1.0)
         assert image_item.levels[1] < full_max

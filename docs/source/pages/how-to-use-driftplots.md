@@ -1,10 +1,10 @@
-# Using `driftplots` 
+# Using `driftplots`
 
-`driftplots` can be used to generate static [Matplotlib](https://matplotlib.org/) figures or an interactive viewer (built on Qt). 
-In the interactive viewer, clicking a spike will display the *template* (unscaled, whitened) for 
+`driftplots` can be used to generate static [Matplotlib](https://matplotlib.org/) figures or an interactive viewer (built on Qt).
+In the interactive viewer, clicking a spike will display the *template* (unscaled, whitened) for
 the template assigned to that spike.
 
-Below we will cover the main ways to use `driftplots`. 
+Below we will cover the main ways to use `driftplots`.
 See the [API Reference](/pages/api_index) for a full list of arguments.
 
 :::{note}
@@ -22,9 +22,9 @@ is used to assign the template for each spike. This follows Kilosort's original 
 template assignment and therefore will not reflect later merges or splits made in Phy.
 
 If passing a `SortingAnalyzer`, it is expected that the required extensions
-have already been computed. See 
-[this example](https://github.com/neuroinformatics-unit/driftplots/blob/e8ec328e14cc848feca3e7e90604501bb9e343f1/examples/example_data/create_analyzer.py#L1) 
-for the required extensions. Note that the number of spikes displayed will depend 
+have already been computed. See
+[this example](https://github.com/neuroinformatics-unit/driftplots/blob/e8ec328e14cc848feca3e7e90604501bb9e343f1/examples/example_data/create_analyzer.py#L1)
+for the required extensions. Note that the number of spikes displayed will depend
 on the argument set for `max_spikes_per_unit` used when computing `"random_spikes"`.
 
 By default, the number of spikes displayed will be decimated to around `100,000`.
@@ -36,8 +36,8 @@ By default, the number of spikes displayed will be decimated to around `100,000`
 
 ## Interactive Viewer
 
-{py:meth}`~driftplots.DriftPlotter.drift_map_plot_matplotlib` generates an interactive viewer 
-allowing selection of individual spikes on the driftmap. Once selected, the template for that 
+{py:meth}`~driftplots.DriftPlotter.drift_map_plot_matplotlib` generates an interactive viewer
+allowing selection of individual spikes on the driftmap. Once selected, the template for that
 spike will be displayed on the right-hand side.
 
 ```{image} /_static/interactive-single-example.png
@@ -61,15 +61,15 @@ driftmap.plot()
 ```
 
 The displayed templates are whitened and are not scaled per-spike  i.e. the template will
-appear the same for all spikes assigned to the same template. The template is whitened and is not 
+appear the same for all spikes assigned to the same template. The template is whitened and is not
 scaled to each individual spike. This approach was chosen for two main reasons:This is due to the difficulty of reconstructing individual waveforms from
 1) it is not always possible to reconstruct the waveforms or their amplitudes across kilosort versions (see [here](/pages/how-parameters-are-calculated))
 2) the main purpose of the interactive mode is to check that templates are identifiably similar
-across sessions, to ensure little drift has occured. This is easier with templates rather than noisier spike waveforms.
+across sessions, to ensure little drift has occurred. This is easier with templates rather than noisier spike waveforms.
 
 ### Interactive Viewer with Multiple Plots
 
-{py:class}`~driftplots.MultiSessionDriftmapWidget` can be used to display 
+{py:class}`~driftplots.MultiSessionDriftmapWidget` can be used to display
 multiple interactive plots at once. In this mode, the y-axis
 zoom is linked across plots.See [the amplitudes section](amplitudes) for details
 on how to ensure amplitude scaling is consistent across sessions.
@@ -118,7 +118,7 @@ but can additionally plot a 1D activity histogram next to the driftmap.
    :width: 750px
 ```
 
-See [this example](/pages/examples/creating-pdf) for how to stitch Matplotlib figures together across 
+See [this example](/pages/examples/creating-pdf) for how to stitch Matplotlib figures together across
 an experimental project to quickly assess recording quality and stability.
 
 ```python
@@ -150,7 +150,7 @@ This can be useful when a small number of high- or low-amplitude spikes dominate
 the color scaling, with a few very light/dark spots with the rest grey.
 
 As such it is useful to apply the same amplitude filtering and colormap
-scaling to all plots when comparing multiple sessions. {py:func}`~driftplots.get_amplitudes` 
+scaling to all plots when comparing multiple sessions. {py:func}`~driftplots.get_amplitudes`
 can be used to pool amplitudes across sessions, allowing cutoffs to be calculated
 across all sessions and applied to all plots.
 
@@ -194,4 +194,3 @@ multi = MultiSessionDriftmapWidget(panels)
 app.exec()
 
 ```
-

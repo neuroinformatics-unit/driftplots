@@ -8,8 +8,6 @@ if TYPE_CHECKING:
 import numpy as np
 from spikeinterface.core import read_python
 
-from driftplots.extractors import kilosort_helpers
-
 
 def get_spikes_info_ks1_3(
     sorter_output: str | Path,

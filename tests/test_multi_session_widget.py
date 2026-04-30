@@ -1,4 +1,3 @@
-import numpy as np
 import pytest
 from pyqtgraph.Qt import QtWidgets
 
@@ -17,13 +16,16 @@ def app():
 @pytest.fixture()
 def make_panels(synthetic_ks4_output):
     """Factory that creates N panels via the DriftPlotter API."""
+
     def _make(n):
         return [
             DriftPlotter(synthetic_ks4_output).drift_map_plot_interactive(
-                decimate=False, exclude_noise=False,
+                decimate=False,
+                exclude_noise=False,
             )
             for _ in range(n)
         ]
+
     return _make
 
 
@@ -38,17 +40,22 @@ class TestGridComputation:
         with pytest.raises(ValueError, match="expects 6 panels but got 4"):
             MultiSessionDriftmapWidget._compute_grid_dimensions(4, (2, 3))
 
-    @pytest.mark.parametrize("num_panels, expected", [
-        (1, (1, 1)),
-        (2, (1, 2)),
-        (3, (2, 2)),
-        (4, (2, 2)),
-        (5, (2, 3)),
-        (6, (2, 3)),
-        (9, (3, 3)),
-    ])
+    @pytest.mark.parametrize(
+        "num_panels, expected",
+        [
+            (1, (1, 1)),
+            (2, (1, 2)),
+            (3, (2, 2)),
+            (4, (2, 2)),
+            (5, (2, 3)),
+            (6, (2, 3)),
+            (9, (3, 3)),
+        ],
+    )
     def test_auto_grid(self, num_panels, expected):
-        rows, cols = MultiSessionDriftmapWidget._compute_grid_dimensions(num_panels, None)
+        rows, cols = MultiSessionDriftmapWidget._compute_grid_dimensions(
+            num_panels, None
+        )
         assert (rows, cols) == expected
         assert rows * cols >= num_panels
 
