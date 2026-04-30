@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 
 from driftplots.amplitudes import get_amplitudes
-from tests.test_unit.conftest import NUM_SPIKES
 
 
 class TestGetAmplitudes:
@@ -20,7 +19,7 @@ class TestGetAmplitudes:
         """Single-session amplitudes must match ground-truth spike amplitudes."""
         result = get_amplitudes([synthetic_ks4_output], concatenate=True)
         expected = synthetic_data["spike_amplitudes"]
-        assert result.size == NUM_SPIKES
+        assert result.size == synthetic_data["spike_times"].size
 
         np.testing.assert_array_almost_equal(result, expected)
 
@@ -46,9 +45,10 @@ class TestGetAmplitudes:
         expected_2 = synthetic_data["spike_amplitudes_second"]
 
         assert isinstance(result, np.ndarray)
-        assert result.size == NUM_SPIKES * 2
-        np.testing.assert_array_almost_equal(result[:NUM_SPIKES], expected_1)
-        np.testing.assert_array_almost_equal(result[NUM_SPIKES:], expected_2)
+        n = synthetic_data["spike_times"].size
+        assert result.size == n * 2
+        np.testing.assert_array_almost_equal(result[:n], expected_1)
+        np.testing.assert_array_almost_equal(result[n:], expected_2)
 
     def test_exclude_noise(self, synthetic_ks4_output, synthetic_ks4_output_second):
         """exclude_noise=True should remove noise spikes from both sessions."""

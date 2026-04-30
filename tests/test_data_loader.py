@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 
 from driftplots.data_loader import DataLoader
-from tests.test_unit.conftest import NOISE_CLUSTER_IDS
 
 pytestmark = pytest.mark.filterwarnings(
     "ignore::pytest.PytestUnraisableExceptionWarning",
@@ -173,14 +172,14 @@ class TestProcessedData:
 class TestExcludeNoise:
     """Test noise exclusion – template 0 is labelled noise in synthetic data."""
 
-    def test_noise_spikes_removed(self, synthetic_ks4_output):
+    def test_noise_spikes_removed(self, synthetic_ks4_output, synthetic_data):
         """Spikes from noise clusters should be excluded."""
         loader = DataLoader(synthetic_ks4_output)
         result = loader.get_processed_data(
             exclude_noise=True, decimate=False,
             filter_amplitude_mode=None, filter_amplitude_values=(),
         )
-        keep = ~np.isin(loader._spike_templates.ravel(), NOISE_CLUSTER_IDS)
+        keep = ~np.isin(loader._spike_templates.ravel(), synthetic_data["noise_cluster_ids"])
         np.testing.assert_array_equal(result.spike_times, loader._spike_times[keep])
         np.testing.assert_array_equal(result.spike_amplitudes, loader._spike_amplitudes[keep])
         np.testing.assert_array_equal(result.spike_depths, loader._spike_depths[keep])

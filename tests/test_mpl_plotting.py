@@ -110,8 +110,7 @@ class TestMatplotlibHistogram:
 
         # Check processed data matches synthetic
         bin_centers, counts = processed.compute_activity_histogram(False)
-        from tests.test_unit.conftest import NUM_SPIKES
-        assert counts.sum() == NUM_SPIKES
+        assert counts.sum() == synthetic_data["spike_times"].size
         np.testing.assert_array_equal(counts, expected_counts)
         np.testing.assert_array_almost_equal(bin_centers, expected_centers)
 

@@ -1,9 +1,15 @@
 """Tests for the KS1–3 extractor and its integration with DataModel.
 
-Two identical spikes from a single cluster are written to disk in KS1–3
-format. The public ``get_spikes_info_ks1_3`` loader is called once
-and the results are wrapped in a ``DataModel`` for all assertions.
-Hand-computed expected values make failures easy to diagnose.
+These checks intentionally stay separate from the KS4 tests. KS1–3 computes
+spike depths from PC features and converts ``amplitudes.npy`` into an
+approximate spike amplitude by scaling the unwhitened template peak-to-trough.
+KS4 instead reads spike positions directly and uses a different amplitude
+proxy, so the expected-value math here is version-specific.
+
+Two identical spikes from a single template are written to disk in KS1–3
+format. The public ``get_spikes_info_ks1_3`` loader is called once and the
+results are wrapped in a ``DataModel`` for all assertions. Hand-computed
+expected values make failures easy to diagnose.
 """
 
 import numpy as np
@@ -15,6 +21,7 @@ from driftplots.extractors.kilosort1_3 import get_spikes_info_ks1_3
 # ---------------------------------------------------------------------------
 # Constants — tweak here to change the synthetic scenario
 # ---------------------------------------------------------------------------
+
 NUM_CHANNELS = 4
 TEMPLATE_SAMPLES = 61
 SAMPLE_RATE = 30_000.0

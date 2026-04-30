@@ -6,7 +6,7 @@ import spikeinterface as si
 
 from driftplots.data_loader import DataLoader
 
-ANALYZER_PATH = Path(__file__).parent.parent.parent / "examples" / "example_data" / "analyzer.zarr"
+ANALYZER_PATH = Path(__file__).parent.parent / "examples" / "example_data" / "analyzer.zarr"
 
 pytestmark = pytest.mark.filterwarnings(
     "ignore::pytest.PytestUnraisableExceptionWarning",
@@ -16,7 +16,7 @@ pytestmark = pytest.mark.filterwarnings(
 class TestFromSortingAnalyzer:
     """DataLoader should correctly load arrays from a SortingAnalyzer."""
 
-    def test_loaded_arrays_match_analyzer_extensions_and_are_read_only(self):
+    def test_loaded_arrays_match_analyzer_extensions(self):
         analyzer = si.load_sorting_analyzer(ANALYZER_PATH)
         loader = DataLoader(analyzer)
 

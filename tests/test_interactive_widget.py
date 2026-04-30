@@ -3,7 +3,6 @@ import pytest
 import pyqtgraph as pg
 
 from driftplots.driftplotter import DriftPlotter
-from tests.test_unit.conftest import NUM_SPIKES
 
 pytestmark = pytest.mark.filterwarnings("ignore::RuntimeWarning")
 
@@ -34,7 +33,7 @@ class TestScatterData:
         """Each scatter point's data field should be its spike index."""
         widget, _ = widget_and_data
         stored_indices = np.array([point.data() for point in widget.scatter.points()])
-        np.testing.assert_array_equal(stored_indices, np.arange(NUM_SPIKES))
+        np.testing.assert_array_equal(stored_indices, np.arange(widget.processed_data.spike_times.size))
 
 
 class TestConstructorParameters:

@@ -195,6 +195,7 @@ def synthetic_data():
         "channel_locations": channel_locations,
         "peak_channels": peak_channels,
         "expected_heatmaps": expected_heatmaps,
+        "noise_cluster_ids": NOISE_CLUSTER_IDS,
     }
 
 
