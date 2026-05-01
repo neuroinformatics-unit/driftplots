@@ -11,10 +11,17 @@ import sys
 
 from importlib.metadata import version as get_version
 
+
 # Used when building API docs, put the dependencies
 # of any class you are documenting here
-autodoc_mock_imports = []
-
+autodoc_mock_imports = [
+    "PySide6",
+    "PySide6.QtCore",
+    "PySide6.QtGui",
+    "PySide6.QtWidgets",
+    "pyqtgraph",
+    "pyqtgraph.Qt",
+]
 # Add the module path to sys.path here.
 # If the directory is relative to the documentation root,
 # use os.path.abspath to make it absolute, like shown here.
