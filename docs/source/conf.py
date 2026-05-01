@@ -122,8 +122,11 @@ html_static_path = ['_static']
 html_css_files = [
     'css/custom.css',
 ]
-
 html_show_sourcelink = False
+
+linkcheck_anchors_ignore_for_url = [
+    r"https://github\.com/.*",
+]
 
 # Redirect the webpage to another URL
 # Sphinx will create the appropriate CNAME file in the build directory
