@@ -13,7 +13,7 @@ from importlib.metadata import version as get_version
 
 # Used when building API docs, put the dependencies
 # of any class you are documenting here
-autodoc_mock_imports = ["pyqtgraph", "PySide6"]
+autodoc_mock_imports = []
 
 # Add the module path to sys.path here.
 # If the directory is relative to the documentation root,
@@ -21,7 +21,7 @@ autodoc_mock_imports = ["pyqtgraph", "PySide6"]
 sys.path.insert(0, os.path.abspath("../.."))
 
 project = "driftplots"
-copyright = "2022, Joseph Ziminski"
+copyright = "2026, Joseph Ziminski"
 author = "Joseph Ziminski"
 try:
     full_version = get_version(project)
@@ -88,10 +88,6 @@ exclude_patterns = [
     "**/includes/**",
 ]
 
-# GitHub blob pages render line-number anchors via JavaScript, so linkcheck
-# cannot verify them. Skip anchor checking for all GitHub URLs.
-linkcheck_anchors_ignore_for_url = [r"https://github\.com/.*"]
-
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 html_theme = "pydata_sphinx_theme"
@@ -118,14 +114,6 @@ html_theme_options = {
     },
 }
 
-# Redirect the webpage to another URL
-# Sphinx will create the appropriate CNAME file in the build directory
-# The default is the URL of the GitHub pages
-# https://www.sphinx-doc.org/en/master/usage/extensions/githubpages.html
-github_user = "JoeZiminski"
-html_baseurl = f"https://{github_user}.github.io/{project}"
-sitemap_url_scheme = "{link}"
-
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
@@ -136,3 +124,11 @@ html_css_files = [
 ]
 
 html_show_sourcelink = False
+
+# Redirect the webpage to another URL
+# Sphinx will create the appropriate CNAME file in the build directory
+# The default is the URL of the GitHub pages
+# https://www.sphinx-doc.org/en/master/usage/extensions/githubpages.html
+github_user = "JoeZiminski"
+html_baseurl = "https://driftplots.neuroinformatics.dev/"
+sitemap_url_scheme = "{link}"
