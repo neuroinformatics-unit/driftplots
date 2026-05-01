@@ -61,7 +61,8 @@ Full Python API reference.
 :caption: index
 :hidden:
 
-pages/articles/index
+pages/how-to-use-driftplots
+pages/how-parameters-are-calculated
 pages/examples/index
 pages/api_index
 ```

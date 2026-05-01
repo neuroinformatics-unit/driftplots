@@ -11,17 +11,24 @@ import sys
 
 from importlib.metadata import version as get_version
 
+
 # Used when building API docs, put the dependencies
 # of any class you are documenting here
-autodoc_mock_imports = []
-
+autodoc_mock_imports = [
+    "PySide6",
+    "PySide6.QtCore",
+    "PySide6.QtGui",
+    "PySide6.QtWidgets",
+    "pyqtgraph",
+    "pyqtgraph.Qt",
+]
 # Add the module path to sys.path here.
 # If the directory is relative to the documentation root,
 # use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath("../.."))
 
 project = "driftplots"
-copyright = "2022, Joseph Ziminski"
+copyright = "2026, Joseph Ziminski"
 author = "Joseph Ziminski"
 try:
     full_version = get_version(project)
@@ -101,7 +108,7 @@ html_theme_options = {
             # Label for this link
             "name": "GitHub",
             # URL where the link will redirect
-            "url": "provide later",  # required
+            "url": "https://github.com/neuroinformatics-unit/driftplots",  # required
             # Icon class (if "type": "fontawesome"),
             # or path to local image (if "type": "local")
             "icon": "fa-brands fa-github",
@@ -114,14 +121,6 @@ html_theme_options = {
     },
 }
 
-# Redirect the webpage to another URL
-# Sphinx will create the appropriate CNAME file in the build directory
-# The default is the URL of the GitHub pages
-# https://www.sphinx-doc.org/en/master/usage/extensions/githubpages.html
-github_user = "JoeZiminski"
-html_baseurl = f"https://{github_user}.github.io/{project}"
-sitemap_url_scheme = "{link}"
-
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
@@ -130,5 +129,16 @@ html_static_path = ['_static']
 html_css_files = [
     'css/custom.css',
 ]
-
 html_show_sourcelink = False
+
+linkcheck_anchors_ignore_for_url = [
+    r"https://github\.com/.*",
+]
+
+# Redirect the webpage to another URL
+# Sphinx will create the appropriate CNAME file in the build directory
+# The default is the URL of the GitHub pages
+# https://www.sphinx-doc.org/en/master/usage/extensions/githubpages.html
+github_user = "JoeZiminski"
+html_baseurl = "https://driftplots.neuroinformatics.dev/"
+sitemap_url_scheme = "{link}"
