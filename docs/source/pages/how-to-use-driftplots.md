@@ -15,9 +15,9 @@ See [here](terminology) for a glossary of key terms.
 
 `driftplots` accepts either a path to the output of Kilosort, or a SpikeInterface `SortingAnalyzer` as input.
 
-A path to Kilosort 1-4 is supported.
+A path to any of Kilosort versions 1-4 is supported.
 See [here](/pages/how-parameters-are-calculated) for details on how spike amplitudes,
-depths and unit templates are computed across Kilosort versions).
+depths and unit templates are computed across Kilosort versions.
 Displayed templates will reflect the unit assignment provided by Kilosort,
 and not reflect any later changes in Phy (`spike_templates.npy` is used for the unit assignments).
 
@@ -38,8 +38,8 @@ Please raise a [GitHub issue](https://github.com/neuroinformatics-unit/driftplot
 ## Interactive Viewer
 
 {py:meth}`~driftplots.DriftPlotter.drift_map_plot_matplotlib` generates an interactive viewer
-allowing selection of individual spikes on the driftmap. Once selected, the template for that
-spike will be displayed on the right-hand side.
+allowing the selection of individual spikes on the driftmap. Once selected, the template for the
+unit that spike is associated with will be displayed on the right-hand side.
 
 ```{image} /_static/interactive-single-example.png
    :align: center
@@ -65,7 +65,7 @@ The displayed templates are whitened and are not scaled per-spike  i.e. the temp
 appear the same for all spikes assigned to the same template. This approach was chosen for
 two main reasons:
 1) It is not always possible to reconstruct individual waveforms across kilosort versions (see [here](/pages/how-parameters-are-calculated))
-2) The main purpose of the interactive mode is to check that templates are identifiably similar
+2) The main purpose of the interactive mode is to check that waveforms are identifiably similar
 across sessions. This is easier with templates rather than noisier spike waveforms.
 
 ### Interactive Viewer with Multiple Plots
@@ -148,11 +148,11 @@ an experimental project into a PDF, to quickly assess recording quality and stab
 ## Aligning Amplitudes Across Sessions
 
 `driftplots` provides options for excluding spikes based on their
-amplitudes. This can be useful when a small number of high- or low-amplitude
-spikes dominate the color scaling, with a few very light/dark spots with the rest grey.
-Options are also provided to adjust the color map scaling based on the amplitudes.
+amplitudes. Options are also provided to adjust the color map scaling based on the amplitudes.
+This can be useful when a small number of high- or low-amplitude
+spikes dominate the color scaling i.e. there are a few very dark and/or light spots with the rest grey.
 
-As such it is useful to apply the same amplitude filtering and colormap
+It aids comparison to apply the same amplitude filtering and colormap
 scaling to all plots when comparing multiple sessions. {py:func}`~driftplots.get_amplitudes`
 can be used to pool amplitudes across sessions, allowing cutoffs to be calculated
 across all sessions and applied to all plots.
