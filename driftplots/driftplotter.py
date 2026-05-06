@@ -15,31 +15,42 @@ from driftplots.interactive.driftmap_plot_widget import DriftmapPlotWidget
 
 
 class DriftPlotter:
-    """Load Kilosort sorter output and provide interactive or static drift map plots.
+    """Load Kilosort or SpikeInterface output and plot drift maps.
 
     On construction, spike data is loaded from a Kilosort output directory
-    and stored as read-only arrays. Plotting methods apply optional
-    filtering (noise exclusion, amplitude filtering, decimation) before
-    handing the data to a plot backend.
+    or a SpikeInterface ``SortingAnalyzer`` and stored as read-only arrays.
+    Plotting methods apply optional filtering (noise exclusion, amplitude
+    filtering, decimation) before handing the data to a plot backend.
 
     Parameters
     ----------
-    sorter_path
-        Path to a Kilosort sorter output directory. Must contain
-        exactly one ``kilosort*.log`` file used to detect the KS version.
+    path_or_analyzer
+        Path to a Kilosort sorter output directory, or a SpikeInterface
+        ``SortingAnalyzer`` object.  When a path is given it must contain
+        exactly one ``kilosort*.log`` file, which is used to detect the
+        Kilosort version.
+
+    Examples
+    --------
+    >>> plotter = DriftPlotter("/path/to/kilosort/output")
+    >>> fig = plotter.drift_map_plot_matplotlib()
 
     """
 
     def __init__(self, path_or_analyzer: str | Path) -> None:
-        """Load spike data from a Kilosort output directory.
+        """Load spike data from a Kilosort output directory or SortingAnalyzer.
 
         Parameters
         ----------
         path_or_analyzer
-            Path to the Kilosort sorter output.
+            Path to a Kilosort sorter output directory, or a SpikeInterface
+            ``SortingAnalyzer`` object.
 
         Raises
         ------
+        FileNotFoundError
+            If ``path_or_analyzer`` is a path and does not point to an
+            existing directory.
         AssertionError
             If the directory does not contain exactly one ``kilosort*.log``
             file, or if the loaded spike arrays have mismatched sizes.
@@ -62,30 +73,41 @@ class DriftPlotter:
         Parameters
         ----------
         decimate
-            Keep every *n*-th spike. Too many spikes will slow down the plot.
-            if ``"estimate"` the number of spikes will be decimated to a reasonable
-            range (e.g. 50,000). ``False``, ``None`` or ``0`` disables decimation.`
-            Otherwise pass an integer e.g. 2 to keep every 2nd spike.
+            Thin the spike dataset before plotting.  Pass ``"estimate"`` to
+            automatically reduce spikes to a reasonable count (≈ 50 000).
+            Pass ``False``, ``None``, or ``0`` to disable decimation.  Pass
+            an integer *n* to keep every *n*-th spike.
         exclude_noise
-            Remove spikes labelled as noise.
+            If ``True``, remove all spikes belonging to clusters labelled
+            "noise" in the Kilosort cluster-groups file (or the
+            ``SortingAnalyzer`` quality labels).
         amplitude_cmap_scaling
-            Colour-scaling mode or explicit ``(min, max)`` range.
+            Controls how spike amplitudes are mapped to the greyscale
+            colormap.  Pass ``"linear"`` or ``"log"`` for automatic
+            scaling, or a ``(min, max)`` tuple to set explicit bounds.
         n_color_bins
-            Number of grey-scale colour bins for amplitude.
+            Number of discrete greyscale bins used to colour spikes by
+            amplitude.
         point_size
-            Scatter-point diameter in pixels.
+            Diameter of each scatter point in pixels.
         filter_amplitude_mode
-            Amplitude filtering mode.
+            How ``filter_amplitude_values`` is interpreted.
+            ``"percentile"`` treats the bounds as percentile ranks;
+            ``"absolute"`` treats them as raw amplitude values.
+            ``None`` disables amplitude filtering.
         filter_amplitude_values
-            Bounds for amplitude filtering.
+            ``(low, high)`` bounds for amplitude filtering.  Ignored when
+            ``filter_amplitude_mode`` is ``None``.
         title
-            Title of the plot
+            Plot title.  Pass a string to set a custom title, ``True`` to
+            use a default title, or ``None`` / ``False`` to suppress the
+            title entirely.
 
         Returns
         -------
         DriftmapPlotWidget
-            The pyqtgraph widget. This is already populated but not yet
-            shown, use app.exec() to display.
+            The pyqtgraph widget.  The widget is already populated but not
+            yet shown; call ``app.exec()`` to display it.
         """
         app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
 
@@ -117,7 +139,53 @@ class DriftPlotter:
         weight_histogram_by_amplitude: bool = False,
         title: bool | str | None = None,
     ) -> Figure:
-        """"""
+        """Create a static Matplotlib drift map figure.
+
+        Parameters
+        ----------
+        decimate
+            Thin the spike dataset before plotting.  Pass ``"estimate"`` to
+            automatically reduce spikes to a reasonable count (≈ 50 000).
+            Pass ``False``, ``None``, or ``0`` to disable decimation.  Pass
+            an integer *n* to keep every *n*-th spike.
+        exclude_noise
+            If ``True``, remove all spikes belonging to clusters labelled
+            "noise" in the Kilosort cluster-groups file (or the
+            ``SortingAnalyzer`` quality labels).
+        amplitude_cmap_scaling
+            Controls how spike amplitudes are mapped to the greyscale
+            colormap.  Pass ``"linear"`` or ``"log"`` for automatic
+            scaling, or a ``(min, max)`` tuple to set explicit bounds.
+        n_color_bins
+            Number of discrete greyscale bins used to colour spikes by
+            amplitude.
+        point_size
+            Diameter of each scatter point in points (Matplotlib units).
+        filter_amplitude_mode
+            How ``filter_amplitude_values`` is interpreted.
+            ``"percentile"`` treats the bounds as percentile ranks;
+            ``"absolute"`` treats them as raw amplitude values.
+            ``None`` disables amplitude filtering.
+        filter_amplitude_values
+            ``(low, high)`` bounds for amplitude filtering.  Ignored when
+            ``filter_amplitude_mode`` is ``None``.
+        add_histogram_plot
+            If ``True``, add a side panel showing a depth histogram of
+            spike activity.
+        weight_histogram_by_amplitude
+            If ``True``, weight the depth histogram by spike amplitude
+            rather than counting spikes uniformly.  Only used when
+            ``add_histogram_plot`` is ``True``.
+        title
+            Plot title.  Pass a string to set a custom title, ``True`` to
+            use a default title, or ``None`` / ``False`` to suppress the
+            title entirely.
+
+        Returns
+        -------
+        Figure
+            The populated Matplotlib figure.
+        """
         processed_data = self._data_loader.get_processed_data(
             exclude_noise, decimate, filter_amplitude_mode, filter_amplitude_values
         )

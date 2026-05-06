@@ -13,19 +13,27 @@ def get_amplitudes(
     exclude_noise: bool = False,
     concatenate: bool = False,
 ) -> np.ndarray | list[np.ndarray]:
-    """Load and concatenate amplitudes.npy from multiple sorter output paths.
+    """Return spike amplitudes from one or more sorter outputs.
 
     Parameters
     ----------
     list_of_path_or_analyzer
-        List of sorter output directories, each containing amplitudes.npy.
+        Kilosort output directories or SpikeInterface ``SortingAnalyzer``
+        objects to load amplitudes from.
+    exclude_noise
+        If ``True``, remove spikes belonging to clusters labelled "noise"
+        before returning amplitudes.
     concatenate
-        If ``True``, concatenate all amplitudes into a single array.
+        If ``True``, concatenate all per-session amplitude arrays into a
+        single 1-D array.  If ``False`` (default), return a list with one
+        array per session.
 
     Returns
     -------
     np.ndarray or list of np.ndarray
-        Concatenated amplitudes from all paths.
+        When ``concatenate=True``, a single 1-D array of all spike
+        amplitudes.  When ``concatenate=False``, a list of 1-D arrays,
+        one per entry in ``list_of_path_or_analyzer``.
     """
     all_spike_amplitudes = []
 

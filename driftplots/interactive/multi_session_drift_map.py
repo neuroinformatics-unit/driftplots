@@ -55,7 +55,11 @@ class MultiSessionDriftmapWidget(QtWidgets.QWidget):
         self._link_y_axes(panels)
 
     def plot(self):
-        self.show()
+        """Display the widget and start the Qt event loop.
+
+        This is a blocking call: it shows the window and runs
+        ``app.exec()`` until the window is closed.
+        """        self.show()
         self.app.exec()
 
     @staticmethod
