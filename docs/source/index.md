@@ -14,13 +14,14 @@ static matplotlib figures or an interactive viewer:
 <br>
 
 Interactive mode can be used to check alignment between recording
-sessions before inter-session matching e.g. with UnitMatch. In the above example,
-it is clear the recordings (chronically recorded Neuropixel sessions with a gap
-between them of 2 hours) are well aligned, as the driftmap and templates
-look similar across the recording depth.
+sessions before inter-session matching (for example, with
+[UnitMatch](https://github.com/EnnyvanBeest/UnitMatch)). The above example
+shows two chronic Neuropixel recording sessions with a gap of two hours
+between them. It is clear the recordings are well aligned, as the driftmaps
+and templates look similar across the recording depth.
 
-Matplotlib mode can also be used to get an overview of the data quality
-across many sessions, for example by [collating these into a PDF](pages/examples/creating-pdf).
+Matplotlib plots can also be generated to get an overview of the data quality
+across many sessions, for example by [collating driftmaps into a PDF](pages/examples/creating-pdf).
 
 ::::{grid} 1 1 3 3
 :gutter: 4

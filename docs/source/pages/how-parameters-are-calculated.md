@@ -1,7 +1,7 @@
 # How features are calculated
 
-The key parameters computed in `driftplots` are the spike amplitudes, depths
-and unit templates. Below are details on how these are computed, as the methods
+The main parameters used in `driftplots` are the spike amplitudes and depths
+as well as the unit templates. Below are details on how these are computed, as the methods
 vary between SpikeInterface and across Kilosort versions.
 
 (terminology)=

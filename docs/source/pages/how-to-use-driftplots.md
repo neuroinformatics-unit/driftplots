@@ -1,8 +1,8 @@
 # Using `driftplots`
 
 `driftplots` can be used to generate static [Matplotlib](https://matplotlib.org/) figures or an interactive viewer (built on Qt).
-In the interactive viewer, clicking a spike will display the *template* (unscaled, whitened) for
-the template assigned to that spike.
+In the interactive viewer, clicking a spike will display the *template* (unscaled, whitened) of the
+unit that spike is assigned to.
 
 Below we will cover the main ways to use `driftplots`.
 See the [API Reference](/pages/api_index) for a full list of arguments.
@@ -13,13 +13,13 @@ See [here](terminology) for a glossary of key terms.
 
 ## Inputs
 
-`driftplots` accepts a path to Kilosort's output or a SpikeInterface `SortingAnalyzer` as input.
+`driftplots` accepts either a path to the output of Kilosort, or a SpikeInterface `SortingAnalyzer` as input.
 
-If passing a path directly to a sorting output, Kilosort 1-4 are supported.
+A path to Kilosort 1-4 is supported.
 See [here](/pages/how-parameters-are-calculated) for details on how spike amplitudes,
-depths and unit templates are computed across Kilosort versions). `spike_templates.npy`
-is used to assign the template for each spike. This follows Kilosort's original per-spike
-template assignment and therefore will not reflect later merges or splits made in Phy.
+depths and unit templates are computed across Kilosort versions).
+Displayed templates will reflect the unit assignment provided by Kilosort,
+and not reflect any later changes in Phy (`spike_templates.npy` is used for the unit assignments).
 
 If passing a `SortingAnalyzer`, it is expected that the required extensions
 have already been computed. See
@@ -30,7 +30,8 @@ on the argument set for `max_spikes_per_unit` used when computing `"random_spike
 By default, the number of spikes displayed will be decimated to around `100,000`.
 
 ::: {warning}
-`driftplots` was designed and tested with Neuropixels probes, but it should also work with most other probe types.
+`driftplots` was designed and tested with Neuropixels probes, but it should also work with most other probes.
+Please raise a [GitHub issue](https://github.com/neuroinformatics-unit/driftplots) if you have any problems.
 :::
 
 
@@ -61,18 +62,20 @@ driftmap.plot()
 ```
 
 The displayed templates are whitened and are not scaled per-spike  i.e. the template will
-appear the same for all spikes assigned to the same template. The template is whitened and is not
-scaled to each individual spike. This approach was chosen for two main reasons:This is due to the difficulty of reconstructing individual waveforms from
-1) it is not always possible to reconstruct the waveforms or their amplitudes across kilosort versions (see [here](/pages/how-parameters-are-calculated))
-2) the main purpose of the interactive mode is to check that templates are identifiably similar
-across sessions, to ensure little drift has occurred. This is easier with templates rather than noisier spike waveforms.
+appear the same for all spikes assigned to the same template. This approach was chosen for
+two main reasons:
+1) It is not always possible to reconstruct individual waveforms across kilosort versions (see [here](/pages/how-parameters-are-calculated))
+2) The main purpose of the interactive mode is to check that templates are identifiably similar
+across sessions. This is easier with templates rather than noisier spike waveforms.
 
 ### Interactive Viewer with Multiple Plots
 
 {py:class}`~driftplots.MultiSessionDriftmapWidget` can be used to display
 multiple interactive plots at once. In this mode, the y-axis
-zoom is linked across plots.See [the amplitudes section](amplitudes) for details
-on how to ensure amplitude scaling is consistent across sessions.
+zoom is linked across plots.
+
+See [the amplitudes section](amplitudes) for details
+on ensuring amplitude scaling is consistent across sessions.
 
 ```{image} /_static/interactive-multi-example.png
    :align: center
@@ -82,10 +85,11 @@ on how to ensure amplitude scaling is consistent across sessions.
 ```python
 import spikeinterface as si
 from driftplots import DriftPlotter, MultiSessionDriftmapWidget
+from pathlib import Path
 
 # Load the data. In this example we load as a sorting analyzer
 # or from the raw kilosort output to demonstrate both methods
-data_path = "/path/to/example_data"
+data_path = Path("/path/to/example_data")
 analyzer = si.load_sorting_analyzer(data_path / "analyzer.zarr")
 sorting_output_path = data_path / "sorting" / "sorter_output"
 
@@ -98,7 +102,7 @@ for title, path_or_analyzer in zip(
 ):
     plotter = DriftPlotter(path_or_analyzer)
 
-    plot = plotter.drift_map_plot_interactive()
+    plot = plotter.drift_map_plot_interactive(title=title)
 
     panels.append(plot)
 
@@ -118,9 +122,6 @@ but can additionally plot a 1D activity histogram next to the driftmap.
    :width: 750px
 ```
 
-See [this example](/pages/examples/creating-pdf) for how to stitch Matplotlib figures together across
-an experimental project to quickly assess recording quality and stability.
-
 ```python
 import matplotlib.pyplot as plt
 import spikeinterface as si
@@ -132,7 +133,6 @@ analyzer = si.load_sorting_analyzer("/path/to/analyzer.zarr")
 plotter = DriftPlotter(analyzer)
 
 fig = plotter.drift_map_plot_matplotlib(
-    exclude_noise="KSLabel",
     add_histogram_plot=True,
     weight_histogram_by_amplitude=True,
 )
@@ -141,13 +141,16 @@ plt.show()
 
 ```
 
+See [this example](/pages/examples/creating-pdf) for how to stitch Matplotlib figures together across
+an experimental project into a PDF, to quickly assess recording quality and stability.
+
 (amplitudes)=
 ## Aligning Amplitudes Across Sessions
 
 `driftplots` provides options for excluding spikes based on their
-amplitudes and scaling the color of the scatter points by amplitude.
-This can be useful when a small number of high- or low-amplitude spikes dominate
-the color scaling, with a few very light/dark spots with the rest grey.
+amplitudes. This can be useful when a small number of high- or low-amplitude
+spikes dominate the color scaling, with a few very light/dark spots with the rest grey.
+Options are also provided to adjust the color map scaling based on the amplitudes.
 
 As such it is useful to apply the same amplitude filtering and colormap
 scaling to all plots when comparing multiple sessions. {py:func}`~driftplots.get_amplitudes`
@@ -157,7 +160,7 @@ across all sessions and applied to all plots.
 ```python
 import numpy as np
 import spikeinterface as si
-from PySide6 import QtWidgets
+from PySide6 import QtWidgets[how-parameters-are-calculated.md](how-parameters-are-calculated.md)
 
 from driftplots import DriftPlotter, MultiSessionDriftmapWidget, get_amplitudes
 
@@ -174,8 +177,6 @@ all_spike_amplitudes = get_amplitudes(
 
 min_cutoff, max_cutoff = np.percentile(all_spike_amplitudes, (0, 95))
 
-app = QtWidgets.QApplication([])
-
 panels = []
 for path_or_analyzer in SORTING_SESSIONS:
     plotter = DriftPlotter(path_or_analyzer)
@@ -191,6 +192,6 @@ for path_or_analyzer in SORTING_SESSIONS:
 
 multi = MultiSessionDriftmapWidget(panels)
 
-app.exec()
+multi.plot()
 
 ```
