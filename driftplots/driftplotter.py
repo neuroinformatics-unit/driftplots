@@ -28,28 +28,14 @@ class DriftPlotter:
         Path to a Kilosort sorter output directory. Must contain
         exactly one ``kilosort*.log`` file used to detect the KS version.
 
-    Attributes
-    ----------
-    spike_times
-        (num_spikes,) spike times (seconds for KS 1-3, samples for KS4).
-    spike_amplitudes
-        (num_spikes,) spike amplitudes.
-    spike_depths
-        (num_spikes,) spike depths along the probe (µm).
-    spike_templates
-        (num_spikes,) template or unit id assigned to each spike.
-    templates
-        (num_templates, num_samples, num_channels) template waveforms.
-    channel_locations
-        (num_channels, 2) x/y positions of each channel on the probe.
     """
 
-    def __init__(self, sorter_path: str | Path) -> None:
+    def __init__(self, path_or_analyzer: str | Path) -> None:
         """Load spike data from a Kilosort output directory.
 
         Parameters
         ----------
-        sorter_path
+        path_or_analyzer
             Path to the Kilosort sorter output.
 
         Raises
@@ -58,7 +44,7 @@ class DriftPlotter:
             If the directory does not contain exactly one ``kilosort*.log``
             file, or if the loaded spike arrays have mismatched sizes.
         """
-        self.data_loader = DataLoader(sorter_path)  # TODO: rename
+        self._data_loader = DataLoader(path_or_analyzer)
 
     def drift_map_plot_interactive(
         self,
@@ -103,7 +89,7 @@ class DriftPlotter:
         """
         app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
 
-        processed_data = self.data_loader.get_processed_data(
+        processed_data = self._data_loader.get_processed_data(
             exclude_noise, decimate, filter_amplitude_mode, filter_amplitude_values
         )
 
@@ -132,7 +118,7 @@ class DriftPlotter:
         title: bool | str | None = None,
     ) -> Figure:
         """"""
-        processed_data = self.data_loader.get_processed_data(
+        processed_data = self._data_loader.get_processed_data(
             exclude_noise, decimate, filter_amplitude_mode, filter_amplitude_values
         )
 

@@ -50,7 +50,7 @@ class TestMatplotlibScatter:
         ax = fig.axes[0]
         facecolors = ax.collections[0].get_facecolors()
 
-        processed = plotter.data_loader.get_processed_data(
+        processed = plotter._data_loader.get_processed_data(
             exclude_noise=False,
             decimate=False,
             filter_amplitude_mode=None,
@@ -119,7 +119,7 @@ class TestMatplotlibHistogram:
             add_histogram_plot=True,
             weight_histogram_by_amplitude=False,
         )
-        processed = plotter.data_loader.get_processed_data(
+        processed = plotter._data_loader.get_processed_data(
             exclude_noise=False,
             decimate=False,
             filter_amplitude_mode=None,
@@ -159,7 +159,7 @@ class TestMatplotlibHistogram:
             add_histogram_plot=True,
             weight_histogram_by_amplitude=True,
         )
-        processed = plotter.data_loader.get_processed_data(
+        processed = plotter._data_loader.get_processed_data(
             exclude_noise=False,
             decimate=False,
             filter_amplitude_mode=None,
