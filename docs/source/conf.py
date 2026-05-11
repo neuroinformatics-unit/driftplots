@@ -84,6 +84,8 @@ templates_path = ["_templates"]
 # Automatically generate stub pages for API
 autosummary_generate = True
 autodoc_default_flags = ["members", "inherited-members"]
+toc_object_entries = True
+toc_object_entries_show_parents = "hide"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -103,6 +105,7 @@ html_title = "driftplots"
 # Customize the theme
 html_theme_options = {
     "navbar_align": "left",
+    "show_toc_level": 2,
     "icon_links": [
         {
             # Label for this link

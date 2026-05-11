@@ -1,3 +1,5 @@
+:tocdepth: 3
+
 .. _API_Reference:
 
 API Reference
@@ -14,3 +16,4 @@ API Reference
    :undoc-members:
 
 .. autofunction:: get_amplitudes
+cnn

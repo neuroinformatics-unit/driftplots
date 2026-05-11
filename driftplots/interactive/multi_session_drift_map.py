@@ -59,7 +59,8 @@ class MultiSessionDriftmapWidget(QtWidgets.QWidget):
 
         This is a blocking call: it shows the window and runs
         ``app.exec()`` until the window is closed.
-        """        self.show()
+        """
+        self.show()
         self.app.exec()
 
     @staticmethod
