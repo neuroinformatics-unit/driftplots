@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Literal
 
+from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from pyqtgraph.Qt import QtWidgets
 
@@ -138,6 +139,7 @@ class DriftPlotter:
         add_histogram_plot: bool = False,
         weight_histogram_by_amplitude: bool = False,
         title: bool | str | None = None,
+        ax: Axes | None = None,
     ) -> Figure:
         """Create a static Matplotlib drift map figure.
 
@@ -180,6 +182,10 @@ class DriftPlotter:
             Plot title.  Pass a string to set a custom title, ``True`` to
             use a default title, or ``None`` / ``False`` to suppress the
             title entirely.
+        ax
+            Existing Matplotlib axis to draw the drift map on.  When
+            ``add_histogram_plot`` is ``True``, a histogram axis is added
+            beside this axis.
 
         Returns
         -------
@@ -198,6 +204,7 @@ class DriftPlotter:
             add_histogram_plot,
             weight_histogram_by_amplitude,
             title=title,
+            ax=ax,
         )
 
         return fig

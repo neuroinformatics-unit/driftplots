@@ -84,6 +84,28 @@ class TestMatplotlibScatter:
         assert len(fig.axes) == 1
         plt.close(fig)
 
+    @pytest.mark.parametrize("add_histogram_plot", [False, True])
+    def test_plots_on_provided_axis(self, synthetic_ks4_output, add_histogram_plot):
+        plotter = DriftPlotter(synthetic_ks4_output)
+        fig, ax = plt.subplots()
+
+        returned = plotter.drift_map_plot_matplotlib(
+            decimate=False,
+            exclude_noise=False,
+            add_histogram_plot=add_histogram_plot,
+            ax=ax,
+        )
+
+        assert returned is fig
+        expected_axes = 2 if add_histogram_plot else 1
+        assert len(fig.axes) == expected_axes
+        assert ax in fig.axes
+        assert len(ax.collections) == 1
+        if add_histogram_plot:
+            hist_axis = next(axis for axis in fig.axes if axis is not ax)
+            assert len(hist_axis.lines) == 1
+        plt.close(fig)
+
     def test_title(self, synthetic_ks4_output):
         plotter = DriftPlotter(synthetic_ks4_output)
         fig = plotter.drift_map_plot_matplotlib(
@@ -205,6 +227,7 @@ def test_interactive_and_matplotlib_share_signature():
         "self",
         "add_histogram_plot",
         "weight_histogram_by_amplitude",
+        "ax",
     ]
 
     interactive = inspect.signature(DriftPlotter.drift_map_plot_interactive)
