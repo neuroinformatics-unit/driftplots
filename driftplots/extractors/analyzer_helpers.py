@@ -77,6 +77,6 @@ def get_noise_mask(
             f"The analyzer does not contain a sorting property called: {exclude_noise}"
         )
 
-    noise_mask = (labels == "noise")[spike_templates]  # TODO: make sure to test this
+    noise_mask = (labels == "noise")[spike_templates]
 
     return noise_mask

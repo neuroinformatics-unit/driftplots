@@ -45,7 +45,7 @@ class TestComputeAmplitudeColors:
     @pytest.fixture()
     def processed(self, synthetic_ks4_output):
         plotter = DriftPlotter(synthetic_ks4_output)
-        return plotter.data_loader.get_processed_data(
+        return plotter._data_loader.get_processed_data(
             exclude_noise=False,
             decimate=False,
             filter_amplitude_mode=None,

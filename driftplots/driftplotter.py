@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Literal
 
+from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from pyqtgraph.Qt import QtWidgets
 
@@ -15,50 +16,30 @@ from driftplots.interactive.driftmap_plot_widget import DriftmapPlotWidget
 
 
 class DriftPlotter:
-    """Load Kilosort sorter output and provide interactive or static drift map plots.
+    """Load Kilosort or SpikeInterface output and plot drift maps.
 
     On construction, spike data is loaded from a Kilosort output directory
-    and stored as read-only arrays. Plotting methods apply optional
-    filtering (noise exclusion, amplitude filtering, decimation) before
-    handing the data to a plot backend.
+    or a SpikeInterface ``SortingAnalyzer`` and stored as read-only arrays.
 
     Parameters
     ----------
-    sorter_path
-        Path to a Kilosort sorter output directory. Must contain
-        exactly one ``kilosort*.log`` file used to detect the KS version.
-
-    Attributes
-    ----------
-    spike_times
-        (num_spikes,) spike times (seconds for KS 1-3, samples for KS4).
-    spike_amplitudes
-        (num_spikes,) spike amplitudes.
-    spike_depths
-        (num_spikes,) spike depths along the probe (µm).
-    spike_templates
-        (num_spikes,) template or unit id assigned to each spike.
-    templates
-        (num_templates, num_samples, num_channels) template waveforms.
-    channel_locations
-        (num_channels, 2) x/y positions of each channel on the probe.
+    path_or_analyzer
+        Path to a Kilosort sorter output directory, or a SpikeInterface
+        ``SortingAnalyzer`` object.  When a path is given it must contain
+        exactly one ``kilosort*.log`` file, which is used to detect the
+        Kilosort version.
     """
 
-    def __init__(self, sorter_path: str | Path) -> None:
-        """Load spike data from a Kilosort output directory.
+    def __init__(self, path_or_analyzer: str | Path) -> None:
+        """Load spike data from a Kilosort output directory or SortingAnalyzer.
 
         Parameters
         ----------
-        sorter_path
-            Path to the Kilosort sorter output.
-
-        Raises
-        ------
-        AssertionError
-            If the directory does not contain exactly one ``kilosort*.log``
-            file, or if the loaded spike arrays have mismatched sizes.
+        path_or_analyzer
+            Path to a Kilosort sorter output directory, or a SpikeInterface
+            ``SortingAnalyzer`` object.
         """
-        self.data_loader = DataLoader(sorter_path)  # TODO: rename
+        self._data_loader = DataLoader(path_or_analyzer)
 
     def drift_map_plot_interactive(
         self,
@@ -76,34 +57,49 @@ class DriftPlotter:
         Parameters
         ----------
         decimate
-            Keep every *n*-th spike. Too many spikes will slow down the plot.
-            if ``"estimate"` the number of spikes will be decimated to a reasonable
-            range (e.g. 50,000). ``False``, ``None`` or ``0`` disables decimation.`
-            Otherwise pass an integer e.g. 2 to keep every 2nd spike.
+            Thin the spike dataset before plotting.  Pass ``"estimate"`` to
+            automatically reduce spikes to a reasonable count (≈ 100 000).
+            Pass ``False``, ``None``, or ``0`` to disable decimation.  Pass
+            an integer *n* to keep every *n*-th spike.
         exclude_noise
-            Remove spikes labelled as noise.
+            If ``True``, remove all spikes belonging to clusters labelled
+            "noise". For Kilosort, this is taken from the cluster_groups.csv /
+            cluster_group.tsv file that reflects labels set in Phy. For a
+            SortingAnalyzer, a string must be passed. The labels are taken from
+            the sorting properly with the passed name (e.g. "KSLabel").
         amplitude_cmap_scaling
-            Colour-scaling mode or explicit ``(min, max)`` range.
+            Controls how spike amplitudes are mapped to the greyscale
+            colormap.  Pass ``"linear"`` or ``"log2"`` or ``"log10"`` for automatic
+            scaling, or a ``(min, max)`` tuple to set explicit bounds.
+            When explicit bounds are set, the scaling is linear.
         n_color_bins
-            Number of grey-scale colour bins for amplitude.
+            Number of discrete greyscale bins used to colour spikes by
+            amplitude.
         point_size
-            Scatter-point diameter in pixels.
+            Diameter of each scatter point in pixels.
         filter_amplitude_mode
-            Amplitude filtering mode.
+            Controls how spikes are filtered based on amplitude before plotting.
+            ``"percentile"`` treats the bounds as percentile ranks;
+            ``"absolute"`` treats them as raw amplitude values.
+            ``None`` disables amplitude filtering.
         filter_amplitude_values
-            Bounds for amplitude filtering.
+            ``(low, high)`` bounds for amplitude filtering, used as set by
+            ``filter_amplitude_mode``.  Ignored when ``filter_amplitude_mode``
+            is ``None``.
         title
-            Title of the plot
+            Plot title.  Pass a string to set a custom title, ``True`` to
+            use a default title, or ``None`` / ``False`` to suppress the
+            title entirely.
 
         Returns
         -------
         DriftmapPlotWidget
-            The pyqtgraph widget. This is already populated but not yet
-            shown, use app.exec() to display.
+            The pyqtgraph widget.  The widget is already populated but not
+            yet shown; call ``app.exec()`` to display it.
         """
         app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
 
-        processed_data = self.data_loader.get_processed_data(
+        processed_data = self._data_loader.get_processed_data(
             exclude_noise, decimate, filter_amplitude_mode, filter_amplitude_values
         )
 
@@ -130,9 +126,68 @@ class DriftPlotter:
         add_histogram_plot: bool = False,
         weight_histogram_by_amplitude: bool = False,
         title: bool | str | None = None,
+        ax: Axes | None = None,
     ) -> Figure:
-        """"""
-        processed_data = self.data_loader.get_processed_data(
+        """Create a static Matplotlib drift map figure.
+
+        Parameters
+        ----------
+        decimate
+            Thin the spike dataset before plotting.  Pass ``"estimate"`` to
+            automatically reduce spikes to a reasonable count (≈ 100 000).
+            Pass ``False``, ``None``, or ``0`` to disable decimation.  Pass
+            an integer *n* to keep every *n*-th spike.
+        exclude_noise
+            If ``True``, remove all spikes belonging to clusters labelled
+            "noise". For Kilosort, this is taken from the
+            cluster_groups.csv / cluster_group.tsv file that reflects labels
+            set in Phy. For a SortingAnalyzer, a string must be passed.
+            The labels are taken from the sorting properly with the
+            passed name (e.g. "KSLabel").
+        amplitude_cmap_scaling
+            Controls how spike amplitudes are mapped to the greyscale
+            colormap.  Pass ``"linear"`` or ``"log2"`` or ``"log10"`` for automatic
+            scaling, or a ``(min, max)`` tuple to set explicit bounds.
+            When explicit bounds are set, the scaling is linear.
+        n_color_bins
+            Number of discrete greyscale bins used to colour spikes by
+            amplitude.
+        point_size
+            Diameter of each scatter point in pixels.
+        filter_amplitude_mode
+            Controls how spikes are filtered based on amplitude before plotting.
+            ``"percentile"`` treats the bounds as percentile ranks;
+            ``"absolute"`` treats them as raw amplitude values.
+            ``None`` disables amplitude filtering.
+        filter_amplitude_values
+            ``(low, high)`` bounds for amplitude filtering, used as set by
+            ``filter_amplitude_mode``.  Ignored when ``filter_amplitude_mode``
+            is ``None``.
+        filter_amplitude_values
+            ``(low, high)`` bounds for amplitude filtering.  Ignored when
+            ``filter_amplitude_mode`` is ``None``.
+        add_histogram_plot
+            If ``True``, add a side panel showing a depth histogram of
+            spike activity.
+        weight_histogram_by_amplitude
+            If ``True``, weight the depth histogram by spike amplitude
+            rather than counting spikes uniformly.  Only used when
+            ``add_histogram_plot`` is ``True``.
+        title
+            Plot title.  Pass a string to set a custom title, ``True`` to
+            use a default title, or ``None`` / ``False`` to suppress the
+            title entirely.
+        ax
+            Existing Matplotlib axis to draw the drift map on.  When
+            ``add_histogram_plot`` is ``True``, a histogram axis is added
+            beside this axis.
+
+        Returns
+        -------
+        Figure
+            The populated Matplotlib figure.
+        """
+        processed_data = self._data_loader.get_processed_data(
             exclude_noise, decimate, filter_amplitude_mode, filter_amplitude_values
         )
 
@@ -144,6 +199,7 @@ class DriftPlotter:
             add_histogram_plot,
             weight_histogram_by_amplitude,
             title=title,
+            ax=ax,
         )
 
         return fig

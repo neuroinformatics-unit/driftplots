@@ -50,7 +50,7 @@ class TestMatplotlibScatter:
         ax = fig.axes[0]
         facecolors = ax.collections[0].get_facecolors()
 
-        processed = plotter.data_loader.get_processed_data(
+        processed = plotter._data_loader.get_processed_data(
             exclude_noise=False,
             decimate=False,
             filter_amplitude_mode=None,
@@ -84,6 +84,28 @@ class TestMatplotlibScatter:
         assert len(fig.axes) == 1
         plt.close(fig)
 
+    @pytest.mark.parametrize("add_histogram_plot", [False, True])
+    def test_plots_on_provided_axis(self, synthetic_ks4_output, add_histogram_plot):
+        plotter = DriftPlotter(synthetic_ks4_output)
+        fig, ax = plt.subplots()
+
+        returned = plotter.drift_map_plot_matplotlib(
+            decimate=False,
+            exclude_noise=False,
+            add_histogram_plot=add_histogram_plot,
+            ax=ax,
+        )
+
+        assert returned is fig
+        expected_axes = 2 if add_histogram_plot else 1
+        assert len(fig.axes) == expected_axes
+        assert ax in fig.axes
+        assert len(ax.collections) == 1
+        if add_histogram_plot:
+            hist_axis = next(axis for axis in fig.axes if axis is not ax)
+            assert len(hist_axis.lines) == 1
+        plt.close(fig)
+
     def test_title(self, synthetic_ks4_output):
         plotter = DriftPlotter(synthetic_ks4_output)
         fig = plotter.drift_map_plot_matplotlib(
@@ -92,6 +114,22 @@ class TestMatplotlibScatter:
             title="My Title",
         )
         assert fig._suptitle.get_text() == "My Title"
+        plt.close(fig)
+
+    def test_title_on_provided_axis(self, synthetic_ks4_output):
+        plotter = DriftPlotter(synthetic_ks4_output)
+        fig, ax = plt.subplots()
+
+        returned = plotter.drift_map_plot_matplotlib(
+            decimate=False,
+            exclude_noise=False,
+            title="My Title",
+            ax=ax,
+        )
+
+        assert returned is fig
+        assert fig._suptitle is None
+        assert ax.get_title() == "My Title"
         plt.close(fig)
 
     def test_no_title(self, synthetic_ks4_output):
@@ -119,7 +157,7 @@ class TestMatplotlibHistogram:
             add_histogram_plot=True,
             weight_histogram_by_amplitude=False,
         )
-        processed = plotter.data_loader.get_processed_data(
+        processed = plotter._data_loader.get_processed_data(
             exclude_noise=False,
             decimate=False,
             filter_amplitude_mode=None,
@@ -159,7 +197,7 @@ class TestMatplotlibHistogram:
             add_histogram_plot=True,
             weight_histogram_by_amplitude=True,
         )
-        processed = plotter.data_loader.get_processed_data(
+        processed = plotter._data_loader.get_processed_data(
             exclude_noise=False,
             decimate=False,
             filter_amplitude_mode=None,
@@ -205,6 +243,7 @@ def test_interactive_and_matplotlib_share_signature():
         "self",
         "add_histogram_plot",
         "weight_histogram_by_amplitude",
+        "ax",
     ]
 
     interactive = inspect.signature(DriftPlotter.drift_map_plot_interactive)

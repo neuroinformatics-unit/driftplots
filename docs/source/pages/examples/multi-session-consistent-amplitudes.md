@@ -1,10 +1,17 @@
-from pathlib import Path
+(consistent-amplitudes)=
 
+# Consistent amplitude scaling across multiple sessions
+
+This example shows how to pool amplitudes from across multiple sessions,
+and use this to calculate thresholds for color scaling amplitudes on
+the plot. This ensures color scaling is comparable across sessions.
+
+```python
+from pathlib import Path
+import spikeinterface as si
+from driftplots import DriftPlotter, get_amplitudes
 import matplotlib.pyplot as plt
 import numpy as np
-import spikeinterface as si
-
-from driftplots import DriftPlotter, get_amplitudes
 
 # Getting the amplitudes across a set of sorting outputs can be useful to
 # compute absolute amplitudes used for filtering spikes based
@@ -45,10 +52,20 @@ for idx, path_or_analzyer in enumerate([analyzer, sorting_output_path]):
         filter_amplitude_mode="absolute",
         filter_amplitude_values=(min_cutoff, max_cutoff),
         title=f"Session {idx + 1}",
-        ax=axes[idx],
+        ax=axes[idx]
     )
 
 plt.show()
 # You will notice the plots and templates look different, even
 # though the underlying data is the same. This is because kilosort
 # and SpikeInterface use different methods to compute amplitudes, depths and templates
+```
+
+```{image} /_static/amplitudes-example-histogram-fig.png
+   :align: center
+   :width: 500px
+```
+```{image} /_static/amplitude-example-mpl-fig.png
+   :align: center
+   :width: 1050px
+```
