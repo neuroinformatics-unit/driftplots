@@ -20,10 +20,17 @@ for customising the displayed data and plots:
 
 ## Get started
 
+See the [documentation](driftplots.neuroinformatics.dev) and locally runnable
+[examples](https://github.com/neuroinformatics-unit/driftplots/tree/main/examples) for full details on how to use `driftplots`.
+
 The package can be installed with:
 ```
 pip install driftplots
 ```
 
-See the [documentation](driftplots.neuroinformatics.dev) and locally runnable
-[examples](https://github.com/neuroinformatics-unit/driftplots/tree/main/examples) for full details on how to use `driftplots`.
+to download the examples and example data, clone this repository and 
+install locally when in the project root with:
+
+```
+pip install -e .
+```
