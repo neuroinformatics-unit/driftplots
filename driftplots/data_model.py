@@ -47,8 +47,8 @@ class DataModel:
         # (NP1: 1 shank, 70um across, NP2: 250um between shank, shank width ~70um,
         # Cambridge Neurotech: shank widths ~80 µm, shank spacing ~200um+,
         # NeuroNexus: does have some shank widths at 100-120um)), in which
-        # this will fail. The simplest solution is to document and
-        # down the line expose this parameter.
+        # this will fail. The simplest solution is to document this and
+        # expose it as a parameter in the future.
         COL_CUTOFF_UM = 125
 
         chan_x_locs = np.unique(self.channel_locations[:, 0])
@@ -68,7 +68,7 @@ class DataModel:
 
         shank_select = np.isin(self.channel_locations[:, 0], valid_pos)
 
-        # Often the contact positions are not organised contiguous
+        # Often the contact positions are not organised contiguously
         # along the y-dimension and need resorting
         sort_idx = np.argsort(self.channel_locations[shank_select, 1], axis=0)
 
@@ -79,7 +79,7 @@ class DataModel:
         # Either display only the channels with signal on, or all channels but
         # non-signal channels are empty. Using the threshold ==0 works well for
         # SI analyzer and whitened KS templates, less well for un-whitened KS
-        # templates which have nonzero signal on all channel, but for which no
+        # templates which have nonzero signal on all channels, but for which no
         # clear threshold exists.
         if view_mode == "heatmap_all_channels":
             template = template.copy()

@@ -10,8 +10,8 @@ from driftplots import DriftPlotter, get_amplitudes
 # compute absolute amplitudes used for filtering spikes based
 # on amplitude, or scaling color map values the same across plots.
 
-# Load the data. In this example we load as a sorting analyzer
-# or from the raw kilosort output to demonstrate both methods
+# Load the data. In this example we load as a SortingAnalyzer
+# or from the raw Kilosort output to demonstrate both methods
 data_path = Path(__file__).parent / "example_data"
 analyzer = si.load_sorting_analyzer(data_path / "analyzer.zarr")
 sorting_output_path = data_path / "sorting" / "sorter_output"

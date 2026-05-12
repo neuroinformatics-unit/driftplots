@@ -55,7 +55,7 @@ amplitudes_npy = np.load(
     r"C:\Users\Jzimi\git-repos\driftplots\examples\example_data\sorting\sorter_output\amplitudes.npy"
 )
 
-# Kilosort method from XXX
+# Kilosort template-scaling method
 amplitudes = np.load(sorter_output / "amplitudes.npy")
 templates = np.load(sorter_output / "templates.npy")  # rename unwhiten?
 spike_templates = np.load(sorter_output / "spike_templates.npy")

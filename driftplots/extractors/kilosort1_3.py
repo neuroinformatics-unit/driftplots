@@ -13,7 +13,7 @@ def get_spikes_info_ks1_3(
     sorter_output: str | Path,
 ) -> tuple[np.ndarray, ...]:
     """
-    Compute the amplitude and depth of all detected spikes from the kilosort output.
+    Compute the amplitude and depth of all detected spikes from the Kilosort output.
 
     This function was ported from Nick Steinmetz's `spikes` repository
     MATLAB code, https://github.com/cortex-lab/spikes
@@ -21,7 +21,7 @@ def get_spikes_info_ks1_3(
     Parameters
     ----------
     sorter_output : str | Path
-        Path to the kilosort run sorting output.
+        Path to the Kilosort run sorting output.
 
     Returns
     -------
@@ -34,14 +34,13 @@ def get_spikes_info_ks1_3(
 
     Notes
     -----
-    In `_template_positions_amplitudes` spike depths is
-    calculated as simply the template depth, for each spike
-    (so it is the same for all spikes in a cluster). Here
-    we need
-    to find the depth of each individual spike, using its low-dimensional projection.
+    In `_template_positions_amplitudes` spike depths are calculated as simply
+    the template depth for each spike (so it is the same for all spikes in a
+    cluster). Here we need to find the depth of each individual spike, using
+    its low-dimensional projection.
     `pc_features` (num_spikes, num_PC, num_channels) holds the PC values for each spike.
     Taking the first component, the subset of 32 channels associated with this
-    spike  are indexed to get the actual channel locations (in um). Then, the channel
+    spike are indexed to get the actual channel locations (in um). Then, the channel
     locations are weighted by their PC values.
     """
     if isinstance(sorter_output, str):

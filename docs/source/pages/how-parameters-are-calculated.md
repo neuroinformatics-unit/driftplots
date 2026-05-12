@@ -54,7 +54,7 @@ template has the strongest signal.
 
 *Kilosort 1, 2*
 
-In Kilosort 1,2 the `amplitudes.npy` file does not contain the actual spike amplitudes.
+In Kilosort 1, 2 the `amplitudes.npy` file does not contain the actual spike amplitudes.
 Instead, it contains a scalar used to scale the template to give the best fit
 to the spike waveform. Therefore, taking the amplitude of the unwhitened template
 scaled by this amplitude value will give the approximate spike amplitude.
@@ -83,7 +83,7 @@ comparable across sessions sorted by the same sorter, but not other sorters.
 
 In Kilosort 4, the `amplitudes.npy` does not contain a scaling value
 as in previous Kilosort versions. Instead, it calculates a proxy for
-the amplitude as the [l2 norm over the PC features](https://github.com/MouseLand/Kilosort/blob/9f8e7052f43fbe12b3462bd185f2de05fceef33a/kilosort/io.py#L353)
+the amplitude as the [L2 norm over the PC features](https://github.com/MouseLand/Kilosort/blob/9f8e7052f43fbe12b3462bd185f2de05fceef33a/kilosort/io.py#L353)
 (over both all channels and all PCs) i.e. like an energy over the feature space.
 
 To approximate the spike amplitude, we use the method
@@ -96,10 +96,10 @@ We are currently investigating how this method compares to SpikeInterface and ot
 When `DriftPlotter` is passed a path to Kilosort 1-3 output, the whitened templates are always displayed.
 Here the template is the universal or learned canonical waveform for each unit, used in Kilosort's template matching.
 
-These templates are not unwhitened, as it is not possible to unwhiten the templates
+These templates remain whitened, as it is not possible to unwhiten the templates
 in Kilosort 2.5 and 3 due to the missing inverse whitening matrix, as mentioned above.
 
-In Kilosort4, the unit templates are the average spike waveform (reconstructed from PCs)
+In Kilosort 4, the unit templates are the average spike waveform (reconstructed from PCs)
 (after whitening, filtering, and drift correction). These are also displayed in their whitened form.
 
 The displayed unit templates are not scaled to the clicked spike amplitude,
