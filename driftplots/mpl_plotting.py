@@ -69,6 +69,8 @@ def plot_matplotlib(
         raster_axis.set_ylabel("Depth (μm)")
 
     else:
+        assert hist_axis is not None
+
         # Plot the histogram on the left-hand subplot
         hist_axis.set_xlabel("Count")
         raster_axis.set_xlabel("Time (s)")

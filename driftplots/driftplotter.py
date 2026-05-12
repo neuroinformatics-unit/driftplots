@@ -63,9 +63,10 @@ class DriftPlotter:
             an integer *n* to keep every *n*-th spike.
         exclude_noise
             If ``True``, remove all spikes belonging to clusters labelled
-            "noise". For Kilosort, this is taken from the cluster_groups.csv / cluster_group.tsv
-             file that reflects labels set in Phy. For a SortingAnalyzer, a string must be passed.
-             The labels are taken from the sorting properly with the passed name (e.g. "KSLabel").
+            "noise". For Kilosort, this is taken from the cluster_groups.csv /
+            cluster_group.tsv file that reflects labels set in Phy. For a
+            SortingAnalyzer, a string must be passed. The labels are taken from
+            the sorting properly with the passed name (e.g. "KSLabel").
         amplitude_cmap_scaling
             Controls how spike amplitudes are mapped to the greyscale
             colormap.  Pass ``"linear"`` or ``"log2"`` or ``"log10"`` for automatic
