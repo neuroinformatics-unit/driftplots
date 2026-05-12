@@ -28,7 +28,7 @@ The package can be installed with:
 pip install driftplots
 ```
 
-to download the examples and example data, clone this repository and 
+to download the examples and example data, clone this repository and
 install locally when in the project root with:
 
 ```
