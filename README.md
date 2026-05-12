@@ -26,4 +26,4 @@ pip install driftplots
 ```
 
 See the [documentation](driftplots.neuroinformatics.dev) and locally runnable
-[examples](https://github.com/neuroinformatics-unit/driftplots/tree/main/examples) for full details on how to use the tool.
+[examples](https://github.com/neuroinformatics-unit/driftplots/tree/main/examples) for full details on how to use `driftplots`.
