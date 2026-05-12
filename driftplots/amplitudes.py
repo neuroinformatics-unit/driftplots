@@ -19,7 +19,7 @@ def get_amplitudes(
     ----------
     list_of_path_or_analyzer
         Kilosort output directory paths or SpikeInterface ``SortingAnalyzer``
-        objects to load amplitudes from. Can be mix of both.
+        objects to load amplitudes from. Can be a mix of both.
     exclude_noise
         If ``True``, remove spikes belonging to clusters labelled "noise"
         before returning amplitudes.

@@ -15,7 +15,7 @@ See [here](terminology) for a glossary of key terms.
 
 `driftplots` accepts either a path to the output of Kilosort, or a SpikeInterface `SortingAnalyzer` as input.
 
-A path to any of Kilosort versions 1-4 is supported.
+A path to Kilosort 1-4 output is supported.
 See [here](/pages/how-parameters-are-calculated) for details on how spike amplitudes,
 depths and unit templates are computed across Kilosort versions.
 Displayed templates will reflect the unit assignment provided by Kilosort,
@@ -61,10 +61,10 @@ driftmap.plot()
 
 ```
 
-The displayed templates are whitened and are not scaled per-spike  i.e. the template will
+The displayed templates are whitened and are not scaled per spike, i.e. the template will
 appear the same for all spikes assigned to the same template. This approach was chosen for
 two main reasons:
-1) It is not always possible to reconstruct individual waveforms across kilosort versions (see [here](/pages/how-parameters-are-calculated))
+1) It is not always possible to reconstruct individual waveforms across Kilosort versions (see [here](/pages/how-parameters-are-calculated))
 2) The main purpose of the interactive mode is to check that waveforms are identifiably similar
 across sessions. This is easier with templates rather than noisier spike waveforms.
 
@@ -87,8 +87,8 @@ import spikeinterface as si
 from driftplots import DriftPlotter, MultiSessionDriftmapWidget
 from pathlib import Path
 
-# Load the data. In this example we load as a sorting analyzer
-# or from the raw kilosort output to demonstrate both methods
+# Load the data. In this example we load as a SortingAnalyzer
+# or from the raw Kilosort output to demonstrate both methods
 data_path = Path("/path/to/example_data")
 analyzer = si.load_sorting_analyzer(data_path / "analyzer.zarr")
 sorting_output_path = data_path / "sorting" / "sorter_output"

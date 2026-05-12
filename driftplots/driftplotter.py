@@ -66,7 +66,7 @@ class DriftPlotter:
             "noise". For Kilosort, this is taken from the cluster_groups.csv /
             cluster_group.tsv file that reflects labels set in Phy. For a
             SortingAnalyzer, a string must be passed. The labels are taken from
-            the sorting properly with the passed name (e.g. "KSLabel").
+            the sorting property with the passed name (e.g. "KSLabel").
         amplitude_cmap_scaling
             Controls how spike amplitudes are mapped to the greyscale
             colormap.  Pass ``"linear"`` or ``"log2"`` or ``"log10"`` for automatic
@@ -142,7 +142,7 @@ class DriftPlotter:
             "noise". For Kilosort, this is taken from the
             cluster_groups.csv / cluster_group.tsv file that reflects labels
             set in Phy. For a SortingAnalyzer, a string must be passed.
-            The labels are taken from the sorting properly with the
+            The labels are taken from the sorting property with the
             passed name (e.g. "KSLabel").
         amplitude_cmap_scaling
             Controls how spike amplitudes are mapped to the greyscale
@@ -163,9 +163,6 @@ class DriftPlotter:
             ``(low, high)`` bounds for amplitude filtering, used as set by
             ``filter_amplitude_mode``.  Ignored when ``filter_amplitude_mode``
             is ``None``.
-        filter_amplitude_values
-            ``(low, high)`` bounds for amplitude filtering.  Ignored when
-            ``filter_amplitude_mode`` is ``None``.
         add_histogram_plot
             If ``True``, add a side panel showing a depth histogram of
             spike activity.

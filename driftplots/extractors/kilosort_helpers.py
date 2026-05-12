@@ -7,13 +7,13 @@ import pandas as pd
 
 
 def load_cluster_groups(cluster_path: Path) -> tuple[np.ndarray, np.ndarray]:
-    """Load kilosort ``cluster_groups`` file.
+    """Load Kilosort ``cluster_groups`` file.
 
     Contains a table of quality assignments, one per unit. These can be
     "noise", "mua", "good" or "unsorted".
 
     There are slight formatting differences between the ``.tsv`` and
-    ``.csv`` versions, presumably from different kilosort versions.
+    ``.csv`` versions, presumably from different Kilosort versions.
 
     This function was ported from Nick Steinmetz's ``spikes`` repository
     MATLAB code, https://github.com/cortex-lab/spikes

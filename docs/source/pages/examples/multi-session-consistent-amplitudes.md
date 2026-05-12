@@ -17,8 +17,8 @@ import numpy as np
 # compute absolute amplitudes used for filtering spikes based
 # on amplitude, or scaling color map values the same across plots.
 
-# Load the data. In this example we load as a sorting analyzer
-# or from the raw kilosort output to demonstrate both methods
+# Load the data. In this example we load as a SortingAnalyzer
+# or from the raw Kilosort output to demonstrate both methods
 data_path = Path(__file__).parent / "example_data"
 analyzer = si.load_sorting_analyzer(data_path / "analyzer.zarr")
 sorting_output_path = data_path / "sorting" / "sorter_output"
@@ -43,8 +43,8 @@ min_cutoff, max_cutoff = concat_spike_amplitudes.min(), concat_spike_amplitudes.
 
 fig, axes = plt.subplots(1, 2)
 
-for idx, path_or_analzyer in enumerate([analyzer, sorting_output_path]):
-    plotter = DriftPlotter(path_or_analzyer)
+for idx, path_or_analyzer in enumerate([analyzer, sorting_output_path]):
+    plotter = DriftPlotter(path_or_analyzer)
 
     plotter.drift_map_plot_matplotlib(
         amplitude_cmap_scaling=(min_cutoff, max_cutoff),

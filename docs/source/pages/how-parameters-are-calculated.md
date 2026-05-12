@@ -35,7 +35,7 @@ will depend on your data and the options chosen when creating the `SortingAnalyz
 
 In SpikeInterface, all spike amplitudes, depths and unit templates are
 directly computed by the `SortingAnalyzer`, from the passed `recording`. They are
-not directly reconstructed the Kilosort output and can be quite different.
+not directly reconstructed from the Kilosort output and can be quite different.
 
 In general, spike amplitudes, depths and unit templates are
 calculated differently in SpikeInterface and across Kilosort versions
@@ -47,16 +47,16 @@ and so are not directly comparable across sorters.
 
 In SpikeInterface, the spike amplitudes
 [are calculated as](https://github.com/SpikeInterface/spikeinterface/blob/4c3a6f9f9a1c61cd634fa353c469e4327c4fb900/src/spikeinterface/postprocessing/spike_amplitudes.py#L93)
-the traces value at the spike peak on the channel in which the associated unit
+the trace value at the spike peak on the channel in which the associated unit
 template has the strongest signal.
 
 **Kilosort**
 
 *Kilosort 1, 2*
 
-In Kilosort 1,2 the `amplitudes.npy` file does not contain the actual spike amplitudes.
+In Kilosort 1, 2 the `amplitudes.npy` file does not contain the actual spike amplitudes.
 Instead, it contains a scalar used to scale the template to give the best fit
-to the spike waveform. Therefore, taking the amplitude of the unwhitented template
+to the spike waveform. Therefore, taking the amplitude of the unwhitened template
 scaled by this amplitude value will give the approximate spike amplitude.
 
 This matches how amplitudes are calculated in Nick Steinmetz
@@ -83,7 +83,7 @@ comparable across sessions sorted by the same sorter, but not other sorters.
 
 In Kilosort 4, the `amplitudes.npy` does not contain a scaling value
 as in previous Kilosort versions. Instead, it calculates a proxy for
-the amplitude as the [l2 norm over the PC features](https://github.com/MouseLand/Kilosort/blob/9f8e7052f43fbe12b3462bd185f2de05fceef33a/kilosort/io.py#L353)
+the amplitude as the [L2 norm over the PC features](https://github.com/MouseLand/Kilosort/blob/9f8e7052f43fbe12b3462bd185f2de05fceef33a/kilosort/io.py#L353)
 (over both all channels and all PCs) i.e. like an energy over the feature space.
 
 To approximate the spike amplitude, we use the method
@@ -96,19 +96,19 @@ We are currently investigating how this method compares to SpikeInterface and ot
 When `DriftPlotter` is passed a path to Kilosort 1-3 output, the whitened templates are always displayed.
 Here the template is the universal or learned canonical waveform for each unit, used in Kilosort's template matching.
 
-These templates are not unwhitened, as it is not possible to unwhiten the templates
+These templates remain whitened, as it is not possible to unwhiten the templates
 in Kilosort 2.5 and 3 due to the missing inverse whitening matrix, as mentioned above.
 
-In Kilosort4, the unit templates are the average spike waveform (reconstructed from PCs)
+In Kilosort 4, the unit templates are the average spike waveform (reconstructed from PCs)
 (after whitening, filtering, and drift correction). These are also displayed in their whitened form.
 
 The displayed unit templates are not scaled to the clicked spike amplitude,
-because to the authors knowledge this scaling value is not available in Kilosort 4.
+because to the authors' knowledge this scaling value is not available in Kilosort 4.
 
-When passing a `SortingAnalzyer`, the displayed templates are taken from
+When passing a `SortingAnalyzer`, the displayed templates are taken from
 the `"templates"` extension. Whether the templates are whitened or unwhitened
 will depend on the preprocessing chain used for the `recording` passed to the
-`SortingAnalzyer`, on which the templates are computed.
+`SortingAnalyzer`, on which the templates are computed.
 
 # Spike Depths
 

@@ -21,8 +21,8 @@ class DataLoader:
     def __init__(self, path_or_analyzer: Path | si.SortingAnalyzer) -> None:
         """ """
 
-        # Get the data loading function depending on if
-        # we are analyzer or kilosort output
+        # Get the data loading function depending on whether
+        # the input is a SortingAnalyzer or Kilosort output.
         func: Callable
         if isinstance(path_or_analyzer, si.SortingAnalyzer):
             self.path_or_analyzer = path_or_analyzer

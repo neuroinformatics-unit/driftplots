@@ -10,7 +10,7 @@ def get_sorting_analyzer(
     analyzer: si.SortingAnalyzer,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
-    Get the required data from the sorting analyzer. Note that this
+    Get the required data from the SortingAnalyzer. Note that this
     will not get all detected spikes, but rather the number of spikes
     specified when creating the analyzer, `max_spikes_per_unit`.
     """
