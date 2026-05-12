@@ -16,4 +16,3 @@ API Reference
    :undoc-members:
 
 .. autofunction:: get_amplitudes
-cnn

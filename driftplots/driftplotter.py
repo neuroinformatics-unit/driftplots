@@ -20,8 +20,6 @@ class DriftPlotter:
 
     On construction, spike data is loaded from a Kilosort output directory
     or a SpikeInterface ``SortingAnalyzer`` and stored as read-only arrays.
-    Plotting methods apply optional filtering (noise exclusion, amplitude
-    filtering, decimation) before handing the data to a plot backend.
 
     Parameters
     ----------
@@ -30,12 +28,6 @@ class DriftPlotter:
         ``SortingAnalyzer`` object.  When a path is given it must contain
         exactly one ``kilosort*.log`` file, which is used to detect the
         Kilosort version.
-
-    Examples
-    --------
-    >>> plotter = DriftPlotter("/path/to/kilosort/output")
-    >>> fig = plotter.drift_map_plot_matplotlib()
-
     """
 
     def __init__(self, path_or_analyzer: str | Path) -> None:
@@ -46,15 +38,6 @@ class DriftPlotter:
         path_or_analyzer
             Path to a Kilosort sorter output directory, or a SpikeInterface
             ``SortingAnalyzer`` object.
-
-        Raises
-        ------
-        FileNotFoundError
-            If ``path_or_analyzer`` is a path and does not point to an
-            existing directory.
-        AssertionError
-            If the directory does not contain exactly one ``kilosort*.log``
-            file, or if the loaded spike arrays have mismatched sizes.
         """
         self._data_loader = DataLoader(path_or_analyzer)
 
@@ -75,30 +58,33 @@ class DriftPlotter:
         ----------
         decimate
             Thin the spike dataset before plotting.  Pass ``"estimate"`` to
-            automatically reduce spikes to a reasonable count (≈ 50 000).
+            automatically reduce spikes to a reasonable count (≈ 100 000).
             Pass ``False``, ``None``, or ``0`` to disable decimation.  Pass
             an integer *n* to keep every *n*-th spike.
         exclude_noise
             If ``True``, remove all spikes belonging to clusters labelled
-            "noise" in the Kilosort cluster-groups file (or the
-            ``SortingAnalyzer`` quality labels).
+            "noise". For Kilosort, this is taken from the cluster_groups.csv / cluster_group.tsv
+             file that reflects labels set in Phy. For a SortingAnalyzer, a string must be passed.
+             The labels are taken from the sorting properly with the passed name (e.g. "KSLabel").
         amplitude_cmap_scaling
             Controls how spike amplitudes are mapped to the greyscale
-            colormap.  Pass ``"linear"`` or ``"log"`` for automatic
+            colormap.  Pass ``"linear"`` or ``"log2"`` or ``"log10"`` for automatic
             scaling, or a ``(min, max)`` tuple to set explicit bounds.
+            When explicit bounds are set, the scaling is linear.
         n_color_bins
             Number of discrete greyscale bins used to colour spikes by
             amplitude.
         point_size
             Diameter of each scatter point in pixels.
         filter_amplitude_mode
-            How ``filter_amplitude_values`` is interpreted.
+            Controls how spikes are filtered based on amplitude before plotting.
             ``"percentile"`` treats the bounds as percentile ranks;
             ``"absolute"`` treats them as raw amplitude values.
             ``None`` disables amplitude filtering.
         filter_amplitude_values
-            ``(low, high)`` bounds for amplitude filtering.  Ignored when
-            ``filter_amplitude_mode`` is ``None``.
+            ``(low, high)`` bounds for amplitude filtering, used as set by
+            ``filter_amplitude_mode``.  Ignored when ``filter_amplitude_mode``
+            is ``None``.
         title
             Plot title.  Pass a string to set a custom title, ``True`` to
             use a default title, or ``None`` / ``False`` to suppress the
@@ -147,27 +133,35 @@ class DriftPlotter:
         ----------
         decimate
             Thin the spike dataset before plotting.  Pass ``"estimate"`` to
-            automatically reduce spikes to a reasonable count (≈ 50 000).
+            automatically reduce spikes to a reasonable count (≈ 100 000).
             Pass ``False``, ``None``, or ``0`` to disable decimation.  Pass
             an integer *n* to keep every *n*-th spike.
         exclude_noise
             If ``True``, remove all spikes belonging to clusters labelled
-            "noise" in the Kilosort cluster-groups file (or the
-            ``SortingAnalyzer`` quality labels).
+            "noise". For Kilosort, this is taken from the
+            cluster_groups.csv / cluster_group.tsv file that reflects labels
+            set in Phy. For a SortingAnalyzer, a string must be passed.
+            The labels are taken from the sorting properly with the
+            passed name (e.g. "KSLabel").
         amplitude_cmap_scaling
             Controls how spike amplitudes are mapped to the greyscale
-            colormap.  Pass ``"linear"`` or ``"log"`` for automatic
+            colormap.  Pass ``"linear"`` or ``"log2"`` or ``"log10"`` for automatic
             scaling, or a ``(min, max)`` tuple to set explicit bounds.
+            When explicit bounds are set, the scaling is linear.
         n_color_bins
             Number of discrete greyscale bins used to colour spikes by
             amplitude.
         point_size
-            Diameter of each scatter point in points (Matplotlib units).
+            Diameter of each scatter point in pixels.
         filter_amplitude_mode
-            How ``filter_amplitude_values`` is interpreted.
+            Controls how spikes are filtered based on amplitude before plotting.
             ``"percentile"`` treats the bounds as percentile ranks;
             ``"absolute"`` treats them as raw amplitude values.
             ``None`` disables amplitude filtering.
+        filter_amplitude_values
+            ``(low, high)`` bounds for amplitude filtering, used as set by
+            ``filter_amplitude_mode``.  Ignored when ``filter_amplitude_mode``
+            is ``None``.
         filter_amplitude_values
             ``(low, high)`` bounds for amplitude filtering.  Ignored when
             ``filter_amplitude_mode`` is ``None``.

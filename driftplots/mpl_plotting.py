@@ -80,7 +80,11 @@ def plot_matplotlib(
         hist_axis.plot(counts, bin_centers, color="black", linewidth=1)
 
     if title:
-        fig.suptitle(title if isinstance(title, str) else "Drift Map")
+        title_text = title if isinstance(title, str) else "Drift Map"
+        if ax is None:
+            fig.suptitle(title_text)
+        else:
+            raster_axis.set_title(title_text)
 
     return fig
 

@@ -163,9 +163,6 @@ def _load_ks_dir(sorter_output: Path, load_pcs: bool = False) -> dict:
     ----------
     sorter_output : Path
         Path to the kilosort run sorting output.
-    exclude_noise : bool
-        If `True`, units labelled as "noise` are removed from all
-        returned arrays (i.e. both units and associated spikes are dropped).
     load_pcs : bool
         If `True`, principal component (PC) features are loaded.
 

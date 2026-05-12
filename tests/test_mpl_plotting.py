@@ -116,6 +116,22 @@ class TestMatplotlibScatter:
         assert fig._suptitle.get_text() == "My Title"
         plt.close(fig)
 
+    def test_title_on_provided_axis(self, synthetic_ks4_output):
+        plotter = DriftPlotter(synthetic_ks4_output)
+        fig, ax = plt.subplots()
+
+        returned = plotter.drift_map_plot_matplotlib(
+            decimate=False,
+            exclude_noise=False,
+            title="My Title",
+            ax=ax,
+        )
+
+        assert returned is fig
+        assert fig._suptitle is None
+        assert ax.get_title() == "My Title"
+        plt.close(fig)
+
     def test_no_title(self, synthetic_ks4_output):
         plotter = DriftPlotter(synthetic_ks4_output)
         fig = plotter.drift_map_plot_matplotlib(
