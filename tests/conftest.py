@@ -1,5 +1,5 @@
 """Shared synthetic dataset fixtures for unit tests. All features
-are tested with mock KS4. SortingAnalzyer and KS1-3 loaders are tested separately.
+are tested with mock KS4. SortingAnalyzer and KS1-3 loaders are tested separately.
 
 Templates are 2-D Gaussians (time × channel) placed on a synthetic
 NP2-like channel layout with two shanks, two columns per shank, and

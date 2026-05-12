@@ -36,8 +36,8 @@ min_cutoff, max_cutoff = concat_spike_amplitudes.min(), concat_spike_amplitudes.
 
 fig, axes = plt.subplots(1, 2)
 
-for idx, path_or_analzyer in enumerate([analyzer, sorting_output_path]):
-    plotter = DriftPlotter(path_or_analzyer)
+for idx, path_or_analyzer in enumerate([analyzer, sorting_output_path]):
+    plotter = DriftPlotter(path_or_analyzer)
 
     plotter.drift_map_plot_matplotlib(
         amplitude_cmap_scaling=(min_cutoff, max_cutoff),
