@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../_static/documentation_options.js?v=0b0d6fe3"></script>
+    <script src="../_static/documentation_options.js?v=01f34227"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
@@ -50,7 +50,7 @@
     <link rel="canonical" href="https://driftplots.neuroinformatics.dev/pages/api_index.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="Creating a PDF from an experiment" href="examples/creating-pdf.html" />
+    <link rel="prev" title="Consistent amplitude scaling across multiple sessions" href="examples/multi-session-consistent-amplitudes.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -121,7 +121,7 @@
   
   
   
-    <p class="title logo__title">driftplots v0.0.0rc1</p>
+    <p class="title logo__title">driftplots v0.1.0</p>
   
 </a></div>
     
@@ -388,54 +388,18 @@
 <span id="id1"></span><h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="driftplots.DriftPlotter">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">driftplots.</span></span><span class="sig-name descname"><span class="pre">DriftPlotter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sorter_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/driftplots/driftplotter.html#DriftPlotter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#driftplots.DriftPlotter" title="Link to this definition">#</a></dt>
-<dd><p>Load Kilosort sorter output and provide interactive or static drift map plots.</p>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">driftplots.</span></span><span class="sig-name descname"><span class="pre">DriftPlotter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_analyzer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/driftplots/driftplotter.html#DriftPlotter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#driftplots.DriftPlotter" title="Link to this definition">#</a></dt>
+<dd><p>Load Kilosort or SpikeInterface output and plot drift maps.</p>
 <p>On construction, spike data is loaded from a Kilosort output directory
-and stored as read-only arrays. Plotting methods apply optional
-filtering (noise exclusion, amplitude filtering, decimation) before
-handing the data to a plot backend.</p>
+or a SpikeInterface <code class="docutils literal notranslate"><span class="pre">SortingAnalyzer</span></code> and stored as read-only arrays.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>sorter_path</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></span>) – Path to a Kilosort sorter output directory. Must contain
-exactly one <code class="docutils literal notranslate"><span class="pre">kilosort*.log</span></code> file used to detect the KS version.</p>
+<dd class="field-odd"><p><strong>path_or_analyzer</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></span>) – Path to a Kilosort sorter output directory, or a SpikeInterface
+<code class="docutils literal notranslate"><span class="pre">SortingAnalyzer</span></code> object.  When a path is given it must contain
+exactly one <code class="docutils literal notranslate"><span class="pre">kilosort*.log</span></code> file, which is used to detect the
+Kilosort version.</p>
 </dd>
 </dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="driftplots.DriftPlotter.spike_times">
-<span class="sig-name descname"><span class="pre">spike_times</span></span><a class="headerlink" href="#driftplots.DriftPlotter.spike_times" title="Link to this definition">#</a></dt>
-<dd><p>(num_spikes,) spike times (seconds for KS 1-3, samples for KS4).</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="driftplots.DriftPlotter.spike_amplitudes">
-<span class="sig-name descname"><span class="pre">spike_amplitudes</span></span><a class="headerlink" href="#driftplots.DriftPlotter.spike_amplitudes" title="Link to this definition">#</a></dt>
-<dd><p>(num_spikes,) spike amplitudes.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="driftplots.DriftPlotter.spike_depths">
-<span class="sig-name descname"><span class="pre">spike_depths</span></span><a class="headerlink" href="#driftplots.DriftPlotter.spike_depths" title="Link to this definition">#</a></dt>
-<dd><p>(num_spikes,) spike depths along the probe (µm).</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="driftplots.DriftPlotter.spike_templates">
-<span class="sig-name descname"><span class="pre">spike_templates</span></span><a class="headerlink" href="#driftplots.DriftPlotter.spike_templates" title="Link to this definition">#</a></dt>
-<dd><p>(num_spikes,) template or unit id assigned to each spike.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="driftplots.DriftPlotter.templates">
-<span class="sig-name descname"><span class="pre">templates</span></span><a class="headerlink" href="#driftplots.DriftPlotter.templates" title="Link to this definition">#</a></dt>
-<dd><p>(num_templates, num_samples, num_channels) template waveforms.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="driftplots.DriftPlotter.channel_locations">
-<span class="sig-name descname"><span class="pre">channel_locations</span></span><a class="headerlink" href="#driftplots.DriftPlotter.channel_locations" title="Link to this definition">#</a></dt>
-<dd><p>(num_channels, 2) x/y positions of each channel on the probe.</p>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="driftplots.DriftPlotter.drift_map_plot_interactive">
 <span class="sig-name descname"><span class="pre">drift_map_plot_interactive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decimate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'estimate'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude_cmap_scaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_color_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_amplitude_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_amplitude_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/driftplots/driftplotter.html#DriftPlotter.drift_map_plot_interactive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#driftplots.DriftPlotter.drift_map_plot_interactive" title="Link to this definition">#</a></dt>
@@ -443,22 +407,37 @@ exactly one <code class="docutils literal notranslate"><span class="pre">kilosor
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>decimate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code> | <code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'estimate'</span></code>]</span>) – Keep every <em>n</em>-th spike. Too many spikes will slow down the plot.
-if <code class="docutils literal notranslate"><span class="pre">&quot;estimate&quot;`</span> <span class="pre">the</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">spikes</span> <span class="pre">will</span> <span class="pre">be</span> <span class="pre">decimated</span> <span class="pre">to</span> <span class="pre">a</span> <span class="pre">reasonable</span>
-<span class="pre">range</span> <span class="pre">(e.g.</span> <span class="pre">50,000).</span> <span class="pre">``False</span></code>, <code class="docutils literal notranslate"><span class="pre">None</span></code> or <code class="docutils literal notranslate"><span class="pre">0</span></code> disables decimation.`
-Otherwise pass an integer e.g. 2 to keep every 2nd spike.</p></li>
-<li><p><strong>exclude_noise</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Remove spikes labelled as noise.</p></li>
-<li><p><strong>amplitude_cmap_scaling</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) – Colour-scaling mode or explicit <code class="docutils literal notranslate"><span class="pre">(min,</span> <span class="pre">max)</span></code> range.</p></li>
-<li><p><strong>n_color_bins</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – Number of grey-scale colour bins for amplitude.</p></li>
-<li><p><strong>point_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – Scatter-point diameter in pixels.</p></li>
-<li><p><strong>filter_amplitude_mode</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Amplitude filtering mode.</p></li>
-<li><p><strong>filter_amplitude_values</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</span>) – Bounds for amplitude filtering.</p></li>
-<li><p><strong>title</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Title of the plot</p></li>
+<li><p><strong>decimate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code> | <code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'estimate'</span></code>]</span>) – Thin the spike dataset before plotting.  Pass <code class="docutils literal notranslate"><span class="pre">&quot;estimate&quot;</span></code> to
+automatically reduce spikes to a reasonable count (≈ 100 000).
+Pass <code class="docutils literal notranslate"><span class="pre">False</span></code>, <code class="docutils literal notranslate"><span class="pre">None</span></code>, or <code class="docutils literal notranslate"><span class="pre">0</span></code> to disable decimation.  Pass
+an integer <em>n</em> to keep every <em>n</em>-th spike.</p></li>
+<li><p><strong>exclude_noise</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, remove all spikes belonging to clusters labelled
+“noise”. For Kilosort, this is taken from the cluster_groups.csv /
+cluster_group.tsv file that reflects labels set in Phy. For a
+SortingAnalyzer, a string must be passed. The labels are taken from
+the sorting property with the passed name (e.g. “KSLabel”).</p></li>
+<li><p><strong>amplitude_cmap_scaling</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) – Controls how spike amplitudes are mapped to the greyscale
+colormap.  Pass <code class="docutils literal notranslate"><span class="pre">&quot;linear&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;log2&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;log10&quot;</span></code> for automatic
+scaling, or a <code class="docutils literal notranslate"><span class="pre">(min,</span> <span class="pre">max)</span></code> tuple to set explicit bounds.
+When explicit bounds are set, the scaling is linear.</p></li>
+<li><p><strong>n_color_bins</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – Number of discrete greyscale bins used to colour spikes by
+amplitude.</p></li>
+<li><p><strong>point_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – Diameter of each scatter point in pixels.</p></li>
+<li><p><strong>filter_amplitude_mode</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Controls how spikes are filtered based on amplitude before plotting.
+<code class="docutils literal notranslate"><span class="pre">&quot;percentile&quot;</span></code> treats the bounds as percentile ranks;
+<code class="docutils literal notranslate"><span class="pre">&quot;absolute&quot;</span></code> treats them as raw amplitude values.
+<code class="docutils literal notranslate"><span class="pre">None</span></code> disables amplitude filtering.</p></li>
+<li><p><strong>filter_amplitude_values</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</span>) – <code class="docutils literal notranslate"><span class="pre">(low,</span> <span class="pre">high)</span></code> bounds for amplitude filtering, used as set by
+<code class="docutils literal notranslate"><span class="pre">filter_amplitude_mode</span></code>.  Ignored when <code class="docutils literal notranslate"><span class="pre">filter_amplitude_mode</span></code>
+is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>title</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Plot title.  Pass a string to set a custom title, <code class="docutils literal notranslate"><span class="pre">True</span></code> to
+use a default title, or <code class="docutils literal notranslate"><span class="pre">None</span></code> / <code class="docutils literal notranslate"><span class="pre">False</span></code> to suppress the
+title entirely.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The pyqtgraph widget. This is already populated but not yet
-shown, use app.exec() to display.</p>
+<dd class="field-even"><p>The pyqtgraph widget.  The widget is already populated but not
+yet shown; call <code class="docutils literal notranslate"><span class="pre">app.exec()</span></code> to display it.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DriftmapPlotWidget</span></code></span></p>
@@ -468,8 +447,51 @@ shown, use app.exec() to display.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="driftplots.DriftPlotter.drift_map_plot_matplotlib">
-<span class="sig-name descname"><span class="pre">drift_map_plot_matplotlib</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decimate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'estimate'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude_cmap_scaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_color_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_amplitude_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_amplitude_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_histogram_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_histogram_by_amplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/driftplots/driftplotter.html#DriftPlotter.drift_map_plot_matplotlib"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#driftplots.DriftPlotter.drift_map_plot_matplotlib" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<span class="sig-name descname"><span class="pre">drift_map_plot_matplotlib</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decimate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'estimate'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude_cmap_scaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_color_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_amplitude_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_amplitude_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_histogram_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_histogram_by_amplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/driftplots/driftplotter.html#DriftPlotter.drift_map_plot_matplotlib"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#driftplots.DriftPlotter.drift_map_plot_matplotlib" title="Link to this definition">#</a></dt>
+<dd><p>Create a static Matplotlib drift map figure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>decimate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code> | <code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'estimate'</span></code>]</span>) – Thin the spike dataset before plotting.  Pass <code class="docutils literal notranslate"><span class="pre">&quot;estimate&quot;</span></code> to
+automatically reduce spikes to a reasonable count (≈ 100 000).
+Pass <code class="docutils literal notranslate"><span class="pre">False</span></code>, <code class="docutils literal notranslate"><span class="pre">None</span></code>, or <code class="docutils literal notranslate"><span class="pre">0</span></code> to disable decimation.  Pass
+an integer <em>n</em> to keep every <em>n</em>-th spike.</p></li>
+<li><p><strong>exclude_noise</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, remove all spikes belonging to clusters labelled
+“noise”. For Kilosort, this is taken from the
+cluster_groups.csv / cluster_group.tsv file that reflects labels
+set in Phy. For a SortingAnalyzer, a string must be passed.
+The labels are taken from the sorting property with the
+passed name (e.g. “KSLabel”).</p></li>
+<li><p><strong>amplitude_cmap_scaling</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) – Controls how spike amplitudes are mapped to the greyscale
+colormap.  Pass <code class="docutils literal notranslate"><span class="pre">&quot;linear&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;log2&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;log10&quot;</span></code> for automatic
+scaling, or a <code class="docutils literal notranslate"><span class="pre">(min,</span> <span class="pre">max)</span></code> tuple to set explicit bounds.
+When explicit bounds are set, the scaling is linear.</p></li>
+<li><p><strong>n_color_bins</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – Number of discrete greyscale bins used to colour spikes by
+amplitude.</p></li>
+<li><p><strong>point_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – Diameter of each scatter point in pixels.</p></li>
+<li><p><strong>filter_amplitude_mode</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Controls how spikes are filtered based on amplitude before plotting.
+<code class="docutils literal notranslate"><span class="pre">&quot;percentile&quot;</span></code> treats the bounds as percentile ranks;
+<code class="docutils literal notranslate"><span class="pre">&quot;absolute&quot;</span></code> treats them as raw amplitude values.
+<code class="docutils literal notranslate"><span class="pre">None</span></code> disables amplitude filtering.</p></li>
+<li><p><strong>filter_amplitude_values</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</span>) – <code class="docutils literal notranslate"><span class="pre">(low,</span> <span class="pre">high)</span></code> bounds for amplitude filtering, used as set by
+<code class="docutils literal notranslate"><span class="pre">filter_amplitude_mode</span></code>.  Ignored when <code class="docutils literal notranslate"><span class="pre">filter_amplitude_mode</span></code>
+is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>add_histogram_plot</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, add a side panel showing a depth histogram of
+spike activity.</p></li>
+<li><p><strong>weight_histogram_by_amplitude</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, weight the depth histogram by spike amplitude
+rather than counting spikes uniformly.  Only used when
+<code class="docutils literal notranslate"><span class="pre">add_histogram_plot</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>title</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Plot title.  Pass a string to set a custom title, <code class="docutils literal notranslate"><span class="pre">True</span></code> to
+use a default title, or <code class="docutils literal notranslate"><span class="pre">None</span></code> / <code class="docutils literal notranslate"><span class="pre">False</span></code> to suppress the
+title entirely.</p></li>
+<li><p><strong>ax</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Existing Matplotlib axis to draw the drift map on.  When
+<code class="docutils literal notranslate"><span class="pre">add_histogram_plot</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, a histogram axis is added
+beside this axis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The populated Matplotlib figure.</p>
+</dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Figure</span></code></span></p>
 </dd>
@@ -499,23 +521,33 @@ square layout is computed automatically.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="driftplots.MultiSessionDriftmapWidget.plot">
 <span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/driftplots/interactive/multi_session_drift_map.html#MultiSessionDriftmapWidget.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#driftplots.MultiSessionDriftmapWidget.plot" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Display the widget and start the Qt event loop.</p>
+<p>This is a blocking call: it shows the window and runs
+<code class="docutils literal notranslate"><span class="pre">app.exec()</span></code> until the window is closed.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="driftplots.get_amplitudes">
 <span class="sig-prename descclassname"><span class="pre">driftplots.</span></span><span class="sig-name descname"><span class="pre">get_amplitudes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_of_path_or_analyzer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concatenate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/driftplots/amplitudes.html#get_amplitudes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#driftplots.get_amplitudes" title="Link to this definition">#</a></dt>
-<dd><p>Load and concatenate amplitudes.npy from multiple sorter output paths.</p>
+<dd><p>Return spike amplitudes from one or more sorter outputs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>list_of_path_or_analyzer</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">SortingAnalyzer</span></code>]</span>) – List of sorter output directories, each containing amplitudes.npy.</p></li>
-<li><p><strong>concatenate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, concatenate all amplitudes into a single array.</p></li>
+<li><p><strong>list_of_path_or_analyzer</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">SortingAnalyzer</span></code>]</span>) – Kilosort output directory paths or SpikeInterface <code class="docutils literal notranslate"><span class="pre">SortingAnalyzer</span></code>
+objects to load amplitudes from. Can be a mix of both.</p></li>
+<li><p><strong>exclude_noise</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, remove spikes belonging to clusters labelled “noise”
+before returning amplitudes.</p></li>
+<li><p><strong>concatenate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, concatenate all per-session amplitude arrays into a
+single 1-D array.  If <code class="docutils literal notranslate"><span class="pre">False</span></code> (default), return a list with one
+array per session.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Concatenated amplitudes from all paths.</p>
+<dd class="field-even"><p>When <code class="docutils literal notranslate"><span class="pre">concatenate=True</span></code>, a single 1-D array of all spike
+amplitudes.  When <code class="docutils literal notranslate"><span class="pre">concatenate=False</span></code>, a list of 1-D arrays,
+one per entry in <code class="docutils literal notranslate"><span class="pre">list_of_path_or_analyzer</span></code>.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span></p>
@@ -536,12 +568,12 @@ square layout is computed automatically.</p></li>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="examples/creating-pdf.html"
+       href="examples/multi-session-consistent-amplitudes.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Creating a PDF from an experiment</p>
+        <p class="prev-next-title">Consistent amplitude scaling across multiple sessions</p>
       </div>
     </a>
 </div>
@@ -563,19 +595,13 @@ square layout is computed automatically.</p></li>
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#driftplots.DriftPlotter"><code class="docutils literal notranslate"><span class="pre">DriftPlotter</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#driftplots.DriftPlotter.spike_times"><code class="docutils literal notranslate"><span class="pre">DriftPlotter.spike_times</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#driftplots.DriftPlotter.spike_amplitudes"><code class="docutils literal notranslate"><span class="pre">DriftPlotter.spike_amplitudes</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#driftplots.DriftPlotter.spike_depths"><code class="docutils literal notranslate"><span class="pre">DriftPlotter.spike_depths</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#driftplots.DriftPlotter.spike_templates"><code class="docutils literal notranslate"><span class="pre">DriftPlotter.spike_templates</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#driftplots.DriftPlotter.templates"><code class="docutils literal notranslate"><span class="pre">DriftPlotter.templates</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#driftplots.DriftPlotter.channel_locations"><code class="docutils literal notranslate"><span class="pre">DriftPlotter.channel_locations</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#driftplots.DriftPlotter.drift_map_plot_interactive"><code class="docutils literal notranslate"><span class="pre">DriftPlotter.drift_map_plot_interactive()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#driftplots.DriftPlotter.drift_map_plot_matplotlib"><code class="docutils literal notranslate"><span class="pre">DriftPlotter.drift_map_plot_matplotlib()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#driftplots.DriftPlotter"><code class="docutils literal notranslate"><span class="pre">DriftPlotter</span></code></a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#driftplots.DriftPlotter.drift_map_plot_interactive"><code class="docutils literal notranslate"><span class="pre">drift_map_plot_interactive()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#driftplots.DriftPlotter.drift_map_plot_matplotlib"><code class="docutils literal notranslate"><span class="pre">drift_map_plot_matplotlib()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#driftplots.MultiSessionDriftmapWidget"><code class="docutils literal notranslate"><span class="pre">MultiSessionDriftmapWidget</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#driftplots.MultiSessionDriftmapWidget.plot"><code class="docutils literal notranslate"><span class="pre">MultiSessionDriftmapWidget.plot()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#driftplots.MultiSessionDriftmapWidget"><code class="docutils literal notranslate"><span class="pre">MultiSessionDriftmapWidget</span></code></a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#driftplots.MultiSessionDriftmapWidget.plot"><code class="docutils literal notranslate"><span class="pre">plot()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#driftplots.get_amplitudes"><code class="docutils literal notranslate"><span class="pre">get_amplitudes()</span></code></a></li>
@@ -607,7 +633,7 @@ square layout is computed automatically.</p></li>
 
   <p class="copyright">
     
-      © Copyright 2026, Joseph Ziminski.
+      © Copyright 2026, University College London.
       <br/>
     
   </p>

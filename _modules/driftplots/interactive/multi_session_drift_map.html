@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../../../_static/documentation_options.js?v=0b0d6fe3"></script>
+    <script src="../../../_static/documentation_options.js?v=01f34227"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -119,7 +119,7 @@
   
   
   
-    <p class="title logo__title">driftplots v0.0.0rc1</p>
+    <p class="title logo__title">driftplots v0.1.0</p>
   
 </a></div>
     
@@ -429,6 +429,11 @@
 <div class="viewcode-block" id="MultiSessionDriftmapWidget.plot">
 <a class="viewcode-back" href="../../../pages/api_index.html#driftplots.MultiSessionDriftmapWidget.plot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Display the widget and start the Qt event loop.</span>
+
+<span class="sd">        This is a blocking call: it shows the window and runs</span>
+<span class="sd">        ``app.exec()`` until the window is closed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span></div>
 
@@ -551,7 +556,7 @@
 
   <p class="copyright">
     
-      © Copyright 2026, Joseph Ziminski.
+      © Copyright 2026, University College London.
       <br/>
     
   </p>

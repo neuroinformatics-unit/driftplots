@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../../_static/documentation_options.js?v=0b0d6fe3"></script>
+    <script src="../../_static/documentation_options.js?v=01f34227"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
@@ -50,8 +50,8 @@
     <link rel="canonical" href="https://driftplots.neuroinformatics.dev/pages/examples/creating-pdf.html" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="API Reference" href="../api_index.html" />
-    <link rel="prev" title="Multi-widgets for comparing sessions" href="multi-widget-comparison.html" />
+    <link rel="next" title="Consistent amplitude scaling across multiple sessions" href="multi-session-consistent-amplitudes.html" />
+    <link rel="prev" title="Examples" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -122,7 +122,7 @@
   
   
   
-    <p class="title logo__title">driftplots v0.0.0rc1</p>
+    <p class="title logo__title">driftplots v0.1.0</p>
   
 </a></div>
     
@@ -327,9 +327,8 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="multi-widget-comparison.html">Multi-widgets for comparing sessions</a></li>
-
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Creating a PDF from an experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multi-session-consistent-amplitudes.html">Consistent amplitude scaling across multiple sessions</a></li>
 </ul>
 </div>
 </nav></div>
@@ -392,27 +391,36 @@
                   
   <section class="tex2jax_ignore mathjax_ignore" id="creating-a-pdf-from-an-experiment">
 <h1>Creating a PDF from an experiment<a class="headerlink" href="#creating-a-pdf-from-an-experiment" title="Link to this heading">#</a></h1>
-<p>The matplotlib viewer</p>
+<p>This example shows how to loop through folders in an experimental project,
+adding the driftplot for each session to a PDF file. This allows you to
+get a quick overview of the drift within and across sessions in an experiment.</p>
+<p>You can extend this example to use the same scaling for the amplitudes
+across sessions, using <a class="reference internal" href="multi-session-consistent-amplitudes.html#consistent-amplitudes"><span class="std std-ref">the consistent amplitudes example</span></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">spikeinterface</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">si</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.backends.backend_pdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">PdfPages</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">driftplots</span><span class="w"> </span><span class="kn">import</span> <span class="n">DriftMapView</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">driftplots</span><span class="w"> </span><span class="kn">import</span> <span class="n">DriftPlotter</span>
 
-<span class="n">project_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/path/to/my_project&quot;</span><span class="p">)</span>
-<span class="n">pdf_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sub_dir</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">ses_dir</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_drift_map.pdf&quot;</span>
-<span class="n">output_path</span> <span class="o">=</span> <span class="n">project_path</span> <span class="o">/</span> <span class="s2">&quot;all_drift_maps.pdf&quot;</span>
+<span class="c1"># Set up paths</span>
+<span class="n">project_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/path/to/my/project&quot;</span><span class="p">)</span>
+<span class="n">derivatives_path</span> <span class="o">=</span> <span class="n">project_path</span> <span class="o">/</span> <span class="s2">&quot;derivatives&quot;</span>
+<span class="n">output_path</span> <span class="o">=</span> <span class="n">project_path</span> <span class="o">/</span> <span class="s2">&quot;output&quot;</span> <span class="o">/</span> <span class="s2">&quot;all_drift_maps.pdf&quot;</span>
+<span class="n">output_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Iterate through every subject and session, adding</span>
+<span class="c1"># the generated matplotlib plot to the PDF</span>
 
 <span class="k">with</span> <span class="n">PdfPages</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">pdf</span><span class="p">:</span>
     <span class="k">for</span> <span class="n">sub_dir</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">derivatives_path</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;sub-*&quot;</span><span class="p">)):</span>
         <span class="k">for</span> <span class="n">ses_dir</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">sub_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;ses-*&quot;</span><span class="p">)):</span>
-
             <span class="n">analyzer_path</span> <span class="o">=</span> <span class="n">ses_dir</span> <span class="o">/</span> <span class="s2">&quot;ephys&quot;</span> <span class="o">/</span> <span class="s2">&quot;sorting_analyzer.zarr&quot;</span>
 
             <span class="n">analyzer</span> <span class="o">=</span> <span class="n">si</span><span class="o">.</span><span class="n">load_sorting_analyzer</span><span class="p">(</span><span class="n">analyzer_path</span><span class="p">)</span>
 
-            <span class="n">plotter</span> <span class="o">=</span> <span class="n">DriftMapView</span><span class="p">(</span><span class="n">analyzer</span><span class="p">)</span>
+            <span class="n">plotter</span> <span class="o">=</span> <span class="n">DriftPlotter</span><span class="p">(</span><span class="n">analyzer</span><span class="p">)</span>
 
             <span class="n">fig</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">drift_map_plot_matplotlib</span><span class="p">(</span>
                 <span class="n">add_histogram_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -424,9 +432,9 @@
             <span class="n">pdf</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Saved </span><span class="si">{</span><span class="n">pdf_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Added </span><span class="si">{</span><span class="n">sub_dir</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">ses_dir</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">All drift map PDFs saved to </span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Saved multi-page PDF to </span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -442,20 +450,20 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="multi-widget-comparison.html"
+       href="index.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Multi-widgets for comparing sessions</p>
+        <p class="prev-next-title">Examples</p>
       </div>
     </a>
     <a class="right-next"
-       href="../api_index.html"
+       href="multi-session-consistent-amplitudes.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">API Reference</p>
+        <p class="prev-next-title">Consistent amplitude scaling across multiple sessions</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -489,7 +497,7 @@
 
   <p class="copyright">
     
-      © Copyright 2026, Joseph Ziminski.
+      © Copyright 2026, University College London.
       <br/>
     
   </p>

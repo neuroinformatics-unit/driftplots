@@ -6,18 +6,18 @@
 ::::{grid} 1 1 2 2
 :gutter: 4
 
-:::{grid-item-card} {fas}`columns;sd-text-primary` Multi-widgets for comparing sessions
-:link: multi-widget-comparison
+:::{grid-item-card} {fas}`sliders;sd-text-primary` Consistent amplitude scaling
+:link: multi-session-consistent-amplitudes
 :link-type: doc
 
-Use multiple drift map widgets side-by-side to compare sessions.
+Pool amplitudes across sessions so plots use comparable colour scaling.
 :::
 
 :::{grid-item-card} {fas}`file-pdf;sd-text-primary` Creating a PDF from an experiment
 :link: creating-pdf
 :link-type: doc
 
-Export drift map figures to a PDF report for an experiment.
+Export matplotlib figures to a PDF report.
 :::
 
 ::::
@@ -27,6 +27,6 @@ Export drift map figures to a PDF report for an experiment.
 :caption: Examples
 :hidden:
 
-multi-widget-comparison
 creating-pdf
+multi-session-consistent-amplitudes
 ```

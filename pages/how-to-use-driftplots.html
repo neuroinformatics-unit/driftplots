@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../_static/documentation_options.js?v=0b0d6fe3"></script>
+    <script src="../_static/documentation_options.js?v=01f34227"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
@@ -122,7 +122,7 @@
   
   
   
-    <p class="title logo__title">driftplots v0.0.0rc1</p>
+    <p class="title logo__title">driftplots v0.1.0</p>
   
 </a></div>
     
@@ -388,8 +388,8 @@
   <section class="tex2jax_ignore mathjax_ignore" id="using-driftplots">
 <h1>Using <code class="docutils literal notranslate"><span class="pre">driftplots</span></code><a class="headerlink" href="#using-driftplots" title="Link to this heading">#</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">driftplots</span></code> can be used to generate static <a class="reference external" href="https://matplotlib.org/">Matplotlib</a> figures or an interactive viewer (built on Qt).
-In the interactive viewer, clicking a spike will display the <em>template</em> (unscaled, whitened) for
-the template assigned to that spike.</p>
+In the interactive viewer, clicking a spike will display the <em>template</em> (unscaled, whitened) of the
+unit that spike is assigned to.</p>
 <p>Below we will cover the main ways to use <code class="docutils literal notranslate"><span class="pre">driftplots</span></code>.
 See the <a class="reference internal" href="api_index.html"><span class="doc std std-doc">API Reference</span></a> for a full list of arguments.</p>
 <div class="admonition note">
@@ -398,12 +398,12 @@ See the <a class="reference internal" href="api_index.html"><span class="doc std
 </div>
 <section id="inputs">
 <h2>Inputs<a class="headerlink" href="#inputs" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">driftplots</span></code> accepts a path to Kilosort’s output or a SpikeInterface <code class="docutils literal notranslate"><span class="pre">SortingAnalyzer</span></code> as input.</p>
-<p>If passing a path directly to a sorting output, Kilosort 1-4 are supported.
+<p><code class="docutils literal notranslate"><span class="pre">driftplots</span></code> accepts either a path to the output of Kilosort, or a SpikeInterface <code class="docutils literal notranslate"><span class="pre">SortingAnalyzer</span></code> as input.</p>
+<p>A path to Kilosort 1-4 output is supported.
 See <a class="reference internal" href="how-parameters-are-calculated.html"><span class="doc std std-doc">here</span></a> for details on how spike amplitudes,
-depths and unit templates are computed across Kilosort versions). <code class="docutils literal notranslate"><span class="pre">spike_templates.npy</span></code>
-is used to assign the template for each spike. This follows Kilosort’s original per-spike
-template assignment and therefore will not reflect later merges or splits made in Phy.</p>
+depths and unit templates are computed across Kilosort versions.
+Displayed templates will reflect the unit assignment provided by Kilosort,
+and not reflect any later changes in Phy (<code class="docutils literal notranslate"><span class="pre">spike_templates.npy</span></code> is used for the unit assignments).</p>
 <p>If passing a <code class="docutils literal notranslate"><span class="pre">SortingAnalyzer</span></code>, it is expected that the required extensions
 have already been computed. See
 <a class="reference external" href="https://github.com/neuroinformatics-unit/driftplots/blob/e8ec328e14cc848feca3e7e90604501bb9e343f1/examples/example_data/create_analyzer.py#L1">this example</a>
@@ -412,14 +412,15 @@ on the argument set for <code class="docutils literal notranslate"><span class="
 <p>By default, the number of spikes displayed will be decimated to around <code class="docutils literal notranslate"><span class="pre">100,000</span></code>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p><code class="docutils literal notranslate"><span class="pre">driftplots</span></code> was designed and tested with Neuropixels probes, but it should also work with most other probe types.</p>
+<p><code class="docutils literal notranslate"><span class="pre">driftplots</span></code> was designed and tested with Neuropixels probes, but it should also work with most other probes.
+Please raise a <a class="reference external" href="https://github.com/neuroinformatics-unit/driftplots">GitHub issue</a> if you have any problems.</p>
 </div>
 </section>
 <section id="interactive-viewer">
 <h2>Interactive Viewer<a class="headerlink" href="#interactive-viewer" title="Link to this heading">#</a></h2>
 <p><a class="reference internal" href="api_index.html#driftplots.DriftPlotter.drift_map_plot_matplotlib" title="driftplots.DriftPlotter.drift_map_plot_matplotlib"><code class="xref py py-meth docutils literal notranslate"><span class="pre">drift_map_plot_matplotlib()</span></code></a> generates an interactive viewer
-allowing selection of individual spikes on the driftmap. Once selected, the template for that
-spike will be displayed on the right-hand side.</p>
+allowing the selection of individual spikes on the driftmap. Once selected, the template for the
+unit that spike is associated with will be displayed on the right-hand side.</p>
 <a class="reference internal image-reference" href="../_images/interactive-single-example.png"><img alt="../_images/interactive-single-example.png" class="align-center" src="../_images/interactive-single-example.png" style="width: 750px;" />
 </a>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">driftplots</span><span class="w"> </span><span class="kn">import</span> <span class="n">DriftPlotter</span>
@@ -436,28 +437,30 @@ spike will be displayed on the right-hand side.</p>
 
 </pre></div>
 </div>
-<p>The displayed templates are whitened and are not scaled per-spike  i.e. the template will
-appear the same for all spikes assigned to the same template. The template is whitened and is not
-scaled to each individual spike. This approach was chosen for two main reasons:This is due to the difficulty of reconstructing individual waveforms from</p>
+<p>The displayed templates are whitened and are not scaled per spike, i.e. the template will
+appear the same for all spikes assigned to the same template. This approach was chosen for
+two main reasons:</p>
 <ol class="arabic simple">
-<li><p>it is not always possible to reconstruct the waveforms or their amplitudes across kilosort versions (see <a class="reference internal" href="how-parameters-are-calculated.html"><span class="doc std std-doc">here</span></a>)</p></li>
-<li><p>the main purpose of the interactive mode is to check that templates are identifiably similar
-across sessions, to ensure little drift has occurred. This is easier with templates rather than noisier spike waveforms.</p></li>
+<li><p>It is not always possible to reconstruct individual waveforms across Kilosort versions (see <a class="reference internal" href="how-parameters-are-calculated.html"><span class="doc std std-doc">here</span></a>)</p></li>
+<li><p>The main purpose of the interactive mode is to check that waveforms are identifiably similar
+across sessions. This is easier with templates rather than noisier spike waveforms.</p></li>
 </ol>
 <section id="interactive-viewer-with-multiple-plots">
 <h3>Interactive Viewer with Multiple Plots<a class="headerlink" href="#interactive-viewer-with-multiple-plots" title="Link to this heading">#</a></h3>
 <p><a class="reference internal" href="api_index.html#driftplots.MultiSessionDriftmapWidget" title="driftplots.MultiSessionDriftmapWidget"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiSessionDriftmapWidget</span></code></a> can be used to display
 multiple interactive plots at once. In this mode, the y-axis
-zoom is linked across plots.See <a class="reference internal" href="#amplitudes"><span class="std std-ref">the amplitudes section</span></a> for details
-on how to ensure amplitude scaling is consistent across sessions.</p>
+zoom is linked across plots.</p>
+<p>See <a class="reference internal" href="#amplitudes"><span class="std std-ref">the amplitudes section</span></a> for details
+on ensuring amplitude scaling is consistent across sessions.</p>
 <a class="reference internal image-reference" href="../_images/interactive-multi-example.png"><img alt="../_images/interactive-multi-example.png" class="align-center" src="../_images/interactive-multi-example.png" style="width: 850px;" />
 </a>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">spikeinterface</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">si</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">driftplots</span><span class="w"> </span><span class="kn">import</span> <span class="n">DriftPlotter</span><span class="p">,</span> <span class="n">MultiSessionDriftmapWidget</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-<span class="c1"># Load the data. In this example we load as a sorting analyzer</span>
-<span class="c1"># or from the raw kilosort output to demonstrate both methods</span>
-<span class="n">data_path</span> <span class="o">=</span> <span class="s2">&quot;/path/to/example_data&quot;</span>
+<span class="c1"># Load the data. In this example we load as a SortingAnalyzer</span>
+<span class="c1"># or from the raw Kilosort output to demonstrate both methods</span>
+<span class="n">data_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/path/to/example_data&quot;</span><span class="p">)</span>
 <span class="n">analyzer</span> <span class="o">=</span> <span class="n">si</span><span class="o">.</span><span class="n">load_sorting_analyzer</span><span class="p">(</span><span class="n">data_path</span> <span class="o">/</span> <span class="s2">&quot;analyzer.zarr&quot;</span><span class="p">)</span>
 <span class="n">sorting_output_path</span> <span class="o">=</span> <span class="n">data_path</span> <span class="o">/</span> <span class="s2">&quot;sorting&quot;</span> <span class="o">/</span> <span class="s2">&quot;sorter_output&quot;</span>
 
@@ -470,7 +473,7 @@ on how to ensure amplitude scaling is consistent across sessions.</p>
 <span class="p">):</span>
     <span class="n">plotter</span> <span class="o">=</span> <span class="n">DriftPlotter</span><span class="p">(</span><span class="n">path_or_analyzer</span><span class="p">)</span>
 
-    <span class="n">plot</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">drift_map_plot_interactive</span><span class="p">()</span>
+    <span class="n">plot</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">drift_map_plot_interactive</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
 
     <span class="n">panels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plot</span><span class="p">)</span>
 
@@ -488,8 +491,6 @@ takes all the same arguments as the interactive viewer
 but can additionally plot a 1D activity histogram next to the driftmap.</p>
 <a class="reference internal image-reference" href="../_images/matplotlib-example.png"><img alt="../_images/matplotlib-example.png" class="align-center" src="../_images/matplotlib-example.png" style="width: 750px;" />
 </a>
-<p>See <a class="reference internal" href="examples/creating-pdf.html"><span class="doc std std-doc">this example</span></a> for how to stitch Matplotlib figures together across
-an experimental project to quickly assess recording quality and stability.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">spikeinterface</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">si</span>
 
@@ -500,7 +501,6 @@ an experimental project to quickly assess recording quality and stability.</p>
 <span class="n">plotter</span> <span class="o">=</span> <span class="n">DriftPlotter</span><span class="p">(</span><span class="n">analyzer</span><span class="p">)</span>
 
 <span class="n">fig</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">drift_map_plot_matplotlib</span><span class="p">(</span>
-    <span class="n">exclude_noise</span><span class="o">=</span><span class="s2">&quot;KSLabel&quot;</span><span class="p">,</span>
     <span class="n">add_histogram_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">weight_histogram_by_amplitude</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
@@ -509,20 +509,22 @@ an experimental project to quickly assess recording quality and stability.</p>
 
 </pre></div>
 </div>
+<p>See <a class="reference internal" href="examples/creating-pdf.html"><span class="doc std std-doc">this example</span></a> for how to stitch Matplotlib figures together across
+an experimental project into a PDF, to quickly assess recording quality and stability.</p>
 </section>
 <section id="aligning-amplitudes-across-sessions">
 <span id="amplitudes"></span><h2>Aligning Amplitudes Across Sessions<a class="headerlink" href="#aligning-amplitudes-across-sessions" title="Link to this heading">#</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">driftplots</span></code> provides options for excluding spikes based on their
-amplitudes and scaling the color of the scatter points by amplitude.
-This can be useful when a small number of high- or low-amplitude spikes dominate
-the color scaling, with a few very light/dark spots with the rest grey.</p>
-<p>As such it is useful to apply the same amplitude filtering and colormap
+amplitudes. Options are also provided to adjust the color map scaling based on the amplitudes.
+This can be useful when a small number of high- or low-amplitude
+spikes dominate the color scaling i.e. there are a few very dark and/or light spots with the rest grey.</p>
+<p>It aids comparison to apply the same amplitude filtering and colormap
 scaling to all plots when comparing multiple sessions. <a class="reference internal" href="api_index.html#driftplots.get_amplitudes" title="driftplots.get_amplitudes"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_amplitudes()</span></code></a>
 can be used to pool amplitudes across sessions, allowing cutoffs to be calculated
 across all sessions and applied to all plots.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">spikeinterface</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">si</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtWidgets</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtWidgets</span><span class="p">[</span><span class="n">how</span><span class="o">-</span><span class="n">parameters</span><span class="o">-</span><span class="n">are</span><span class="o">-</span><span class="n">calculated</span><span class="o">.</span><span class="n">md</span><span class="p">](</span><span class="n">how</span><span class="o">-</span><span class="n">parameters</span><span class="o">-</span><span class="n">are</span><span class="o">-</span><span class="n">calculated</span><span class="o">.</span><span class="n">md</span><span class="p">)</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">driftplots</span><span class="w"> </span><span class="kn">import</span> <span class="n">DriftPlotter</span><span class="p">,</span> <span class="n">MultiSessionDriftmapWidget</span><span class="p">,</span> <span class="n">get_amplitudes</span>
 
@@ -539,8 +541,6 @@ across all sessions and applied to all plots.</p>
 
 <span class="n">min_cutoff</span><span class="p">,</span> <span class="n">max_cutoff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">all_spike_amplitudes</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">95</span><span class="p">))</span>
 
-<span class="n">app</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="p">([])</span>
-
 <span class="n">panels</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">path_or_analyzer</span> <span class="ow">in</span> <span class="n">SORTING_SESSIONS</span><span class="p">:</span>
     <span class="n">plotter</span> <span class="o">=</span> <span class="n">DriftPlotter</span><span class="p">(</span><span class="n">path_or_analyzer</span><span class="p">)</span>
@@ -556,7 +556,7 @@ across all sessions and applied to all plots.</p>
 
 <span class="n">multi</span> <span class="o">=</span> <span class="n">MultiSessionDriftmapWidget</span><span class="p">(</span><span class="n">panels</span><span class="p">)</span>
 
-<span class="n">app</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span>
+<span class="n">multi</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 
 </pre></div>
 </div>
@@ -611,7 +611,7 @@ across all sessions and applied to all plots.</p>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inputs">Inputs</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#interactive-viewer">Interactive Viewer</a><ul class="nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#interactive-viewer">Interactive Viewer</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#interactive-viewer-with-multiple-plots">Interactive Viewer with Multiple Plots</a></li>
 </ul>
 </li>
@@ -645,7 +645,7 @@ across all sessions and applied to all plots.</p>
 
   <p class="copyright">
     
-      © Copyright 2026, Joseph Ziminski.
+      © Copyright 2026, University College London.
       <br/>
     
   </p>
