@@ -175,11 +175,11 @@ class DataLoader:
                 spike_depths = spike_depths[::decimation_factor]
                 spike_templates = spike_templates[::decimation_factor]
 
-            self._print(
-                f"Decimated by factor {decimation_factor}. "
-                f"{spike_times.size} spikes remaining.",
-                verbose,
-            )
+                self._print(
+                    f"Decimated by factor {decimation_factor}. "
+                    f"{spike_times.size} spikes remaining.",
+                    verbose,
+                )
 
         return DataModel(
             spike_times,

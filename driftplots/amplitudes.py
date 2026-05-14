@@ -12,6 +12,7 @@ def get_amplitudes(
     list_of_path_or_analyzer: list[Path | si.SortingAnalyzer],
     exclude_noise: bool = False,
     concatenate: bool = False,
+    verbose: bool = True,
 ) -> np.ndarray | list[np.ndarray]:
     """Return spike amplitudes from one or more sorter outputs.
 
@@ -27,6 +28,8 @@ def get_amplitudes(
         If ``True``, concatenate all per-session amplitude arrays into a
         single 1-D array.  If ``False`` (default), return a list with one
         array per session.
+    verbose :
+            If `True`, messages are printed.
 
     Returns
     -------
@@ -45,7 +48,7 @@ def get_amplitudes(
             decimate=False,
             filter_amplitude_mode=None,
             filter_amplitude_values=None,
-            verbose=False,
+            verbose=verbose,
         )
 
         all_spike_amplitudes.append(processed_data.spike_amplitudes)
