@@ -34,7 +34,7 @@ on the argument set for `max_spikes_per_unit` used when computing `"random_spike
 By default, the number of spikes displayed will be decimated to around `100,000`.
 
 ::: {tip}
-`good_units_only` is a useful way of excluding spikes from noise and MUA units, tidying up the drift map.
+`good_units_only=True` is a useful way of excluding spikes from noise and MUA units, tidying up the drift map.
 :::
 
 ## Interactive Viewer

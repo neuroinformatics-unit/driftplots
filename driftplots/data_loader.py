@@ -77,10 +77,6 @@ class DataLoader:
     ):
         """Filter and subsample the loaded spike data.
 
-        Operations are applied in order: decimation → noise exclusion →
-        amplitude filtering → masking. Decimation is applied first as a
-        performance knob to thin the full dataset before further filtering.
-
         Parameters
         ----------
         good_units_only
