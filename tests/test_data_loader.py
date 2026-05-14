@@ -69,6 +69,7 @@ class TestProcessedData:
             decimate=False,
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
+            verbose=False,
         )
         np.testing.assert_array_equal(result.spike_times, loader._spike_times)
         np.testing.assert_array_equal(result.spike_amplitudes, loader._spike_amplitudes)
@@ -84,6 +85,7 @@ class TestProcessedData:
             decimate=factor,
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
+            verbose=False,
         )
         assert result.spike_times.size == loader._spike_times[::factor].size
         np.testing.assert_array_equal(result.spike_times, loader._spike_times[::factor])
@@ -96,6 +98,7 @@ class TestProcessedData:
             decimate="estimate",
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
+            verbose=False,
         )
         # Synthetic data has 50 spikes (< 100k), so no decimation should occur
         assert result.spike_times.size == loader._spike_times.size
@@ -115,6 +118,7 @@ class TestProcessedData:
             decimate="estimate",
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
+            verbose=False,
         )
         expected_factor = n // 100_000  # 3
         assert result.spike_times.size == len(loader._spike_times[::expected_factor])
@@ -130,6 +134,7 @@ class TestProcessedData:
             decimate=False,
             filter_amplitude_mode="absolute",
             filter_amplitude_values=(low, high),
+            verbose=False,
         )
         assert result.spike_times.size < loader._spike_times.size
         assert np.all(result.spike_amplitudes >= low)
@@ -143,6 +148,7 @@ class TestProcessedData:
             decimate=False,
             filter_amplitude_mode="percentile",
             filter_amplitude_values=(10, 90),
+            verbose=False,
         )
         amplitudes = loader._spike_amplitudes
         low, high = np.percentile(amplitudes, (10, 90))
@@ -162,12 +168,14 @@ class TestProcessedData:
             decimate=2,
             filter_amplitude_mode="absolute",
             filter_amplitude_values=(low, high),
+            verbose=False,
         )
         only_filtered = loader.get_processed_data(
             exclude_noise=False,
             decimate=False,
             filter_amplitude_mode="absolute",
             filter_amplitude_values=(low, high),
+            verbose=False,
         )
         # Amplitude filter is applied before decimation, so the combined
         # result should exactly match slicing the filtered-only output.
@@ -187,6 +195,7 @@ class TestProcessedData:
             decimate=2,
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
+            verbose=False,
         )
         assert result.spike_times.size < only_decimated.spike_times.size
         assert result.spike_times.size < only_filtered.spike_times.size
@@ -199,6 +208,7 @@ class TestProcessedData:
             decimate=2,
             filter_amplitude_mode="percentile",
             filter_amplitude_values=(5, 95),
+            verbose=False,
         )
         n = result.spike_times.size
         assert result.spike_amplitudes.size == n
@@ -220,6 +230,7 @@ class TestExcludeNoise:
             decimate=False,
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
+            verbose=False,
         )
         keep = ~np.isin(
             loader._spike_templates.ravel(), synthetic_data["noise_cluster_ids"]
@@ -241,6 +252,7 @@ class TestExcludeNoise:
             decimate=False,
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
+            verbose=False,
         )
         assert result.spike_times.size == loader._spike_times.size
 
@@ -265,6 +277,7 @@ class TestTemplateHeatmap:
             decimate=False,
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
+            verbose=False,
         )
 
         # Find the first spike assigned to this template

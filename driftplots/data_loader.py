@@ -73,7 +73,7 @@ class DataLoader:
         decimate,
         filter_amplitude_mode,
         filter_amplitude_values,
-        verbose: bool = True,
+        verbose: bool,
     ):
         """Filter and subsample the loaded spike data.
 
@@ -149,7 +149,8 @@ class DataLoader:
             keep_bool_mask[spike_amplitudes > max_val] = False
 
             self._print(
-                f"Excluded spikes based on amplitude. {keep_bool_mask.sum()} spikes remaining",
+                "Excluded spikes based on amplitude. "
+                f"{keep_bool_mask.sum()} spikes remaining",
                 verbose,
             )
 
@@ -175,7 +176,8 @@ class DataLoader:
                 spike_templates = spike_templates[::decimation_factor]
 
             self._print(
-                f"Decimated by factor {decimation_factor}. {spike_times.size} spikes remaining.",
+                f"Decimated by factor {decimation_factor}. "
+                f"{spike_times.size} spikes remaining.",
                 verbose,
             )
 

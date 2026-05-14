@@ -45,6 +45,7 @@ def get_amplitudes(
             decimate=False,
             filter_amplitude_mode=None,
             filter_amplitude_values=None,
+            verbose=False,
         )
 
         all_spike_amplitudes.append(processed_data.spike_amplitudes)

@@ -72,6 +72,7 @@ def _load_data_model(sorter_output) -> DataModel:
         decimate=False,
         filter_amplitude_mode=None,
         filter_amplitude_values=None,
+        verbose=False,
     )
 
 

@@ -55,6 +55,7 @@ class TestMatplotlibScatter:
             decimate=False,
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
+            verbose=False,
         )
         expected = processed.compute_amplitude_colors(
             scaling, n_bins, unit_normalise=True
@@ -162,6 +163,7 @@ class TestMatplotlibHistogram:
             decimate=False,
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
+            verbose=False,
         )
 
         # Independently compute histogram from synthetic depths
@@ -202,6 +204,7 @@ class TestMatplotlibHistogram:
             decimate=False,
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
+            verbose=False,
         )
 
         # Independently compute weighted histogram
