@@ -17,7 +17,7 @@ class TestMatplotlibScatter:
         plotter = DriftPlotter(synthetic_ks4_output)
         fig = plotter.drift_map_plot_matplotlib(
             decimate=False,
-            exclude_noise=False,
+            good_units_only=False,
         )
         ax = fig.axes[0]
         offsets = ax.collections[0].get_offsets()
@@ -43,7 +43,7 @@ class TestMatplotlibScatter:
         plotter = DriftPlotter(synthetic_ks4_output)
         fig = plotter.drift_map_plot_matplotlib(
             decimate=False,
-            exclude_noise=False,
+            good_units_only=False,
             amplitude_cmap_scaling=scaling,
             n_color_bins=n_bins,
         )
@@ -51,7 +51,7 @@ class TestMatplotlibScatter:
         facecolors = ax.collections[0].get_facecolors()
 
         processed = plotter._data_loader.get_processed_data(
-            exclude_noise=False,
+            good_units_only=False,
             decimate=False,
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
@@ -67,7 +67,7 @@ class TestMatplotlibScatter:
         plotter = DriftPlotter(synthetic_ks4_output)
         fig = plotter.drift_map_plot_matplotlib(
             decimate=False,
-            exclude_noise=False,
+            good_units_only=False,
             point_size=42.0,
         )
         ax = fig.axes[0]
@@ -79,7 +79,7 @@ class TestMatplotlibScatter:
         plotter = DriftPlotter(synthetic_ks4_output)
         fig = plotter.drift_map_plot_matplotlib(
             decimate=False,
-            exclude_noise=False,
+            good_units_only=False,
             add_histogram_plot=False,
         )
         assert len(fig.axes) == 1
@@ -92,7 +92,7 @@ class TestMatplotlibScatter:
 
         returned = plotter.drift_map_plot_matplotlib(
             decimate=False,
-            exclude_noise=False,
+            good_units_only=False,
             add_histogram_plot=add_histogram_plot,
             ax=ax,
         )
@@ -111,7 +111,7 @@ class TestMatplotlibScatter:
         plotter = DriftPlotter(synthetic_ks4_output)
         fig = plotter.drift_map_plot_matplotlib(
             decimate=False,
-            exclude_noise=False,
+            good_units_only=False,
             title="My Title",
         )
         assert fig._suptitle.get_text() == "My Title"
@@ -123,7 +123,7 @@ class TestMatplotlibScatter:
 
         returned = plotter.drift_map_plot_matplotlib(
             decimate=False,
-            exclude_noise=False,
+            good_units_only=False,
             title="My Title",
             ax=ax,
         )
@@ -137,7 +137,7 @@ class TestMatplotlibScatter:
         plotter = DriftPlotter(synthetic_ks4_output)
         fig = plotter.drift_map_plot_matplotlib(
             decimate=False,
-            exclude_noise=False,
+            good_units_only=False,
         )
         assert fig._suptitle is None
         plt.close(fig)
@@ -154,12 +154,12 @@ class TestMatplotlibHistogram:
         plotter = DriftPlotter(synthetic_ks4_output)
         fig = plotter.drift_map_plot_matplotlib(
             decimate=False,
-            exclude_noise=False,
+            good_units_only=False,
             add_histogram_plot=True,
             weight_histogram_by_amplitude=False,
         )
         processed = plotter._data_loader.get_processed_data(
-            exclude_noise=False,
+            good_units_only=False,
             decimate=False,
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
@@ -195,12 +195,12 @@ class TestMatplotlibHistogram:
         plotter = DriftPlotter(synthetic_ks4_output)
         fig = plotter.drift_map_plot_matplotlib(
             decimate=False,
-            exclude_noise=False,
+            good_units_only=False,
             add_histogram_plot=True,
             weight_histogram_by_amplitude=True,
         )
         processed = plotter._data_loader.get_processed_data(
-            exclude_noise=False,
+            good_units_only=False,
             decimate=False,
             filter_amplitude_mode=None,
             filter_amplitude_values=(),

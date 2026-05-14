@@ -68,7 +68,7 @@ def ks13_data(tmp_path):
 
 def _load_data_model(sorter_output) -> DataModel:
     return DataLoader(sorter_output, verbose=False).get_processed_data(
-        exclude_noise=False,
+        good_units_only=False,
         decimate=False,
         filter_amplitude_mode=None,
         filter_amplitude_values=None,

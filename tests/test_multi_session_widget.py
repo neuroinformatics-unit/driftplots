@@ -21,7 +21,7 @@ def make_panels(synthetic_ks4_output):
         return [
             DriftPlotter(synthetic_ks4_output).drift_map_plot_interactive(
                 decimate=False,
-                exclude_noise=False,
+                good_units_only=False,
             )
             for _ in range(n)
         ]

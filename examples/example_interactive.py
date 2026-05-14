@@ -20,7 +20,6 @@ for title, path_or_analyzer in zip(
 
     plot = plotter.drift_map_plot_interactive(
         decimate=False,
-        exclude_noise=False,
         filter_amplitude_mode="percentile",
         filter_amplitude_values=(1, 99),
         amplitude_cmap_scaling="linear",

@@ -56,27 +56,28 @@ def get_sorting_analyzer(
     )
 
 
-def get_noise_mask(
-    exclude_noise: bool | str,
+def get_good_unit_mask(
+    good_units_only: bool | str,
     spike_templates: np.ndarray,
     analyzer: si.SortingAnalyzer,
 ) -> np.ndarray:
     """ """
-    if exclude_noise is True:
+    if good_units_only is True:
         raise ValueError(
-            f"When using SortingAnalyzer, `exclude_noise` must be a string of the "
-            f"name of the labels to use, passed to `analyzer.get_sorting_property()."
+            f"When using SortingAnalyzer, `good_units_only` must be a string of the "
+            f"name of the sorting property to use."
             f"Properties on this analyzer are: {analyzer.sorting.get_property_keys()}"
         )
 
-    assert isinstance(exclude_noise, str), "`exclude_noise` must be a string"
-    labels = analyzer.get_sorting_property(exclude_noise)
+    assert isinstance(good_units_only, str), "`good_units_only` must be a string"
+    labels = analyzer.get_sorting_property(good_units_only)
 
     if labels is None:
         raise ValueError(
-            f"The analyzer does not contain a sorting property called: {exclude_noise}"
+            "The analyzer does not contain a sorting property called: "
+            f"{good_units_only}"
         )
 
-    noise_mask = (labels == "noise")[spike_templates]
+    good_mask = (labels == "good")[spike_templates]
 
-    return noise_mask
+    return good_mask

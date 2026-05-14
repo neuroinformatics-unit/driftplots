@@ -56,16 +56,22 @@ class TestGetAmplitudes:
         np.testing.assert_array_almost_equal(result[:n], expected_1)
         np.testing.assert_array_almost_equal(result[n:], expected_2)
 
-    def test_exclude_noise(self, synthetic_ks4_output, synthetic_ks4_output_second):
-        """exclude_noise=True should remove noise spikes from both sessions."""
+    def test_good_units_only(
+        self, synthetic_ks4_output, synthetic_ks4_output_second, synthetic_data
+    ):
+        """good_units_only=True should keep only good-unit spikes from both sessions."""
         result = get_amplitudes(
             [synthetic_ks4_output, synthetic_ks4_output_second],
-            exclude_noise=True,
+            good_units_only=True,
             concatenate=True,
         )
-        full = get_amplitudes(
-            [synthetic_ks4_output, synthetic_ks4_output_second],
-            exclude_noise=False,
-            concatenate=True,
+        keep = np.isin(
+            synthetic_data["spike_templates"], synthetic_data["good_unit_cluster_ids"]
         )
-        assert result.size < full.size
+        expected = np.concatenate(
+            [
+                synthetic_data["spike_amplitudes"][keep],
+                synthetic_data["spike_amplitudes_second"][keep],
+            ]
+        )
+        np.testing.assert_array_almost_equal(result, expected)

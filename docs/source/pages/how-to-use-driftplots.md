@@ -7,9 +7,13 @@ unit that spike is assigned to.
 Below we will cover the main ways to use `driftplots`.
 See the [API Reference](/pages/api_index) for a full list of arguments.
 
-:::{note}
 See [here](terminology) for a glossary of key terms.
+
+::: {warning}
+`driftplots` was designed and tested with Neuropixels probes, but it should also work with most other probes.
+Please raise a [GitHub issue](https://github.com/neuroinformatics-unit/driftplots) if you have any problems.
 :::
+
 
 ## Inputs
 
@@ -29,15 +33,14 @@ on the argument set for `max_spikes_per_unit` used when computing `"random_spike
 
 By default, the number of spikes displayed will be decimated to around `100,000`.
 
-::: {warning}
-`driftplots` was designed and tested with Neuropixels probes, but it should also work with most other probes.
-Please raise a [GitHub issue](https://github.com/neuroinformatics-unit/driftplots) if you have any problems.
+::: {tip}
+`good_units_only` is a useful way of excluding spikes from noise and MUA units, tidying up the drift map.
+For Kilosort outputs, pass `good_units_only=True`. For `SortingAnalyzer` inputs, pass the sorting property name that contains unit labels, for example `good_units_only="KSLabel"`.
 :::
-
 
 ## Interactive Viewer
 
-{py:meth}`~driftplots.DriftPlotter.drift_map_plot_matplotlib` generates an interactive viewer
+{py:meth}`~driftplots.DriftPlotter.drift_map_plot_interactive` generates an interactive viewer
 allowing the selection of individual spikes on the driftmap. Once selected, the template for the
 unit that spike is associated with will be displayed on the right-hand side.
 
@@ -54,7 +57,7 @@ plotter = DriftPlotter(
 )
 
 driftmap = plotter.drift_map_plot_interactive(
-    exclude_noise=True,
+    good_units_only=True,
 )
 
 driftmap.plot()
@@ -160,7 +163,6 @@ across all sessions and applied to all plots.
 ```python
 import numpy as np
 import spikeinterface as si
-from PySide6 import QtWidgets[how-parameters-are-calculated.md](how-parameters-are-calculated.md)
 
 from driftplots import DriftPlotter, MultiSessionDriftmapWidget, get_amplitudes
 
@@ -172,7 +174,7 @@ SORTING_SESSIONS = [
 ]
 
 all_spike_amplitudes = get_amplitudes(
-    SORTING_SESSIONS, exclude_noise=False, concatenate=True
+    SORTING_SESSIONS, good_units_only=False, concatenate=True
 )
 
 min_cutoff, max_cutoff = np.percentile(all_spike_amplitudes, (0, 95))
