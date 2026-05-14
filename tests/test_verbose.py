@@ -32,7 +32,7 @@ class TestVerbosity:
     def test_matplotlib_verbose_true_prints(self, synthetic_ks4_output, capsys):
         plotter = DriftPlotter(synthetic_ks4_output, verbose=False)
         capsys.readouterr()  # clear construction output
-        fig = plotter.drift_map_plot_matplotlib(verbose=True)
+        fig = plotter.drift_map_plot_matplotlib(decimate=2, verbose=True)
         out = capsys.readouterr().out
         assert "spikes" in out.lower()
         plt.close(fig)
@@ -40,7 +40,7 @@ class TestVerbosity:
     def test_matplotlib_verbose_false_suppresses(self, synthetic_ks4_output, capsys):
         plotter = DriftPlotter(synthetic_ks4_output, verbose=False)
         capsys.readouterr()
-        fig = plotter.drift_map_plot_matplotlib(verbose=False)
+        fig = plotter.drift_map_plot_matplotlib(decimate=2, verbose=False)
         out = capsys.readouterr().out
         assert out == ""
         plt.close(fig)
@@ -52,7 +52,7 @@ class TestVerbosity:
     def test_interactive_verbose_true_prints(self, synthetic_ks4_output, capsys):
         plotter = DriftPlotter(synthetic_ks4_output, verbose=False)
         capsys.readouterr()
-        widget = plotter.drift_map_plot_interactive(verbose=True)
+        widget = plotter.drift_map_plot_interactive(decimate=2, verbose=True)
         out = capsys.readouterr().out
         assert "spikes" in out.lower()
         widget.close()
@@ -60,7 +60,7 @@ class TestVerbosity:
     def test_interactive_verbose_false_suppresses(self, synthetic_ks4_output, capsys):
         plotter = DriftPlotter(synthetic_ks4_output, verbose=False)
         capsys.readouterr()
-        widget = plotter.drift_map_plot_interactive(verbose=False)
+        widget = plotter.drift_map_plot_interactive(decimate=2, verbose=False)
         out = capsys.readouterr().out
         assert out == ""
         widget.close()

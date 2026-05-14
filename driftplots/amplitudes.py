@@ -41,7 +41,7 @@ def get_amplitudes(
     all_spike_amplitudes = []
 
     for path_or_analyzer in list_of_path_or_analyzer:
-        loader = DataLoader(path_or_analyzer)
+        loader = DataLoader(path_or_analyzer, verbose)
 
         processed_data = loader.get_processed_data(
             exclude_noise,
