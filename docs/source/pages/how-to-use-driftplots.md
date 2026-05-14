@@ -28,8 +28,7 @@ and not reflect any later changes in Phy (`spike_templates.npy` is used for the 
 If passing a `SortingAnalyzer`, it is expected that the required extensions
 have already been computed. See
 [this example](https://github.com/neuroinformatics-unit/driftplots/blob/e8ec328e14cc848feca3e7e90604501bb9e343f1/examples/example_data/create_analyzer.py#L1)
-for the required extensions. Note that the number of spikes displayed will depend
-on the argument set for `max_spikes_per_unit` used when computing `"random_spikes"`.
+for the required extensions.
 
 By default, the number of spikes displayed will be decimated to around `100,000`.
 
@@ -194,5 +193,3 @@ for path_or_analyzer in SORTING_SESSIONS:
 multi = MultiSessionDriftmapWidget(panels)
 
 multi.plot()
-
-```
