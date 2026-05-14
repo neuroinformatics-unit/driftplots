@@ -10,26 +10,19 @@ def get_sorting_analyzer(
     analyzer: si.SortingAnalyzer,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
-    Get the required data from the SortingAnalyzer. Note that this
-    will not get all detected spikes, but rather the number of spikes
-    specified when creating the analyzer, `max_spikes_per_unit`.
+    Get the required data from the SortingAnalyzer.
     """
-    random_spike_indices = analyzer.get_extension("random_spikes").data[
-        "random_spikes_indices"
-    ]
     spike_vector = analyzer.sorting.to_spike_vector()
     spike_times = (
-        spike_vector["sample_index"][random_spike_indices]
-        / analyzer.sorting.get_sampling_frequency()
+        spike_vector["sample_index"] / analyzer.sorting.get_sampling_frequency()
     )
     spike_amplitudes = np.abs(
         analyzer.get_extension("spike_amplitudes").data["amplitudes"]
     )
-
     spike_depths = analyzer.get_extension("spike_locations").data["spike_locations"][
         "y"
     ]
-    spike_templates = spike_vector["unit_index"][random_spike_indices]
+    spike_templates = spike_vector["unit_index"]
 
     # Get the templates, assume only one method was used. If multiple
     # methods were used, use the first and throw a warning. If people
