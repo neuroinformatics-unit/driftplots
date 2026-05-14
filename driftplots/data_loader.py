@@ -19,7 +19,7 @@ class DataLoader:
     """"""
 
     def __init__(
-        self, path_or_analyzer: Path | si.SortingAnalyzer, verbose: bool = True
+        self, path_or_analyzer: Path | si.SortingAnalyzer, verbose: bool
     ) -> None:
         """ """
 
