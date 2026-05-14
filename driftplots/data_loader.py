@@ -18,8 +18,12 @@ from driftplots.extractors import (
 class DataLoader:
     """"""
 
-    def __init__(self, path_or_analyzer: Path | si.SortingAnalyzer) -> None:
+    def __init__(
+        self, path_or_analyzer: Path | si.SortingAnalyzer, verbose: bool = True
+    ) -> None:
         """ """
+
+        self._print(f"Loading data from {path_or_analyzer}...", verbose)
 
         # Get the data loading function depending on whether
         # the input is a SortingAnalyzer or Kilosort output.
@@ -61,8 +65,15 @@ class DataLoader:
         self.templates.flags.writeable = False
         self.channel_locations.flags.writeable = False
 
+        self._print(f"Loaded {self._spike_times.size} spikes.", verbose)
+
     def get_processed_data(
-        self, exclude_noise, decimate, filter_amplitude_mode, filter_amplitude_values
+        self,
+        exclude_noise,
+        decimate,
+        filter_amplitude_mode,
+        filter_amplitude_values,
+        verbose: bool = True,
     ):
         """Filter and subsample the loaded spike data.
 
@@ -75,15 +86,17 @@ class DataLoader:
         exclude_noise :
             If ``True``, spikes belonging to clusters labelled "noise" in
             the Kilosort cluster groups file are removed.
-        decimate : int | False
+        decimate :
             Keep every *n*-th spike. Applied first to reduce the dataset
             before noise/amplitude filters. ``False`` disables decimation.
-        filter_amplitude_mode : {"percentile", "absolute"} | None
+        filter_amplitude_mode :
             How ``filter_amplitude_values`` is interpreted.
             ``None`` disables amplitude filtering.
-        filter_amplitude_values : tuple of float
+        filter_amplitude_values :
             (low, high) bounds. Interpreted as percentile ranks or
             absolute amplitude values depending on ``filter_amplitude_mode``.
+        verbose :
+            If `True`, messages are printed.
 
         Returns
         -------
@@ -113,6 +126,11 @@ class DataLoader:
                     spike_templates, self.path_or_analyzer
                 )
 
+            self._print(
+                f"Excluding noise spikes. {keep_bool_mask.sum()} spikes remaining.",
+                verbose,
+            )
+
         # Next, filter spikes based on amplitude
         if filter_amplitude_mode is not None:
             assert filter_amplitude_mode in ["percentile", "absolute"]
@@ -129,6 +147,11 @@ class DataLoader:
 
             keep_bool_mask[spike_amplitudes < min_val] = False
             keep_bool_mask[spike_amplitudes > max_val] = False
+
+            self._print(
+                f"Excluded spikes based on amplitude. {keep_bool_mask.sum()} spikes remaining",
+                verbose,
+            )
 
         # mask exclude_noise / filtered amplitudes
         if keep_bool_mask is not None:
@@ -151,13 +174,10 @@ class DataLoader:
                 spike_depths = spike_depths[::decimation_factor]
                 spike_templates = spike_templates[::decimation_factor]
 
-                import logging
-
-                logger = logging.getLogger(__name__)
-                logger.info(
-                    f"Decimated {num_spikes} spikes down to "
-                    f"{spike_times.size} with factor {decimation_factor}."
-                )
+            self._print(
+                f"Decimated by factor {decimation_factor}. {spike_times.size} spikes remaining.",
+                verbose,
+            )
 
         return DataModel(
             spike_times,
@@ -167,3 +187,7 @@ class DataLoader:
             self.templates,
             self.channel_locations,
         )
+
+    def _print(self, message, verbose):
+        if verbose:
+            print(message)

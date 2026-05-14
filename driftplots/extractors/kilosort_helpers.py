@@ -87,7 +87,7 @@ def get_noise_mask(spike_templates: np.ndarray, sorter_output: Path) -> np.ndarr
 
     cluster_ids, cluster_groups = load_cluster_groups(cluster_path)
 
-    noise_cluster_ids = cluster_ids[cluster_groups == 0]
+    noise_cluster_ids = cluster_ids[cluster_groups != 2]
 
     exclude_bool_mask = np.isin(spike_templates.ravel(), noise_cluster_ids)
 
