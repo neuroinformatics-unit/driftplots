@@ -29,7 +29,7 @@ def get_amplitudes(
         single 1-D array.  If ``False`` (default), return a list with one
         array per session.
     verbose :
-            If `True`, messages are printed.
+        If `True`, messages are printed.
 
     Returns
     -------

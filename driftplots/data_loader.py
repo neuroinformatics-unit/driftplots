@@ -150,7 +150,7 @@ class DataLoader:
 
             self._print(
                 "Excluded spikes based on amplitude. "
-                f"{keep_bool_mask.sum()} spikes remaining",
+                f"{keep_bool_mask.sum()} spikes remaining.",
                 verbose,
             )
 
