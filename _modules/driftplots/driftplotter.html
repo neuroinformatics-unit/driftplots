@@ -39,7 +39,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../../_static/documentation_options.js?v=92734c54"></script>
+    <script src="../../_static/documentation_options.js?v=938c9ccc"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
@@ -119,7 +119,7 @@
   
   
   
-    <p class="title logo__title">driftplots v0.1.2</p>
+    <p class="title logo__title">driftplots v0.2.0</p>
   
 </a></div>
     
@@ -381,9 +381,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">driftplots.data_loader</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">driftplots.interactive.driftmap_plot_widget</span><span class="w"> </span><span class="kn">import</span> <span class="n">DriftmapPlotWidget</span>
 
-<span class="c1"># test ideas:</span>
-<span class="c1"># check signatures match default args between interactive and matplotlib</span>
-
 
 <div class="viewcode-block" id="DriftPlotter">
 <a class="viewcode-back" href="../../pages/api_index.html#driftplots.DriftPlotter">[docs]</a>
@@ -402,7 +399,7 @@
 <span class="sd">        Kilosort version.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_or_analyzer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_or_analyzer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load spike data from a Kilosort output directory or SortingAnalyzer.</span>
 
 <span class="sd">        Parameters</span>
@@ -410,21 +407,24 @@
 <span class="sd">        path_or_analyzer</span>
 <span class="sd">            Path to a Kilosort sorter output directory, or a SpikeInterface</span>
 <span class="sd">            ``SortingAnalyzer`` object.</span>
+<span class="sd">        verbose :</span>
+<span class="sd">            If `True`, messages are printed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data_loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">path_or_analyzer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">path_or_analyzer</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
 
 <div class="viewcode-block" id="DriftPlotter.drift_map_plot_interactive">
 <a class="viewcode-back" href="../../pages/api_index.html#driftplots.DriftPlotter.drift_map_plot_interactive">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">drift_map_plot_interactive</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">decimate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;estimate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;estimate&quot;</span><span class="p">,</span>
-        <span class="n">exclude_noise</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">good_units_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">amplitude_cmap_scaling</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;linear&quot;</span><span class="p">,</span>
         <span class="n">n_color_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
         <span class="n">point_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">,</span>
         <span class="n">filter_amplitude_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">filter_amplitude_values</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
         <span class="n">title</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DriftmapPlotWidget</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create an interactive pyqtgraph-based drift map widget.</span>
 
@@ -435,12 +435,13 @@
 <span class="sd">            automatically reduce spikes to a reasonable count (≈ 100 000).</span>
 <span class="sd">            Pass ``False``, ``None``, or ``0`` to disable decimation.  Pass</span>
 <span class="sd">            an integer *n* to keep every *n*-th spike.</span>
-<span class="sd">        exclude_noise</span>
-<span class="sd">            If ``True``, remove all spikes belonging to clusters labelled</span>
-<span class="sd">            &quot;noise&quot;. For Kilosort, this is taken from the cluster_groups.csv /</span>
-<span class="sd">            cluster_group.tsv file that reflects labels set in Phy. For a</span>
-<span class="sd">            SortingAnalyzer, a string must be passed. The labels are taken from</span>
-<span class="sd">            the sorting property with the passed name (e.g. &quot;KSLabel&quot;).</span>
+<span class="sd">        good_units_only</span>
+<span class="sd">            If ``True``, only spikes belonging to &quot;good&quot; units are displayed.</span>
+<span class="sd">            For Kilosort, this is taken from the</span>
+<span class="sd">            cluster_groups.csv / cluster_group.tsv file that reflects labels</span>
+<span class="sd">            set in Phy. For a SortingAnalyzer, a string must be passed.</span>
+<span class="sd">            The labels are taken from the sorting property with the</span>
+<span class="sd">            passed name (e.g. &quot;KSLabel&quot;).</span>
 <span class="sd">        amplitude_cmap_scaling</span>
 <span class="sd">            Controls how spike amplitudes are mapped to the greyscale</span>
 <span class="sd">            colormap.  Pass ``&quot;linear&quot;`` or ``&quot;log2&quot;`` or ``&quot;log10&quot;`` for automatic</span>
@@ -464,6 +465,8 @@
 <span class="sd">            Plot title.  Pass a string to set a custom title, ``True`` to</span>
 <span class="sd">            use a default title, or ``None`` / ``False`` to suppress the</span>
 <span class="sd">            title entirely.</span>
+<span class="sd">        verbose :</span>
+<span class="sd">            If `True`, messages are printed.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -474,7 +477,11 @@
         <span class="n">app</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span> <span class="ow">or</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="p">([])</span>
 
         <span class="n">processed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_loader</span><span class="o">.</span><span class="n">get_processed_data</span><span class="p">(</span>
-            <span class="n">exclude_noise</span><span class="p">,</span> <span class="n">decimate</span><span class="p">,</span> <span class="n">filter_amplitude_mode</span><span class="p">,</span> <span class="n">filter_amplitude_values</span>
+            <span class="n">good_units_only</span><span class="p">,</span>
+            <span class="n">decimate</span><span class="p">,</span>
+            <span class="n">filter_amplitude_mode</span><span class="p">,</span>
+            <span class="n">filter_amplitude_values</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">plot</span> <span class="o">=</span> <span class="n">DriftmapPlotWidget</span><span class="p">(</span>
@@ -494,7 +501,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">drift_map_plot_matplotlib</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">decimate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;estimate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;estimate&quot;</span><span class="p">,</span>
-        <span class="n">exclude_noise</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">good_units_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">amplitude_cmap_scaling</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;linear&quot;</span><span class="p">,</span>
         <span class="n">n_color_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
         <span class="n">point_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">,</span>
@@ -504,6 +511,7 @@
         <span class="n">weight_histogram_by_amplitude</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">title</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Figure</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a static Matplotlib drift map figure.</span>
 
@@ -514,9 +522,9 @@
 <span class="sd">            automatically reduce spikes to a reasonable count (≈ 100 000).</span>
 <span class="sd">            Pass ``False``, ``None``, or ``0`` to disable decimation.  Pass</span>
 <span class="sd">            an integer *n* to keep every *n*-th spike.</span>
-<span class="sd">        exclude_noise</span>
-<span class="sd">            If ``True``, remove all spikes belonging to clusters labelled</span>
-<span class="sd">            &quot;noise&quot;. For Kilosort, this is taken from the</span>
+<span class="sd">        good_units_only</span>
+<span class="sd">            If ``True``, only spikes belonging to &quot;good&quot; units are displayed.</span>
+<span class="sd">            For Kilosort, this is taken from the</span>
 <span class="sd">            cluster_groups.csv / cluster_group.tsv file that reflects labels</span>
 <span class="sd">            set in Phy. For a SortingAnalyzer, a string must be passed.</span>
 <span class="sd">            The labels are taken from the sorting property with the</span>
@@ -555,6 +563,8 @@
 <span class="sd">            Existing Matplotlib axis to draw the drift map on.  When</span>
 <span class="sd">            ``add_histogram_plot`` is ``True``, a histogram axis is added</span>
 <span class="sd">            beside this axis.</span>
+<span class="sd">        verbose :</span>
+<span class="sd">            If `True`, messages are printed.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -562,7 +572,11 @@
 <span class="sd">            The populated Matplotlib figure.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">processed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_loader</span><span class="o">.</span><span class="n">get_processed_data</span><span class="p">(</span>
-            <span class="n">exclude_noise</span><span class="p">,</span> <span class="n">decimate</span><span class="p">,</span> <span class="n">filter_amplitude_mode</span><span class="p">,</span> <span class="n">filter_amplitude_values</span>
+            <span class="n">good_units_only</span><span class="p">,</span>
+            <span class="n">decimate</span><span class="p">,</span>
+            <span class="n">filter_amplitude_mode</span><span class="p">,</span>
+            <span class="n">filter_amplitude_values</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">fig</span> <span class="o">=</span> <span class="n">mpl_plotting</span><span class="o">.</span><span class="n">plot_matplotlib</span><span class="p">(</span>
