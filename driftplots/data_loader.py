@@ -114,7 +114,7 @@ class DataLoader:
 
         keep_bool_mask = None
 
-        # First, exclude spikes from units labeled as "noise"
+        # First, exclude spikes from units that are not labelled "good"
         if good_units_only:
             if isinstance(self.path_or_analyzer, si.SortingAnalyzer):
                 keep_bool_mask = analyzer_helpers.get_good_unit_mask(
@@ -126,7 +126,7 @@ class DataLoader:
                 )
 
             self._print(
-                f"Excluding noise spikes. {keep_bool_mask.sum()} spikes remaining.",
+                f"Keeping good spikes only. {keep_bool_mask.sum()} spikes remaining.",
                 verbose,
             )
 

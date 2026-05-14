@@ -35,7 +35,6 @@ By default, the number of spikes displayed will be decimated to around `100,000`
 
 ::: {tip}
 `good_units_only` is a useful way of excluding spikes from noise and MUA units, tidying up the drift map.
-For Kilosort outputs, pass `good_units_only=True`. For `SortingAnalyzer` inputs, pass the sorting property name that contains unit labels, for example `good_units_only="KSLabel"`.
 :::
 
 ## Interactive Viewer
@@ -174,7 +173,7 @@ SORTING_SESSIONS = [
 ]
 
 all_spike_amplitudes = get_amplitudes(
-    SORTING_SESSIONS, good_units_only=False, concatenate=True
+    SORTING_SESSIONS, good_units_only=True, concatenate=True
 )
 
 min_cutoff, max_cutoff = np.percentile(all_spike_amplitudes, (0, 95))
