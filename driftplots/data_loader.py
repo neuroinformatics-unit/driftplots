@@ -131,8 +131,13 @@ class DataLoader:
             assert filter_amplitude_mode in ["percentile", "absolute"]
 
             if filter_amplitude_mode == "percentile":
+                amps_for_percentile = (
+                    spike_amplitudes
+                    if keep_bool_mask is None
+                    else spike_amplitudes[keep_bool_mask]
+                )
                 min_val, max_val = np.percentile(
-                    spike_amplitudes, filter_amplitude_values
+                    amps_for_percentile, filter_amplitude_values
                 )
             else:
                 min_val, max_val = filter_amplitude_values

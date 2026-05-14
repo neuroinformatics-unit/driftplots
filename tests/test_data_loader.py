@@ -261,6 +261,157 @@ class TestGoodUnitsOnly:
 
 
 # ---------------------------------------------------------------------------
+# Interactions between good_units_only and amplitude / decimation filters
+# ---------------------------------------------------------------------------
+class TestGoodUnitsOnlyInteractions:
+    """Cover the combinations of good_units_only with other processing steps.
+
+    The synthetic clusters have distinct amplitude scales (noise ~5,
+    good ~10, mua ~15), so percentile cutoffs differ depending on
+    whether the percentile is computed over the full population or
+    only over good-unit spikes.  These tests pin that down.
+    """
+
+    def test_good_units_only_with_percentile_uses_good_subset(
+        self, synthetic_ks4_output, synthetic_data
+    ):
+        """Regression: percentile cutoffs must be computed AFTER good-unit
+        filtering, not over the full (noise + mua + good) population."""
+        loader = DataLoader(synthetic_ks4_output, verbose=False)
+
+        good_mask = np.isin(
+            loader._spike_templates.ravel(),
+            synthetic_data["good_unit_cluster_ids"],
+        )
+        good_amps = loader._spike_amplitudes[good_mask]
+        expected_low, expected_high = np.percentile(good_amps, (10, 90))
+
+        # Sanity: cutoffs differ from the full-population percentile, so
+        # the test would actually fail under the old buggy behaviour.
+        full_low, full_high = np.percentile(loader._spike_amplitudes, (10, 90))
+        assert (expected_low, expected_high) != (full_low, full_high)
+
+        result = loader.get_processed_data(
+            good_units_only=True,
+            decimate=False,
+            filter_amplitude_mode="percentile",
+            filter_amplitude_values=(10, 90),
+            verbose=False,
+        )
+        expected_keep = (
+            good_mask
+            & (loader._spike_amplitudes >= expected_low)
+            & (loader._spike_amplitudes <= expected_high)
+        )
+        np.testing.assert_array_equal(
+            result.spike_times, loader._spike_times[expected_keep]
+        )
+        np.testing.assert_array_almost_equal(
+            result.spike_amplitudes, loader._spike_amplitudes[expected_keep]
+        )
+        np.testing.assert_array_equal(
+            result.spike_templates, loader._spike_templates[expected_keep]
+        )
+        assert not np.isin(
+            result.spike_templates, synthetic_data["non_good_cluster_ids"]
+        ).any()
+
+    def test_good_units_only_with_absolute_filter(
+        self, synthetic_ks4_output, synthetic_data
+    ):
+        """Absolute bounds are user-supplied so cutoffs are unchanged; the
+        result is the intersection of the good-unit and amplitude masks."""
+        loader = DataLoader(synthetic_ks4_output, verbose=False)
+        good_mask = np.isin(
+            loader._spike_templates.ravel(),
+            synthetic_data["good_unit_cluster_ids"],
+        )
+        good_amps = loader._spike_amplitudes[good_mask]
+        low, high = np.percentile(good_amps, (25, 75))
+
+        result = loader.get_processed_data(
+            good_units_only=True,
+            decimate=False,
+            filter_amplitude_mode="absolute",
+            filter_amplitude_values=(low, high),
+            verbose=False,
+        )
+        expected_keep = (
+            good_mask
+            & (loader._spike_amplitudes >= low)
+            & (loader._spike_amplitudes <= high)
+        )
+        np.testing.assert_array_equal(
+            result.spike_times, loader._spike_times[expected_keep]
+        )
+        np.testing.assert_array_almost_equal(
+            result.spike_amplitudes, loader._spike_amplitudes[expected_keep]
+        )
+        assert not np.isin(
+            result.spike_templates, synthetic_data["non_good_cluster_ids"]
+        ).any()
+        assert np.all(result.spike_amplitudes >= low)
+        assert np.all(result.spike_amplitudes <= high)
+
+    def test_good_units_only_with_decimate(self, synthetic_ks4_output, synthetic_data):
+        """Decimation runs after good-unit filtering — striding the
+        filtered set must match good_filter -> [::factor]."""
+        loader = DataLoader(synthetic_ks4_output, verbose=False)
+        factor = 2
+        good_mask = np.isin(
+            loader._spike_templates.ravel(),
+            synthetic_data["good_unit_cluster_ids"],
+        )
+
+        result = loader.get_processed_data(
+            good_units_only=True,
+            decimate=factor,
+            filter_amplitude_mode=None,
+            filter_amplitude_values=(),
+            verbose=False,
+        )
+        expected_times = loader._spike_times[good_mask][::factor]
+        expected_amps = loader._spike_amplitudes[good_mask][::factor]
+        np.testing.assert_array_equal(result.spike_times, expected_times)
+        np.testing.assert_array_almost_equal(result.spike_amplitudes, expected_amps)
+        assert not np.isin(
+            result.spike_templates, synthetic_data["non_good_cluster_ids"]
+        ).any()
+
+    def test_good_units_only_with_percentile_and_decimate(
+        self, synthetic_ks4_output, synthetic_data
+    ):
+        """Full pipeline: good_units_only -> percentile filter -> decimate.
+        Combined result must equal applying the steps independently in
+        that order."""
+        loader = DataLoader(synthetic_ks4_output, verbose=False)
+        factor = 2
+        good_mask = np.isin(
+            loader._spike_templates.ravel(),
+            synthetic_data["good_unit_cluster_ids"],
+        )
+        good_amps = loader._spike_amplitudes[good_mask]
+        low, high = np.percentile(good_amps, (10, 90))
+        keep_mask = (
+            good_mask
+            & (loader._spike_amplitudes >= low)
+            & (loader._spike_amplitudes <= high)
+        )
+        expected_times = loader._spike_times[keep_mask][::factor]
+        expected_amps = loader._spike_amplitudes[keep_mask][::factor]
+
+        result = loader.get_processed_data(
+            good_units_only=True,
+            decimate=factor,
+            filter_amplitude_mode="percentile",
+            filter_amplitude_values=(10, 90),
+            verbose=False,
+        )
+        np.testing.assert_array_equal(result.spike_times, expected_times)
+        np.testing.assert_array_almost_equal(result.spike_amplitudes, expected_amps)
+
+
+# ---------------------------------------------------------------------------
 # Template heatmap reconstruction
 # ---------------------------------------------------------------------------
 class TestTemplateHeatmap:
