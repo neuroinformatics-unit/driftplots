@@ -22,15 +22,10 @@ class TestFromSortingAnalyzer:
         analyzer = si.load_sorting_analyzer(ANALYZER_PATH)
         loader = DataLoader(analyzer, verbose=False)
 
-        # Expected values from the analyzer extensions
-        random_spike_indices = analyzer.get_extension("random_spikes").data[
-            "random_spikes_indices"
-        ]
         spike_vector = analyzer.sorting.to_spike_vector()
 
         expected_times = (
-            spike_vector["sample_index"][random_spike_indices]
-            / analyzer.sorting.get_sampling_frequency()
+            spike_vector["sample_index"] / analyzer.sorting.get_sampling_frequency()
         )
         np.testing.assert_array_equal(loader._spike_times, expected_times)
 
@@ -44,7 +39,7 @@ class TestFromSortingAnalyzer:
         ]["y"]
         np.testing.assert_array_equal(loader._spike_depths, expected_depths)
 
-        expected_templates = spike_vector["unit_index"][random_spike_indices]
+        expected_templates = spike_vector["unit_index"]
         np.testing.assert_array_equal(loader._spike_templates, expected_templates)
 
         expected_waveforms = analyzer.get_extension("templates").data["average"]
@@ -64,6 +59,27 @@ class TestFromSortingAnalyzer:
             loader.channel_locations,
         ):
             assert not arr.flags.writeable
+
+    def test_loaded_spikes_ignore_random_spikes_subset(self):
+        analyzer = si.load_sorting_analyzer(ANALYZER_PATH).copy()
+        spike_vector = analyzer.sorting.to_spike_vector()
+
+        random_spikes = analyzer.get_extension("random_spikes")
+        random_spikes.data["random_spikes_indices"] = random_spikes.data[
+            "random_spikes_indices"
+        ][::2]
+        assert random_spikes.data["random_spikes_indices"].size < spike_vector.size
+
+        loader = DataLoader(analyzer, verbose=False)
+
+        expected_times = (
+            spike_vector["sample_index"] / analyzer.sorting.get_sampling_frequency()
+        )
+        np.testing.assert_array_equal(loader._spike_times, expected_times)
+        np.testing.assert_array_equal(
+            loader._spike_templates, spike_vector["unit_index"]
+        )
+        assert loader._spike_times.size == spike_vector.size
 
     def test_good_units_only_keeps_kslabel_good_units(self):
         analyzer = si.load_sorting_analyzer(ANALYZER_PATH)
