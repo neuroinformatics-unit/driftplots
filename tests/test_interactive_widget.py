@@ -11,7 +11,7 @@ pytestmark = pytest.mark.filterwarnings("ignore::RuntimeWarning")
 def widget_and_data(synthetic_ks4_output, synthetic_data):
     """Default widget created via the high-level API + synthetic ground truth."""
     plotter = DriftPlotter(synthetic_ks4_output)
-    widget = plotter.drift_map_plot_interactive(decimate=False, exclude_noise=False)
+    widget = plotter.drift_map_plot_interactive(decimate=False, good_units_only=False)
     yield widget, synthetic_data
     widget.close()
 
@@ -50,7 +50,7 @@ class TestConstructorParameters:
     def test_custom_point_size(self, synthetic_ks4_output):
         plotter = DriftPlotter(synthetic_ks4_output)
         widget = plotter.drift_map_plot_interactive(
-            decimate=False, exclude_noise=False, point_size=12.0
+            decimate=False, good_units_only=False, point_size=12.0
         )
         assert widget.scatter.opts["size"] == 12.0
         widget.close()
@@ -73,7 +73,7 @@ class TestConstructorParameters:
         plotter = DriftPlotter(synthetic_ks4_output)
         widget = plotter.drift_map_plot_interactive(
             decimate=False,
-            exclude_noise=False,
+            good_units_only=False,
             amplitude_cmap_scaling=scaling,
             n_color_bins=n_bins,
         )
@@ -93,7 +93,7 @@ class TestConstructorParameters:
     def test_title_set(self, synthetic_ks4_output):
         plotter = DriftPlotter(synthetic_ks4_output)
         widget = plotter.drift_map_plot_interactive(
-            decimate=False, exclude_noise=False, title="Test Title"
+            decimate=False, good_units_only=False, title="Test Title"
         )
         assert widget.p_scatter.titleLabel.text == "Test Title"
         widget.close()

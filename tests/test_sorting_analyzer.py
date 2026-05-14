@@ -20,7 +20,7 @@ class TestFromSortingAnalyzer:
 
     def test_loaded_arrays_match_analyzer_extensions(self):
         analyzer = si.load_sorting_analyzer(ANALYZER_PATH)
-        loader = DataLoader(analyzer)
+        loader = DataLoader(analyzer, verbose=False)
 
         # Expected values from the analyzer extensions
         random_spike_indices = analyzer.get_extension("random_spikes").data[
@@ -64,3 +64,42 @@ class TestFromSortingAnalyzer:
             loader.channel_locations,
         ):
             assert not arr.flags.writeable
+
+    def test_good_units_only_keeps_kslabel_good_units(self):
+        analyzer = si.load_sorting_analyzer(ANALYZER_PATH)
+        loader = DataLoader(analyzer, verbose=False)
+
+        result = loader.get_processed_data(
+            good_units_only="KSLabel",
+            decimate=False,
+            filter_amplitude_mode=None,
+            filter_amplitude_values=(),
+            verbose=False,
+        )
+
+        labels = analyzer.sorting.get_property("KSLabel")
+        expected_keep = labels[loader._spike_templates] == "good"
+
+        np.testing.assert_array_equal(
+            result.spike_times, loader._spike_times[expected_keep]
+        )
+        np.testing.assert_array_equal(
+            result.spike_amplitudes, loader._spike_amplitudes[expected_keep]
+        )
+        np.testing.assert_array_equal(
+            result.spike_depths, loader._spike_depths[expected_keep]
+        )
+        assert (labels[result.spike_templates] == "good").all()
+
+    def test_good_units_only_true_raises_for_sorting_analyzer(self):
+        analyzer = si.load_sorting_analyzer(ANALYZER_PATH)
+        loader = DataLoader(analyzer, verbose=False)
+
+        with pytest.raises(ValueError, match="must be a string"):
+            loader.get_processed_data(
+                good_units_only=True,
+                decimate=False,
+                filter_amplitude_mode=None,
+                filter_amplitude_values=(),
+                verbose=False,
+            )

@@ -10,7 +10,7 @@ from driftplots.data_loader import DataLoader
 
 def get_amplitudes(
     list_of_path_or_analyzer: list[Path | si.SortingAnalyzer],
-    exclude_noise: bool = False,
+    good_units_only: bool | str = False,
     concatenate: bool = False,
     verbose: bool = True,
 ) -> np.ndarray | list[np.ndarray]:
@@ -21,9 +21,13 @@ def get_amplitudes(
     list_of_path_or_analyzer
         Kilosort output directory paths or SpikeInterface ``SortingAnalyzer``
         objects to load amplitudes from. Can be a mix of both.
-    exclude_noise
-        If ``True``, remove spikes belonging to clusters labelled "noise"
-        before returning amplitudes.
+    good_units_only
+        If ``True``, only spikes belonging to "good" units are displayed.
+        For Kilosort, this is taken from the
+        cluster_groups.csv / cluster_group.tsv file that reflects labels
+        set in Phy. For a SortingAnalyzer, a string must be passed.
+        The labels are taken from the sorting property with the
+        passed name (e.g. "KSLabel").
     concatenate
         If ``True``, concatenate all per-session amplitude arrays into a
         single 1-D array.  If ``False`` (default), return a list with one
@@ -44,7 +48,7 @@ def get_amplitudes(
         loader = DataLoader(path_or_analyzer, verbose)
 
         processed_data = loader.get_processed_data(
-            exclude_noise,
+            good_units_only,
             decimate=False,
             filter_amplitude_mode=None,
             filter_amplitude_values=None,

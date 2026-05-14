@@ -11,9 +11,6 @@ from driftplots import mpl_plotting
 from driftplots.data_loader import DataLoader
 from driftplots.interactive.driftmap_plot_widget import DriftmapPlotWidget
 
-# test ideas:
-# check signatures match default args between interactive and matplotlib
-
 
 class DriftPlotter:
     """Load Kilosort or SpikeInterface output and plot drift maps.
@@ -46,7 +43,7 @@ class DriftPlotter:
     def drift_map_plot_interactive(
         self,
         decimate: int | bool | None | Literal["estimate"] = "estimate",
-        exclude_noise: bool | str = False,
+        good_units_only: bool | str = False,
         amplitude_cmap_scaling: str | tuple[float, float] = "linear",
         n_color_bins: int = 20,
         point_size: float = 5.0,
@@ -64,12 +61,13 @@ class DriftPlotter:
             automatically reduce spikes to a reasonable count (≈ 100 000).
             Pass ``False``, ``None``, or ``0`` to disable decimation.  Pass
             an integer *n* to keep every *n*-th spike.
-        exclude_noise
-            If ``True``, remove all spikes belonging to clusters labelled
-            "noise". For Kilosort, this is taken from the cluster_groups.csv /
-            cluster_group.tsv file that reflects labels set in Phy. For a
-            SortingAnalyzer, a string must be passed. The labels are taken from
-            the sorting property with the passed name (e.g. "KSLabel").
+        good_units_only
+            If ``True``, only spikes belonging to "good" units are displayed.
+            For Kilosort, this is taken from the
+            cluster_groups.csv / cluster_group.tsv file that reflects labels
+            set in Phy. For a SortingAnalyzer, a string must be passed.
+            The labels are taken from the sorting property with the
+            passed name (e.g. "KSLabel").
         amplitude_cmap_scaling
             Controls how spike amplitudes are mapped to the greyscale
             colormap.  Pass ``"linear"`` or ``"log2"`` or ``"log10"`` for automatic
@@ -105,7 +103,7 @@ class DriftPlotter:
         app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
 
         processed_data = self._data_loader.get_processed_data(
-            exclude_noise,
+            good_units_only,
             decimate,
             filter_amplitude_mode,
             filter_amplitude_values,
@@ -126,7 +124,7 @@ class DriftPlotter:
     def drift_map_plot_matplotlib(
         self,
         decimate: int | bool | None | Literal["estimate"] = "estimate",
-        exclude_noise: bool | str = False,
+        good_units_only: bool | str = False,
         amplitude_cmap_scaling: str | tuple[float, float] = "linear",
         n_color_bins: int = 20,
         point_size: float = 5.0,
@@ -147,12 +145,13 @@ class DriftPlotter:
             automatically reduce spikes to a reasonable count (≈ 100 000).
             Pass ``False``, ``None``, or ``0`` to disable decimation.  Pass
             an integer *n* to keep every *n*-th spike.
-        exclude_noise
-            If ``True``, remove all spikes belonging to clusters labelled
-            "noise". For Kilosort, this is taken from the cluster_groups.csv /
-            cluster_group.tsv file that reflects labels set in Phy. For a
-            SortingAnalyzer, a string must be passed. The labels are taken from
-            the sorting property with the passed name (e.g. "KSLabel").
+        good_units_only
+            If ``True``, only spikes belonging to "good" units are displayed.
+            For Kilosort, this is taken from the
+            cluster_groups.csv / cluster_group.tsv file that reflects labels
+            set in Phy. For a SortingAnalyzer, a string must be passed.
+            The labels are taken from the sorting property with the
+            passed name (e.g. "KSLabel").
         amplitude_cmap_scaling
             Controls how spike amplitudes are mapped to the greyscale
             colormap.  Pass ``"linear"`` or ``"log2"`` or ``"log10"`` for automatic
@@ -196,7 +195,7 @@ class DriftPlotter:
             The populated Matplotlib figure.
         """
         processed_data = self._data_loader.get_processed_data(
-            exclude_noise,
+            good_units_only,
             decimate,
             filter_amplitude_mode,
             filter_amplitude_values,

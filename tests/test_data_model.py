@@ -46,7 +46,7 @@ class TestComputeAmplitudeColors:
     def processed(self, synthetic_ks4_output):
         plotter = DriftPlotter(synthetic_ks4_output)
         return plotter._data_loader.get_processed_data(
-            exclude_noise=False,
+            good_units_only=False,
             decimate=False,
             filter_amplitude_mode=None,
             filter_amplitude_values=(),

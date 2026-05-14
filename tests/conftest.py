@@ -13,6 +13,8 @@ import pytest
 NUM_SPIKES = 150
 NUM_CLUSTERS = 3
 NOISE_CLUSTER_IDS = [0]
+GOOD_CLUSTER_IDS = [1]
+MUA_CLUSTER_IDS = [2]
 TEMPLATE_SAMPLES = 61
 SAMPLE_RATE = 30_000.0
 
@@ -193,6 +195,8 @@ def synthetic_data():
         "peak_channels": peak_channels,
         "expected_heatmaps": expected_heatmaps,
         "noise_cluster_ids": NOISE_CLUSTER_IDS,
+        "good_unit_cluster_ids": GOOD_CLUSTER_IDS,
+        "non_good_cluster_ids": NOISE_CLUSTER_IDS + MUA_CLUSTER_IDS,
     }
 
 
@@ -226,7 +230,12 @@ def _write_ks4_output(out, data, scaling_factors_first_session_key):
     n_clusters = data["whitened_templates"].shape[0]
     lines = ["cluster_id\tKSLabel\n"]
     for i in range(n_clusters):
-        label = "noise" if i in NOISE_CLUSTER_IDS else "good"
+        if i in NOISE_CLUSTER_IDS:
+            label = "noise"
+        elif i in GOOD_CLUSTER_IDS:
+            label = "good"
+        else:
+            label = "mua"
         lines.append(f"{i}\t{label}\n")
     (out / "cluster_group.tsv").write_text("".join(lines))
     (out / "kilosort4.log").write_text("")

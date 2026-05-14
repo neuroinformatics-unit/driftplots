@@ -69,7 +69,7 @@ class DataLoader:
 
     def get_processed_data(
         self,
-        exclude_noise,
+        good_units_only,
         decimate,
         filter_amplitude_mode,
         filter_amplitude_values,
@@ -77,15 +77,10 @@ class DataLoader:
     ):
         """Filter and subsample the loaded spike data.
 
-        Operations are applied in order: decimation → noise exclusion →
-        amplitude filtering → masking. Decimation is applied first as a
-        performance knob to thin the full dataset before further filtering.
-
         Parameters
         ----------
-        exclude_noise :
-            If ``True``, spikes belonging to clusters labelled "noise" in
-            the Kilosort cluster groups file are removed.
+        good_units_only
+            If ``True``, only spikes belonging to "good" units are kept.
         decimate :
             Keep every *n*-th spike. Applied first to reduce the dataset
             before noise/amplitude filters. ``False`` disables decimation.
@@ -115,19 +110,19 @@ class DataLoader:
 
         keep_bool_mask = None
 
-        # First, exclude spikes from units labeled as "noise"
-        if exclude_noise:
+        # First, exclude spikes from units that are not labelled "good"
+        if good_units_only:
             if isinstance(self.path_or_analyzer, si.SortingAnalyzer):
-                keep_bool_mask = ~analyzer_helpers.get_noise_mask(
-                    exclude_noise, spike_templates, self.path_or_analyzer
+                keep_bool_mask = analyzer_helpers.get_good_unit_mask(
+                    good_units_only, spike_templates, self.path_or_analyzer
                 )
             else:
-                keep_bool_mask = ~kilosort_helpers.get_noise_mask(
+                keep_bool_mask = kilosort_helpers.get_good_unit_mask(
                     spike_templates, self.path_or_analyzer
                 )
 
             self._print(
-                f"Excluding noise spikes. {keep_bool_mask.sum()} spikes remaining.",
+                f"Keeping good spikes only. {keep_bool_mask.sum()} spikes remaining.",
                 verbose,
             )
 
@@ -154,7 +149,7 @@ class DataLoader:
                 verbose,
             )
 
-        # mask exclude_noise / filtered amplitudes
+        # mask good_units_only / filtered amplitudes
         if keep_bool_mask is not None:
             spike_times = spike_times[keep_bool_mask]
             spike_amplitudes = spike_amplitudes[keep_bool_mask]

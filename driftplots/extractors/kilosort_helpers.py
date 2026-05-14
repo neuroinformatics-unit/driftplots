@@ -50,12 +50,12 @@ def load_cluster_groups(cluster_path: Path) -> tuple[np.ndarray, np.ndarray]:
     return cluster_ids, cluster_groups
 
 
-def get_noise_mask(spike_templates: np.ndarray, sorter_output: Path) -> np.ndarray:
-    """Build a boolean mask identifying spikes that belong to noise-labelled templates.
+def get_good_unit_mask(spike_templates: np.ndarray, sorter_output: Path) -> np.ndarray:
+    """Build a boolean mask identifying spikes that belong to good-labelled templates.
 
     Loads the cluster-groups file (``cluster_groups.csv`` or
     ``cluster_group.tsv``) from the sorter output directory.  Spikes
-    whose cluster is labelled *noise* (group == 0) are marked ``True``.
+    whose cluster is labelled *good* (group == 2) are marked ``True``.
 
     Parameters
     ----------
@@ -68,30 +68,24 @@ def get_noise_mask(spike_templates: np.ndarray, sorter_output: Path) -> np.ndarr
     -------
     np.ndarray
         (num_spikes,) boolean array — ``True`` for spikes belonging to
-        a noise-labelled template.
-
-    Raises
-    ------
-    ValueError
-        If neither ``cluster_groups.csv`` nor ``cluster_group.tsv``
-        exists in ``sorter_output``.
+        a good-labelled template.
     """
     if not (
         (cluster_path := sorter_output / "cluster_groups.csv").is_file()
         or (cluster_path := sorter_output / "cluster_group.tsv").is_file()
     ):
         raise ValueError(
-            f"`exclude_noise` is `True` but there is no `cluster_groups.csv/.tsv` "
+            f"`good_units_only` is `True` but there is no `cluster_groups.csv/.tsv` "
             f"in the sorting output at: {sorter_output}"
         )
 
     cluster_ids, cluster_groups = load_cluster_groups(cluster_path)
 
-    noise_cluster_ids = cluster_ids[cluster_groups == 0]
+    good_cluster_ids = cluster_ids[cluster_groups == 2]
 
-    exclude_bool_mask = np.isin(spike_templates.ravel(), noise_cluster_ids)
+    good_mask = np.isin(spike_templates.ravel(), good_cluster_ids)
 
-    return exclude_bool_mask
+    return good_mask
 
 
 def get_ks_version(sorter_path: Path) -> str:

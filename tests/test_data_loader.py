@@ -17,7 +17,7 @@ class TestFromSorterOutput:
     def test_loaded_arrays_match_known_values_and_are_read_only(
         self, synthetic_ks4_output, synthetic_data
     ):
-        loader = DataLoader(synthetic_ks4_output)
+        loader = DataLoader(synthetic_ks4_output, verbose=False)
 
         # Spike times and depths should match what was written
         np.testing.assert_array_equal(
@@ -63,9 +63,9 @@ class TestProcessedData:
 
     def test_no_processing(self, synthetic_ks4_output):
         """With all processing off, output matches raw arrays."""
-        loader = DataLoader(synthetic_ks4_output)
+        loader = DataLoader(synthetic_ks4_output, verbose=False)
         result = loader.get_processed_data(
-            exclude_noise=False,
+            good_units_only=False,
             decimate=False,
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
@@ -78,10 +78,10 @@ class TestProcessedData:
 
     def test_decimate_int(self, synthetic_ks4_output):
         """Decimation by factor keeps every n-th spike."""
-        loader = DataLoader(synthetic_ks4_output)
+        loader = DataLoader(synthetic_ks4_output, verbose=False)
         factor = 3
         result = loader.get_processed_data(
-            exclude_noise=False,
+            good_units_only=False,
             decimate=factor,
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
@@ -92,9 +92,9 @@ class TestProcessedData:
 
     def test_decimate_estimate(self, synthetic_ks4_output):
         """'estimate' decimation targets ~100k spikes."""
-        loader = DataLoader(synthetic_ks4_output)
+        loader = DataLoader(synthetic_ks4_output, verbose=False)
         result = loader.get_processed_data(
-            exclude_noise=False,
+            good_units_only=False,
             decimate="estimate",
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
@@ -105,7 +105,7 @@ class TestProcessedData:
 
     def test_decimate_estimate_over_100k(self, synthetic_ks4_output):
         """'estimate' decimation should downsample when spikes exceed 100k."""
-        loader = DataLoader(synthetic_ks4_output)
+        loader = DataLoader(synthetic_ks4_output, verbose=False)
         n = 300_000
         rng = np.random.default_rng(0)
         loader._spike_times = np.linspace(0, 1000, n)
@@ -114,7 +114,7 @@ class TestProcessedData:
         loader._spike_templates = rng.integers(0, 3, n)
 
         result = loader.get_processed_data(
-            exclude_noise=False,
+            good_units_only=False,
             decimate="estimate",
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
@@ -125,12 +125,12 @@ class TestProcessedData:
 
     def test_filter_amplitude_absolute(self, synthetic_ks4_output):
         """Absolute amplitude filter removes spikes outside bounds."""
-        loader = DataLoader(synthetic_ks4_output)
+        loader = DataLoader(synthetic_ks4_output, verbose=False)
         amplitudes = loader._spike_amplitudes
         low, high = np.percentile(amplitudes, (25, 75))
 
         result = loader.get_processed_data(
-            exclude_noise=False,
+            good_units_only=False,
             decimate=False,
             filter_amplitude_mode="absolute",
             filter_amplitude_values=(low, high),
@@ -142,9 +142,9 @@ class TestProcessedData:
 
     def test_filter_amplitude_percentile(self, synthetic_ks4_output):
         """Percentile amplitude filter removes spikes outside percentile bounds."""
-        loader = DataLoader(synthetic_ks4_output)
+        loader = DataLoader(synthetic_ks4_output, verbose=False)
         result = loader.get_processed_data(
-            exclude_noise=False,
+            good_units_only=False,
             decimate=False,
             filter_amplitude_mode="percentile",
             filter_amplitude_values=(10, 90),
@@ -159,19 +159,19 @@ class TestProcessedData:
 
     def test_combined_decimate_and_filter(self, synthetic_ks4_output):
         """Combined result equals filter-then-decimate (applied in that order)."""
-        loader = DataLoader(synthetic_ks4_output)
+        loader = DataLoader(synthetic_ks4_output, verbose=False)
         amps = loader._spike_amplitudes
         low, high = np.percentile(amps, (10, 90))
 
         result = loader.get_processed_data(
-            exclude_noise=False,
+            good_units_only=False,
             decimate=2,
             filter_amplitude_mode="absolute",
             filter_amplitude_values=(low, high),
             verbose=False,
         )
         only_filtered = loader.get_processed_data(
-            exclude_noise=False,
+            good_units_only=False,
             decimate=False,
             filter_amplitude_mode="absolute",
             filter_amplitude_values=(low, high),
@@ -191,7 +191,7 @@ class TestProcessedData:
 
         # Strictly fewer spikes than either operation alone
         only_decimated = loader.get_processed_data(
-            exclude_noise=False,
+            good_units_only=False,
             decimate=2,
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
@@ -202,9 +202,9 @@ class TestProcessedData:
 
     def test_all_arrays_same_length(self, synthetic_ks4_output):
         """All output arrays must have the same length after processing."""
-        loader = DataLoader(synthetic_ks4_output)
+        loader = DataLoader(synthetic_ks4_output, verbose=False)
         result = loader.get_processed_data(
-            exclude_noise=False,
+            good_units_only=False,
             decimate=2,
             filter_amplitude_mode="percentile",
             filter_amplitude_values=(5, 95),
@@ -217,23 +217,23 @@ class TestProcessedData:
 
 
 # ---------------------------------------------------------------------------
-# Noise exclusion – synthetic data with known noise clusters
+# Good-unit filtering – synthetic data with known noise, good, and MUA clusters
 # ---------------------------------------------------------------------------
-class TestExcludeNoise:
-    """Test noise exclusion – template 0 is labelled noise in synthetic data."""
+class TestGoodUnitsOnly:
+    """Test good-unit filtering with noise and MUA labels in synthetic data."""
 
-    def test_noise_spikes_removed(self, synthetic_ks4_output, synthetic_data):
-        """Spikes from noise clusters should be excluded."""
-        loader = DataLoader(synthetic_ks4_output)
+    def test_only_good_unit_spikes_kept(self, synthetic_ks4_output, synthetic_data):
+        """Only spikes from clusters labelled good should be kept."""
+        loader = DataLoader(synthetic_ks4_output, verbose=False)
         result = loader.get_processed_data(
-            exclude_noise=True,
+            good_units_only=True,
             decimate=False,
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
             verbose=False,
         )
-        keep = ~np.isin(
-            loader._spike_templates.ravel(), synthetic_data["noise_cluster_ids"]
+        keep = np.isin(
+            loader._spike_templates.ravel(), synthetic_data["good_unit_cluster_ids"]
         )
         np.testing.assert_array_equal(result.spike_times, loader._spike_times[keep])
         np.testing.assert_array_equal(
@@ -243,12 +243,15 @@ class TestExcludeNoise:
         np.testing.assert_array_equal(
             result.spike_templates, loader._spike_templates[keep]
         )
+        assert not np.isin(
+            result.spike_templates, synthetic_data["non_good_cluster_ids"]
+        ).any()
 
-    def test_noise_off_keeps_all(self, synthetic_ks4_output):
-        """With exclude_noise=False, noise spikes are kept."""
-        loader = DataLoader(synthetic_ks4_output)
+    def test_good_units_only_off_keeps_all(self, synthetic_ks4_output):
+        """With good_units_only=False, all spikes are kept."""
+        loader = DataLoader(synthetic_ks4_output, verbose=False)
         result = loader.get_processed_data(
-            exclude_noise=False,
+            good_units_only=False,
             decimate=False,
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
@@ -271,9 +274,9 @@ class TestTemplateHeatmap:
         template_id,
     ):
         """Reconstructed heatmap should match the known ground truth template."""
-        loader = DataLoader(synthetic_ks4_output)
+        loader = DataLoader(synthetic_ks4_output, verbose=False)
         result = loader.get_processed_data(
-            exclude_noise=False,
+            good_units_only=False,
             decimate=False,
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
