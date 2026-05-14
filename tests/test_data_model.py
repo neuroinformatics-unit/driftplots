@@ -50,6 +50,7 @@ class TestComputeAmplitudeColors:
             decimate=False,
             filter_amplitude_mode=None,
             filter_amplitude_values=(),
+            verbose=False,
         )
 
     @pytest.mark.parametrize("scaling", SCALINGS)

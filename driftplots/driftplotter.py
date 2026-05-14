@@ -30,7 +30,7 @@ class DriftPlotter:
         Kilosort version.
     """
 
-    def __init__(self, path_or_analyzer: str | Path) -> None:
+    def __init__(self, path_or_analyzer: str | Path, verbose: bool = True) -> None:
         """Load spike data from a Kilosort output directory or SortingAnalyzer.
 
         Parameters
@@ -38,8 +38,10 @@ class DriftPlotter:
         path_or_analyzer
             Path to a Kilosort sorter output directory, or a SpikeInterface
             ``SortingAnalyzer`` object.
+        verbose :
+            If `True`, messages are printed.
         """
-        self._data_loader = DataLoader(path_or_analyzer)
+        self._data_loader = DataLoader(path_or_analyzer, verbose)
 
     def drift_map_plot_interactive(
         self,
@@ -51,6 +53,7 @@ class DriftPlotter:
         filter_amplitude_mode: str | None = None,
         filter_amplitude_values: tuple[float, ...] = (),
         title: bool | str | None = None,
+        verbose: bool = True,
     ) -> DriftmapPlotWidget:
         """Create an interactive pyqtgraph-based drift map widget.
 
@@ -90,6 +93,8 @@ class DriftPlotter:
             Plot title.  Pass a string to set a custom title, ``True`` to
             use a default title, or ``None`` / ``False`` to suppress the
             title entirely.
+        verbose :
+            If `True`, messages are printed.
 
         Returns
         -------
@@ -100,7 +105,11 @@ class DriftPlotter:
         app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
 
         processed_data = self._data_loader.get_processed_data(
-            exclude_noise, decimate, filter_amplitude_mode, filter_amplitude_values
+            exclude_noise,
+            decimate,
+            filter_amplitude_mode,
+            filter_amplitude_values,
+            verbose,
         )
 
         self.plot = DriftmapPlotWidget(
@@ -127,6 +136,7 @@ class DriftPlotter:
         weight_histogram_by_amplitude: bool = False,
         title: bool | str | None = None,
         ax: Axes | None = None,
+        verbose: bool = True,
     ) -> Figure:
         """Create a static Matplotlib drift map figure.
 
@@ -139,11 +149,10 @@ class DriftPlotter:
             an integer *n* to keep every *n*-th spike.
         exclude_noise
             If ``True``, remove all spikes belonging to clusters labelled
-            "noise". For Kilosort, this is taken from the
-            cluster_groups.csv / cluster_group.tsv file that reflects labels
-            set in Phy. For a SortingAnalyzer, a string must be passed.
-            The labels are taken from the sorting property with the
-            passed name (e.g. "KSLabel").
+            "noise". For Kilosort, this is taken from the cluster_groups.csv /
+            cluster_group.tsv file that reflects labels set in Phy. For a
+            SortingAnalyzer, a string must be passed. The labels are taken from
+            the sorting property with the passed name (e.g. "KSLabel").
         amplitude_cmap_scaling
             Controls how spike amplitudes are mapped to the greyscale
             colormap.  Pass ``"linear"`` or ``"log2"`` or ``"log10"`` for automatic
@@ -178,6 +187,8 @@ class DriftPlotter:
             Existing Matplotlib axis to draw the drift map on.  When
             ``add_histogram_plot`` is ``True``, a histogram axis is added
             beside this axis.
+        verbose :
+            If `True`, messages are printed.
 
         Returns
         -------
@@ -185,7 +196,11 @@ class DriftPlotter:
             The populated Matplotlib figure.
         """
         processed_data = self._data_loader.get_processed_data(
-            exclude_noise, decimate, filter_amplitude_mode, filter_amplitude_values
+            exclude_noise,
+            decimate,
+            filter_amplitude_mode,
+            filter_amplitude_values,
+            verbose,
         )
 
         fig = mpl_plotting.plot_matplotlib(
