@@ -52,7 +52,7 @@ for idx, path_or_analyzer in enumerate([analyzer, sorting_output_path]):
         filter_amplitude_mode="absolute",
         filter_amplitude_values=(min_cutoff, max_cutoff),
         title=f"Session {idx + 1}",
-        ax=axes[idx]
+        ax=axes[idx],
     )
 
 plt.show()
