@@ -59,7 +59,6 @@ driftmap = plotter.drift_map_plot_interactive(
 )
 
 driftmap.plot()
-
 ```
 
 The displayed templates are whitened and are not scaled per spike, i.e. the template will
@@ -98,8 +97,7 @@ sorting_output_path = data_path / "sorting" / "sorter_output"
 # into a single plot using MultiSessionDriftmapWidget
 panels = []
 for title, path_or_analyzer in zip(
-        ["Session 1", "Session 2"],
-        [analyzer, sorting_output_path]
+    ["Session 1", "Session 2"], [analyzer, sorting_output_path]
 ):
     plotter = DriftPlotter(path_or_analyzer)
 
@@ -139,7 +137,6 @@ fig = plotter.drift_map_plot_matplotlib(
 )
 
 plt.show()
-
 ```
 
 See [this example](/pages/examples/creating-pdf) for how to stitch Matplotlib figures together across
